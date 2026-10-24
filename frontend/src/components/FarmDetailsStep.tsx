@@ -13,6 +13,7 @@ interface FarmDetailsStepProps {
 const CROPS: CropId[] = [
   'wheat_hard', 'wheat_soft', 'barley', 'olive',
   'argan', 'tomato', 'chickpea', 'cactus_pear',
+  'potato', 'almond',
 ];
 
 export default function FarmDetailsStep({ form, setForm, onNext, onBack }: FarmDetailsStepProps) {

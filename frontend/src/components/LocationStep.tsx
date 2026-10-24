@@ -1,16 +1,18 @@
 import { useContext, useState } from 'react';
 import { AppContext, type FormData } from '../App';
 import { StepHeader, FormField, TextInput, NavButtons, PageWrapper } from './ui';
+import { MapPin, Navigation, BookmarkCheck } from 'lucide-react';
 
 interface LocationStepProps {
   form: FormData;
   setForm: (f: FormData) => void;
   onNext: () => void;
   onBack: () => void;
+  onOpenParcels?: () => void;
 }
 
-export default function LocationStep({ form, setForm, onNext, onBack }: LocationStepProps) {
-  const { t } = useContext(AppContext);
+export default function LocationStep({ form, setForm, onNext, onBack, onOpenParcels }: LocationStepProps) {
+  const { t, user } = useContext(AppContext);
   const [errors, setErrors] = useState<{ latitude?: string; longitude?: string }>({});
 
   function validate(): boolean {
@@ -42,10 +44,22 @@ export default function LocationStep({ form, setForm, onNext, onBack }: Location
     <PageWrapper>
       <StepHeader currentStep={1} totalSteps={3} title={t('step1')} />
 
-      <div className="glass-card p-6">
-        <p className="text-sm mb-6" style={{ color: 'var(--color-text-muted)' }}>
-          Entrez les coordonnées GPS de votre parcelle. Utilisez Google Maps ou un GPS pour trouver les coordonnées exactes.
-        </p>
+      <div className="glass-card p-6 border border-white/10 rounded-2xl bg-white/[0.02]">
+        <div className="flex items-center justify-between mb-6">
+          <p className="text-xs text-slate-400 leading-relaxed">
+            Entrez les coordonnées géodésiques WGS84 de votre parcelle ou sélectionnez un pôle agricole marocain.
+          </p>
+          {user && onOpenParcels && (
+            <button
+              type="button"
+              onClick={onOpenParcels}
+              className="px-3 py-1.5 rounded-lg bg-emerald-500/10 border border-emerald-500/30 text-emerald-300 text-xs font-medium flex items-center gap-1.5 hover:bg-emerald-500/20 transition-colors shrink-0 ml-3 cursor-pointer"
+            >
+              <BookmarkCheck className="w-3.5 h-3.5 text-emerald-400" />
+              <span>{t('myParcels')}</span>
+            </button>
+          )}
+        </div>
 
         <FormField
           id="latitude"
@@ -84,24 +98,27 @@ export default function LocationStep({ form, setForm, onNext, onBack }: Location
         </FormField>
 
         {/* Quick presets for Morocco */}
-        <div className="mt-2">
-          <p className="text-xs mb-2" style={{ color: 'var(--color-text-muted)' }}>
-            Lieux de référence (Maroc) :
-          </p>
+        <div className="mt-4 pt-4 border-t border-white/5">
+          <div className="flex items-center gap-1.5 mb-2.5 text-slate-400 text-xs">
+            <Navigation className="w-3.5 h-3.5 text-emerald-400" />
+            <span>Pôles agricoles de référence (Maroc) :</span>
+          </div>
           <div className="flex flex-wrap gap-2">
             {[
-              { label: 'Marrakech', lat: '31.63', lon: '-8.00' },
-              { label: 'Agadir', lat: '30.43', lon: '-9.60' },
-              { label: 'Fès', lat: '34.03', lon: '-5.00' },
-              { label: 'Beni Mellal', lat: '32.33', lon: '-6.35' },
+              { label: 'Marrakech (Haouz)', lat: '31.63', lon: '-8.00' },
+              { label: 'Agadir (Souss)', lat: '30.43', lon: '-9.60' },
+              { label: 'Fès (Saïss)', lat: '34.03', lon: '-5.00' },
+              { label: 'Beni Mellal (Tadla)', lat: '32.33', lon: '-6.35' },
+              { label: 'Kénitra (Gharb)', lat: '34.26', lon: '-6.58' },
             ].map(({ label, lat, lon }) => (
               <button
                 key={label}
+                type="button"
                 onClick={() => setForm({ ...form, latitude: lat, longitude: lon })}
-                className="px-3 py-1 rounded-full text-xs transition-all hover:opacity-80"
-                style={{ background: 'rgba(107,158,107,0.15)', border: '1px solid rgba(107,158,107,0.3)', color: 'var(--color-sage-light)' }}
+                className="px-3 py-1.5 rounded-lg text-xs font-medium bg-white/[0.04] hover:bg-emerald-500/20 text-slate-300 hover:text-emerald-300 border border-white/10 hover:border-emerald-500/30 transition-all flex items-center gap-1.5 cursor-pointer"
               >
-                📍 {label}
+                <MapPin className="w-3 h-3 text-emerald-400 shrink-0" />
+                <span>{label}</span>
               </button>
             ))}
           </div>

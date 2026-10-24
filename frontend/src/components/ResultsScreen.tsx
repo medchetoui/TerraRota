@@ -1,34 +1,76 @@
 import { useContext, useState } from 'react';
 import { AppContext, type FormData } from '../App';
 import type { RecommendationResponse, CropRecommendation, Indicators } from '../types/api';
+import { createParcel } from '../api/client';
+import {
+  Droplets,
+  Thermometer,
+  Sun,
+  Snowflake,
+  Wind,
+  Calendar,
+  CheckCircle2,
+  AlertTriangle,
+  Info,
+  ChevronDown,
+  ChevronUp,
+  MapPin,
+  Satellite,
+  BarChart3,
+  Bookmark,
+  BookmarkCheck,
+  Check,
+  RotateCcw,
+  Sparkles,
+  TreeDeciduous,
+  Wheat,
+  CircleDot,
+  Loader2,
+} from 'lucide-react';
 
 interface ResultsScreenProps {
   result: RecommendationResponse;
   form: FormData;
   onRevise: () => void;
+  onOpenAuth: () => void;
+}
+
+function getCropIcon(category: string) {
+  switch (category) {
+    case 'cereal':
+      return Wheat;
+    case 'tree_crop':
+      return TreeDeciduous;
+    case 'legume':
+    case 'vegetable':
+    case 'cactus':
+    default:
+      return CircleDot;
+  }
 }
 
 function ScoreBadge({ score }: { score: number }) {
-  const color =
-    score >= 70 ? 'var(--color-sage)' :
-    score >= 45 ? 'var(--color-gold)' :
-    'var(--color-terracotta)';
+  const strokeColor =
+    score >= 70 ? '#10b981' : score >= 45 ? '#f59e0b' : '#ef4444';
+  const textColor =
+    score >= 70 ? 'text-emerald-400' : score >= 45 ? 'text-amber-400' : 'text-rose-400';
 
   return (
     <div className="flex items-center gap-2">
-      <div className="relative w-12 h-12">
+      <div className="relative w-12 h-12 flex items-center justify-center">
         <svg viewBox="0 0 36 36" className="w-12 h-12 -rotate-90">
           <circle cx="18" cy="18" r="15" fill="none" stroke="rgba(255,255,255,0.08)" strokeWidth="3" />
           <circle
             cx="18" cy="18" r="15" fill="none"
-            stroke={color} strokeWidth="3"
+            stroke={strokeColor}
+            strokeWidth="3.2"
             strokeDasharray={`${(score / 100) * 94.25} 94.25`}
             strokeLinecap="round"
           />
         </svg>
-        <div className="absolute inset-0 flex items-center justify-center">
-          <span className="text-xs font-bold" style={{ color }}>{score}</span>
-        </div>
+        <span className={`absolute text-xs font-black ${textColor}`}>
+          {score}
+        </span>
       </div>
     </div>
   );
@@ -36,62 +78,71 @@ function ScoreBadge({ score }: { score: number }) {
 
 function CropCard({ rec, rank }: { rec: CropRecommendation; rank: number }) {
   const [expanded, setExpanded] = useState(rank === 1);
+  const CropIcon = getCropIcon(rec.crop_category);
 
   return (
     <div
-      className="rounded-2xl overflow-hidden transition-all"
-      style={{
-        background: rank === 1 ? 'rgba(193,68,14,0.1)' : 'rgba(22,33,17,0.8)',
-        border: `1px solid ${rank === 1 ? 'rgba(193,68,14,0.4)' : 'rgba(255,255,255,0.08)'}`,
-      }}
+      className={`rounded-2xl border transition-all overflow-hidden ${
+        rank === 1
+          ? 'bg-gradient-to-r from-emerald-950/40 via-black/40 to-emerald-950/20 border-emerald-500/40 shadow-lg shadow-emerald-950/30'
+          : 'bg-white/[0.03] border-white/10 hover:border-white/20'
+      }`}
     >
-      {/* Header */}
       <button
-        className="w-full flex items-center gap-4 p-4 text-left"
+        type="button"
+        className="w-full flex items-center gap-3.5 p-4 text-left cursor-pointer"
         onClick={() => setExpanded(!expanded)}
         aria-expanded={expanded}
       >
-        <div className="text-3xl">{rec.crop_emoji}</div>
-        <div className="flex-1">
-          <div className="flex items-center gap-2 mb-0.5">
+        <div className={`w-10 h-10 rounded-xl flex items-center justify-center shrink-0 ${
+          rank === 1 ? 'bg-emerald-500/20 text-emerald-400 border border-emerald-500/40' : 'bg-white/5 text-slate-300 border border-white/10'
+        }`}>
+          <CropIcon className="w-5 h-5" />
+        </div>
+
+        <div className="flex-1 min-w-0">
+          <div className="flex items-center gap-2">
             {rank === 1 && (
-              <span className="text-xs px-2 py-0.5 rounded-full font-bold"
-                style={{ background: 'var(--color-gold)', color: '#1a0f00' }}>
-                ★ N°1
+              <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-amber-400 text-slate-950">
+                Top 1
               </span>
             )}
-            <span className="font-bold text-base">{rec.crop_name_fr}</span>
+            <h3 className="font-bold text-base text-slate-100 truncate">
+              {rec.crop_name_fr}
+            </h3>
           </div>
-          <div className="flex items-center gap-2">
-            <span className="text-xs" style={{ color: 'var(--color-text-muted)' }}>
+          <div className="flex items-center gap-2 mt-0.5">
+            <span className="text-xs text-slate-400 font-medium">
               {rec.crop_name_ar}
             </span>
             {rec.is_provisional && (
-              <span className="text-xs px-1.5 py-0.5 rounded"
-                style={{ background: 'rgba(212,160,23,0.15)', color: 'var(--color-gold)', border: '1px solid rgba(212,160,23,0.3)' }}>
-                ⚠️ Provisoire
+              <span className="text-[10px] px-1.5 py-0.2 rounded bg-amber-500/10 text-amber-300 border border-amber-500/20 flex items-center gap-1">
+                <AlertTriangle className="w-2.5 h-2.5" />
+                Provisoire
               </span>
             )}
           </div>
         </div>
+
         <ScoreBadge score={rec.score} />
-        <span className="text-xs ml-1" style={{ color: 'var(--color-text-muted)' }}>
-          {expanded ? '▲' : '▼'}
-        </span>
+
+        <div className="text-slate-400 pl-1">
+          {expanded ? <ChevronUp className="w-4 h-4" /> : <ChevronDown className="w-4 h-4" />}
+        </div>
       </button>
 
-      {/* Expanded details */}
       {expanded && (
-        <div className="px-4 pb-4 space-y-3">
+        <div className="px-4 pb-4 pt-1 space-y-3 border-t border-white/5 text-xs">
           {/* Reasons */}
           {rec.reasons.length > 0 && (
             <div>
-              <p className="text-xs font-semibold mb-1.5" style={{ color: 'var(--color-sage-light)' }}>
-                ✅ Points positifs
+              <p className="font-semibold text-emerald-400 flex items-center gap-1.5 mb-1.5">
+                <CheckCircle2 className="w-3.5 h-3.5" />
+                Facteurs favorables
               </p>
               <ul className="space-y-1">
                 {rec.reasons.map((r, i) => (
-                  <li key={i} className="text-xs pl-3" style={{ color: 'var(--color-text-muted)', borderLeft: '2px solid var(--color-sage)' }}>
+                  <li key={i} className="pl-3 border-l-2 border-emerald-500/50 text-slate-300 leading-relaxed">
                     {r}
                   </li>
                 ))}
@@ -102,12 +153,13 @@ function CropCard({ rec, rank }: { rec: CropRecommendation; rank: number }) {
           {/* Cautions */}
           {rec.cautions.length > 0 && (
             <div>
-              <p className="text-xs font-semibold mb-1.5" style={{ color: 'var(--color-gold)' }}>
-                ⚠️ Mises en garde
+              <p className="font-semibold text-amber-400 flex items-center gap-1.5 mb-1.5">
+                <AlertTriangle className="w-3.5 h-3.5" />
+                Points de vigilance
               </p>
               <ul className="space-y-1">
                 {rec.cautions.map((c, i) => (
-                  <li key={i} className="text-xs pl-3" style={{ color: 'var(--color-text-muted)', borderLeft: '2px solid var(--color-gold)' }}>
+                  <li key={i} className="pl-3 border-l-2 border-amber-500/50 text-slate-300 leading-relaxed">
                     {c}
                   </li>
                 ))}
@@ -118,12 +170,13 @@ function CropCard({ rec, rank }: { rec: CropRecommendation; rank: number }) {
           {/* Infos */}
           {rec.infos?.length > 0 && (
             <div>
-              <p className="text-xs font-semibold mb-1.5" style={{ color: 'var(--color-sky)' }}>
-                ℹ️ Informations
+              <p className="font-semibold text-sky-400 flex items-center gap-1.5 mb-1.5">
+                <Info className="w-3.5 h-3.5" />
+                Informations culturales
               </p>
               <ul className="space-y-1">
                 {rec.infos.map((info, i) => (
-                  <li key={i} className="text-xs pl-3" style={{ color: 'var(--color-text-muted)', borderLeft: '2px solid var(--color-sky)' }}>
+                  <li key={i} className="pl-3 border-l-2 border-sky-500/50 text-slate-300 leading-relaxed">
                     {info}
                   </li>
                 ))}
@@ -131,41 +184,20 @@ function CropCard({ rec, rank }: { rec: CropRecommendation; rank: number }) {
             </div>
           )}
 
-          {/* Missing data */}
-          {rec.missing_data?.length > 0 && (
-            <div className="rounded-lg p-3"
-              style={{ background: 'rgba(255,255,255,0.04)', border: '1px solid var(--color-border)' }}>
-              <p className="text-xs font-semibold mb-1" style={{ color: 'var(--color-text-muted)' }}>
-                📋 Données manquantes (amélioreraient les recommandations)
-              </p>
-              {rec.missing_data.map((m, i) => (
-                <p key={i} className="text-xs" style={{ color: 'var(--color-text-muted)' }}>• {m}</p>
-              ))}
-            </div>
-          )}
-
-          {/* Provisional note */}
-          {rec.is_provisional && rec.provisional_note && (
-            <div className="rounded-lg p-3"
-              style={{ background: 'rgba(212,160,23,0.08)', border: '1px solid rgba(212,160,23,0.2)' }}>
-              <p className="text-xs" style={{ color: 'var(--color-gold)' }}>
-                ⚠️ {rec.provisional_note}
-              </p>
-            </div>
-          )}
-
-          {/* Rules applied */}
+          {/* Rules applied tags */}
           {rec.rules_applied?.length > 0 && (
-            <details className="text-xs">
-              <summary className="cursor-pointer" style={{ color: 'var(--color-text-muted)' }}>
-                Règles appliquées ({rec.rules_applied.length})
+            <details className="pt-2 text-[11px] text-slate-400">
+              <summary className="cursor-pointer hover:text-slate-200">
+                Règles de décision validées ({rec.rules_applied.length})
               </summary>
-              <div className="mt-1 flex flex-wrap gap-1">
-                {rec.rules_applied.map((r) => (
-                  <code key={r} className="px-1.5 py-0.5 rounded text-xs"
-                    style={{ background: 'rgba(255,255,255,0.06)', color: 'var(--color-text-muted)' }}>
-                    {r}
-                  </code>
+              <div className="mt-1.5 flex flex-wrap gap-1">
+                {rec.rules_applied.map((rule) => (
+                  <span
+                    key={rule}
+                    className="px-2 py-0.5 rounded bg-black/40 text-slate-400 border border-white/5 font-mono"
+                  >
+                    {rule}
+                  </span>
                 ))}
               </div>
             </details>
@@ -178,159 +210,237 @@ function CropCard({ rec, rank }: { rec: CropRecommendation; rank: number }) {
 
 function IndicatorCard({ indicators }: { indicators: Indicators }) {
   const items = [
-    { label: 'Précipitations annuelles', value: `${indicators.annual_rain_mm?.toFixed(0)} mm`, icon: '🌧️' },
-    { label: 'Température moyenne', value: `${indicators.mean_annual_temp_c?.toFixed(1)} °C`, icon: '🌡️' },
-    { label: 'Degrés-jours (base 10°C)', value: `${indicators.gdd_base10?.toFixed(0)}`, icon: '☀️' },
-    { label: 'Jours de gel / an', value: `${indicators.frost_days_per_year?.toFixed(1)}`, icon: '❄️' },
-    { label: 'Indice d\'aridité', value: `${indicators.aridity_index?.toFixed(3)}`, icon: '🏜️' },
-    { label: 'Mois secs / an', value: `${indicators.dry_months?.toFixed(1)}`, icon: '📅' },
+    { label: 'Précipitations', value: `${indicators.annual_rain_mm?.toFixed(0)} mm`, icon: Droplets, sub: 'Cumul annuel' },
+    { label: 'Température', value: `${indicators.mean_annual_temp_c?.toFixed(1)} °C`, icon: Thermometer, sub: 'Moyenne 2m' },
+    { label: 'Degrés-jours', value: `${indicators.gdd_base10?.toFixed(0)}`, icon: Sun, sub: 'GDD base 10°C' },
+    { label: 'Jours de gel', value: `${indicators.frost_days_per_year?.toFixed(1)} j/an`, icon: Snowflake, sub: 'Tmin < 0°C' },
+    { label: 'Indice d\'aridité', value: `${indicators.aridity_index?.toFixed(3)}`, icon: Wind, sub: 'P / PET' },
+    { label: 'Mois secs', value: `${indicators.dry_months?.toFixed(1)}`, icon: Calendar, sub: 'P < 2T' },
   ];
 
   return (
-    <div className="grid grid-cols-2 gap-3">
-      {items.map(({ label, value, icon }) => (
-        <div key={label} className="rounded-xl p-3"
-          style={{ background: 'rgba(255,255,255,0.04)', border: '1px solid var(--color-border)' }}>
-          <div className="text-xl mb-1">{icon}</div>
-          <div className="text-base font-bold">{value}</div>
-          <div className="text-xs mt-0.5" style={{ color: 'var(--color-text-muted)' }}>{label}</div>
+    <div className="grid grid-cols-2 sm:grid-cols-3 gap-2.5">
+      {items.map(({ label, value, icon: Icon, sub }) => (
+        <div
+          key={label}
+          className="rounded-xl p-3 bg-white/[0.03] border border-white/10 hover:border-emerald-500/30 transition-all"
+        >
+          <div className="flex items-center justify-between text-slate-400 mb-1.5">
+            <span className="text-[11px] font-medium">{label}</span>
+            <Icon className="w-3.5 h-3.5 text-emerald-400" />
+          </div>
+          <div className="text-base font-bold text-slate-100">{value}</div>
+          <div className="text-[10px] text-slate-500 mt-0.5">{sub}</div>
         </div>
       ))}
     </div>
   );
 }
 
-export default function ResultsScreen({ result, form, onRevise }: ResultsScreenProps) {
-  const { t } = useContext(AppContext);
+export default function ResultsScreen({ result, form, onRevise, onOpenAuth }: ResultsScreenProps) {
+  const { t, user } = useContext(AppContext);
   const [showAbstained, setShowAbstained] = useState(false);
+  const [saving, setSaving] = useState(false);
+  const [saveSuccess, setSaveSuccess] = useState(false);
+  const [parcelName, setParcelName] = useState(`Parcelle (${form.latitude}, ${form.longitude})`);
+  const [showSaveInput, setShowSaveInput] = useState(false);
 
-  const dataStatusColor =
-    result.data_status === 'live' ? 'var(--color-sage)' :
-    result.data_status === 'cached' ? 'var(--color-gold)' :
-    'var(--color-terracotta)';
+  const dataStatusClass =
+    result.data_status === 'live'
+      ? 'bg-emerald-500/10 text-emerald-400 border-emerald-500/30'
+      : result.data_status === 'cached'
+      ? 'bg-amber-500/10 text-amber-300 border-amber-500/30'
+      : 'bg-rose-500/10 text-rose-300 border-rose-500/30';
 
   const dataStatusLabel =
-    result.data_status === 'live' ? t('nasaLive') :
-    result.data_status === 'cached' ? t('nasaCached') :
-    t('nasaSample');
+    result.data_status === 'live'
+      ? t('nasaLive')
+      : result.data_status === 'cached'
+      ? t('nasaCached')
+      : t('nasaSample');
+
+  const handleSaveParcel = async () => {
+    if (!user) {
+      onOpenAuth();
+      return;
+    }
+
+    setSaving(true);
+    try {
+      await createParcel({
+        name: parcelName,
+        latitude: parseFloat(form.latitude),
+        longitude: parseFloat(form.longitude),
+        water_access: form.water_access || '',
+        soil_type: form.soil_type,
+        field_size_ha: form.field_size_ha ? parseFloat(form.field_size_ha) : null,
+        notes: form.notes,
+      });
+      setSaveSuccess(true);
+      setShowSaveInput(false);
+    } catch {
+      alert("Erreur lors de l'enregistrement de la parcelle.");
+    } finally {
+      setSaving(false);
+    }
+  };
 
   return (
-    <div className="min-h-screen px-4 py-8 max-w-lg mx-auto">
-      {/* Header */}
-      <div className="flex items-center justify-between mb-6">
-        <h1 className="text-2xl font-black gradient-text">{t('appName')}</h1>
-        <div className="flex items-center gap-1.5 px-3 py-1 rounded-full text-xs"
-          style={{ background: 'rgba(255,255,255,0.06)', border: '1px solid var(--color-border)', color: dataStatusColor }}>
-          {dataStatusLabel}
+    <div className="min-h-screen px-4 py-8 max-w-2xl mx-auto text-slate-100">
+      {/* Top Header */}
+      <div className="flex items-center justify-between mb-6 pb-4 border-b border-white/5">
+        <div>
+          <span className="text-xs uppercase tracking-wider text-emerald-400 font-bold">Rapport d'adéquation</span>
+          <h1 className="text-2xl font-black text-slate-100">Recommandations</h1>
+        </div>
+
+        <div className="flex items-center gap-2">
+          <div className={`flex items-center gap-1.5 px-3 py-1 rounded-full text-xs border ${dataStatusClass}`}>
+            <Satellite className="w-3.5 h-3.5" />
+            <span>{dataStatusLabel}</span>
+          </div>
         </div>
       </div>
 
-      {/* Sample data warning */}
-      {result.data_status === 'sample' && result.sample_note && (
-        <div id="sample-data-warning" className="rounded-xl p-4 mb-5 text-sm font-medium"
-          style={{ background: 'rgba(193,68,14,0.15)', border: '2px solid rgba(193,68,14,0.5)', color: 'var(--color-terracotta-light)' }}>
-          {t('sampleDataWarning')}
+      {/* Save parcel banner */}
+      <div className="mb-6 p-4 rounded-xl bg-white/[0.03] border border-white/10 flex flex-col sm:flex-row items-center justify-between gap-3">
+        <div className="flex items-center gap-3">
+          <div className="w-9 h-9 rounded-lg bg-emerald-500/10 border border-emerald-500/30 flex items-center justify-center text-emerald-400 shrink-0">
+            {saveSuccess ? <BookmarkCheck className="w-5 h-5 text-emerald-400" /> : <Bookmark className="w-5 h-5" />}
+          </div>
+          <div>
+            <h2 className="text-sm font-semibold text-slate-200">
+              {saveSuccess ? t('savedSuccess') : t('saveParcel')}
+            </h2>
+            <p className="text-xs text-slate-400">
+              {user ? 'Conservez cette analyse dans votre compte' : t('authRequired')}
+            </p>
+          </div>
         </div>
-      )}
 
-      {/* Insufficient data */}
-      {result.data_status === 'insufficient_data' && (
-        <div className="glass-card p-6 mb-5 text-center">
-          <div className="text-4xl mb-3">📡</div>
-          <h2 className="font-bold mb-2">{t('insufficientData')}</h2>
-          <p className="text-sm" style={{ color: 'var(--color-text-muted)' }}>
-            {result.insufficient_data_reason}
-          </p>
-        </div>
-      )}
-
-      {/* Location summary */}
-      <div className="flex items-center gap-2 mb-5 text-sm" style={{ color: 'var(--color-text-muted)' }}>
-        <span>📍</span>
-        <span>Lat {form.latitude}, Lon {form.longitude}</span>
-        {result.provenance?.period && (
-          <span className="ml-auto text-xs">
-            {result.provenance.period.start.slice(0, 4)}–{result.provenance.period.end.slice(0, 4)}
-          </span>
+        {!saveSuccess && (
+          <div className="w-full sm:w-auto flex items-center gap-2">
+            {showSaveInput ? (
+              <div className="flex items-center gap-2 w-full">
+                <input
+                  type="text"
+                  value={parcelName}
+                  onChange={(e) => setParcelName(e.target.value)}
+                  className="px-3 py-1.5 rounded-lg bg-black/50 border border-white/20 text-xs text-white"
+                />
+                <button
+                  onClick={handleSaveParcel}
+                  disabled={saving}
+                  className="px-3 py-1.5 rounded-lg bg-emerald-600 hover:bg-emerald-500 text-xs font-semibold text-white flex items-center gap-1 cursor-pointer"
+                >
+                  {saving ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Check className="w-3.5 h-3.5" />}
+                  <span>Confirmer</span>
+                </button>
+              </div>
+            ) : (
+              <button
+                onClick={() => {
+                  if (!user) onOpenAuth();
+                  else setShowSaveInput(true);
+                }}
+                className="w-full sm:w-auto px-4 py-2 rounded-lg bg-emerald-600/80 hover:bg-emerald-500 text-xs font-semibold text-white flex items-center justify-center gap-1.5 transition-colors cursor-pointer"
+              >
+                <Bookmark className="w-3.5 h-3.5" />
+                <span>{user ? 'Sauvegarder' : t('login')}</span>
+              </button>
+            )}
+          </div>
         )}
       </div>
 
-      {/* Climate indicators */}
-      {result.indicators && (
-        <div className="mb-6">
-          <h2 className="text-lg font-bold mb-3">📊 {t('indicators')}</h2>
-          <IndicatorCard indicators={result.indicators} />
-          {result.provenance && (
-            <p className="text-xs mt-2" style={{ color: 'var(--color-text-muted)' }}>
-              Source : {result.provenance.source} · Résolution ~{result.provenance.spatial_resolution_deg ?? '?'}°
-            </p>
-          )}
+      {/* Location Bar */}
+      <div className="flex items-center justify-between p-3 rounded-xl bg-white/[0.02] border border-white/5 mb-6 text-xs text-slate-400">
+        <div className="flex items-center gap-1.5">
+          <MapPin className="w-4 h-4 text-emerald-400" />
+          <span className="font-mono text-slate-300">Lat {form.latitude}, Lon {form.longitude}</span>
         </div>
+        {result.provenance?.period && (
+          <div className="flex items-center gap-1">
+            <Calendar className="w-3.5 h-3.5 text-slate-500" />
+            <span>Période : {result.provenance.period.start.slice(0, 4)}–{result.provenance.period.end.slice(0, 4)}</span>
+          </div>
+        )}
+      </div>
+
+      {/* Climate Indicators Section */}
+      {result.indicators && (
+        <section className="mb-8">
+          <div className="flex items-center gap-2 mb-3">
+            <BarChart3 className="w-4 h-4 text-emerald-400" />
+            <h2 className="text-sm font-bold text-slate-200 uppercase tracking-wider">{t('indicators')}</h2>
+          </div>
+          <IndicatorCard indicators={result.indicators} />
+        </section>
       )}
 
-      {/* Recommendations */}
-      {result.recommendations.length > 0 ? (
-        <div className="mb-6">
-          <h2 className="text-lg font-bold mb-3">🌾 {t('recommendations')}</h2>
+      {/* Recommendations List */}
+      <section className="mb-8">
+        <div className="flex items-center justify-between mb-3">
+          <div className="flex items-center gap-2">
+            <Sparkles className="w-4 h-4 text-amber-400" />
+            <h2 className="text-sm font-bold text-slate-200 uppercase tracking-wider">{t('recommendations')}</h2>
+          </div>
+          <span className="text-xs text-slate-400">{result.recommendations.length} cultures éligibles</span>
+        </div>
+
+        {result.recommendations.length > 0 ? (
           <div className="space-y-3">
             {result.recommendations.map((rec) => (
               <CropCard key={rec.crop_id} rec={rec} rank={rec.rank} />
             ))}
           </div>
-        </div>
-      ) : result.data_status !== 'insufficient_data' && (
-        <div className="glass-card p-6 mb-6 text-center">
-          <div className="text-3xl mb-2">🤔</div>
-          <p className="text-sm" style={{ color: 'var(--color-text-muted)' }}>
-            {result.abstention_reason || t('noRecommendations')}
-          </p>
-        </div>
-      )}
+        ) : (
+          <div className="p-8 rounded-2xl bg-white/[0.02] border border-white/10 text-center">
+            <AlertTriangle className="w-8 h-8 text-amber-400 mx-auto mb-2" />
+            <p className="text-sm text-slate-300">
+              {result.abstention_reason || t('noRecommendations')}
+            </p>
+          </div>
+        )}
+      </section>
 
-      {/* Abstained crops (collapsed) */}
+      {/* Abstained / Ineligible Crops */}
       {result.abstained_crops?.length > 0 && (
-        <div className="mb-6">
+        <section className="mb-8">
           <button
+            type="button"
             onClick={() => setShowAbstained(!showAbstained)}
-            className="text-sm hover:opacity-70 transition-opacity"
-            style={{ color: 'var(--color-text-muted)' }}
+            className="w-full flex items-center justify-between p-3.5 rounded-xl bg-white/[0.02] border border-white/5 text-xs text-slate-400 hover:text-slate-200 transition-colors cursor-pointer"
           >
-            {showAbstained ? '▲' : '▼'} Cultures non éligibles ({result.abstained_crops.length})
+            <span>Cultures non adaptées à ces contraintes ({result.abstained_crops.length})</span>
+            {showAbstained ? <ChevronUp className="w-4 h-4" /> : <ChevronDown className="w-4 h-4" />}
           </button>
+
           {showAbstained && (
             <div className="mt-2 space-y-2">
               {result.abstained_crops.map((a) => (
-                <div key={a.crop_id} className="rounded-xl px-4 py-3 flex justify-between items-start gap-3"
-                  style={{ background: 'rgba(255,255,255,0.03)', border: '1px solid var(--color-border)' }}>
-                  <span className="text-sm font-medium" style={{ color: 'var(--color-text-muted)' }}>
-                    {a.crop_name_fr}
-                  </span>
-                  <span className="text-xs text-right" style={{ color: 'rgba(255,255,255,0.3)' }}>
-                    {a.reason}
-                  </span>
+                <div
+                  key={a.crop_id}
+                  className="p-3 rounded-xl bg-black/40 border border-white/5 flex items-center justify-between gap-3 text-xs"
+                >
+                  <span className="font-semibold text-slate-300">{a.crop_name_fr}</span>
+                  <span className="text-slate-500 text-right">{a.reason}</span>
                 </div>
               ))}
             </div>
           )}
-        </div>
+        </section>
       )}
 
-      {/* Revise button */}
+      {/* Modify input button */}
       <button
         id="revise-btn"
         onClick={onRevise}
-        className="w-full py-3 rounded-xl text-sm font-medium transition-all hover:opacity-80"
-        style={{ background: 'rgba(255,255,255,0.06)', border: '1px solid var(--color-border)', color: 'var(--color-text)' }}
+        className="w-full py-3.5 px-4 rounded-xl text-sm font-semibold bg-white/5 hover:bg-white/10 border border-white/10 text-slate-200 flex items-center justify-center gap-2 transition-all cursor-pointer"
       >
-        ← {t('reviseBtn')}
+        <RotateCcw className="w-4 h-4" />
+        <span>{t('reviseBtn')}</span>
       </button>
-
-      {/* Rules version */}
-      {result.rules_version && (
-        <p className="text-center text-xs mt-4" style={{ color: 'rgba(255,255,255,0.2)' }}>
-          Moteur de règles : {result.rules_version}
-        </p>
-      )}
     </div>
   );
 }

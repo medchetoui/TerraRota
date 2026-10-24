@@ -1,5 +1,6 @@
 import { useContext } from 'react';
 import { AppContext } from '../App';
+import { AlertTriangle, RotateCcw, Home } from 'lucide-react';
 
 interface ErrorScreenProps {
   message: string;
@@ -11,37 +12,38 @@ export default function ErrorScreen({ message, onRetry, onReset }: ErrorScreenPr
   const { t } = useContext(AppContext);
 
   return (
-    <div className="min-h-screen flex items-center justify-center px-4">
+    <div className="min-h-screen flex items-center justify-center px-4 bg-[#0a110a] text-slate-100">
       <div className="max-w-sm w-full text-center">
-        <div className="text-5xl mb-6">⚠️</div>
-        <h2 className="text-xl font-bold mb-3" style={{ color: 'var(--color-terracotta-light)' }}>
+        <div className="w-16 h-16 rounded-2xl bg-rose-500/10 border border-rose-500/30 flex items-center justify-center text-rose-400 mx-auto mb-6 shadow-xl shadow-rose-950/40">
+          <AlertTriangle className="w-8 h-8" />
+        </div>
+
+        <h2 className="text-xl font-bold mb-2 text-rose-400">
           {t('errorTitle')}
         </h2>
+
         {message && (
-          <div className="glass-card p-4 mb-6 text-sm text-left"
-            style={{ color: 'var(--color-text-muted)', wordBreak: 'break-word' }}>
+          <div className="p-4 mb-6 rounded-xl bg-white/[0.03] border border-white/10 text-xs text-slate-300 text-left font-mono break-all leading-relaxed">
             {message}
           </div>
         )}
-        <div className="flex flex-col gap-3">
+
+        <div className="flex flex-col gap-2.5">
           <button
             id="retry-btn"
             onClick={onRetry}
-            className="py-3 rounded-xl font-bold text-sm"
-            style={{
-              background: 'linear-gradient(135deg, var(--color-terracotta) 0%, var(--color-terracotta-light) 100%)',
-              color: 'white',
-            }}
+            className="py-3.5 px-4 rounded-xl font-bold text-xs bg-rose-600 hover:bg-rose-500 text-white flex items-center justify-center gap-2 transition-all cursor-pointer shadow-lg shadow-rose-950/50"
           >
-            {t('errorRetry')}
+            <RotateCcw className="w-4 h-4" />
+            <span>{t('errorRetry')}</span>
           </button>
           <button
             id="reset-btn"
             onClick={onReset}
-            className="py-3 rounded-xl text-sm font-medium"
-            style={{ background: 'rgba(255,255,255,0.06)', border: '1px solid var(--color-border)', color: 'var(--color-text)' }}
+            className="py-3 px-4 rounded-xl text-xs font-semibold text-slate-400 hover:text-white bg-white/5 hover:bg-white/10 border border-white/10 flex items-center justify-center gap-2 transition-colors cursor-pointer"
           >
-            Recommencer depuis le début
+            <Home className="w-4 h-4" />
+            <span>Recommencer depuis le début</span>
           </button>
         </div>
       </div>

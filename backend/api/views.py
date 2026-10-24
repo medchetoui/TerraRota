@@ -4,11 +4,19 @@ TerraRota API views.
 import logging
 from datetime import datetime, timezone
 
-from rest_framework.decorators import api_view
+from rest_framework.decorators import api_view, permission_classes
+from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework.response import Response
 from rest_framework import status
+from rest_framework_simplejwt.tokens import RefreshToken
 
-from .serializers import RecommendationRequestSerializer
+from .serializers import (
+    RecommendationRequestSerializer,
+    UserRegistrationSerializer,
+    UserSerializer,
+    ParcelSerializer,
+)
+from fields.models import Parcel
 from data_services import nasa_power
 from data_services.nasa_power import NASADataStatus
 from indicators import calculator
@@ -139,3 +147,83 @@ def crops_list(request):
 def _clean_indicators(indicators: dict) -> dict:
     """Remove internal fields (prefixed with _) from indicator dict for API response."""
     return {k: v for k, v in indicators.items() if not k.startswith("_")}
+
+
+@api_view(["POST"])
+@permission_classes([AllowAny])
+def register(request):
+    """
+    POST /api/v1/auth/register/
+    Register a new user and return JWT tokens.
+    """
+    serializer = UserRegistrationSerializer(data=request.data)
+    if serializer.is_valid():
+        user = serializer.save()
+        refresh = RefreshToken.for_user(user)
+        return Response({
+            "status": "ok",
+            "user": UserSerializer(user).data,
+            "access": str(refresh.access_token),
+            "refresh": str(refresh),
+        }, status=status.HTTP_201_CREATED)
+    return Response(
+        {"status": "error", "errors": serializer.errors},
+        status=status.HTTP_400_BAD_REQUEST,
+    )
+
+
+@api_view(["GET"])
+@permission_classes([IsAuthenticated])
+def current_user(request):
+    """
+    GET /api/v1/auth/me/
+    Return the profile of the authenticated user.
+    """
+    return Response({
+        "status": "ok",
+        "user": UserSerializer(request.user).data,
+    })
+
+
+@api_view(["GET", "POST"])
+@permission_classes([IsAuthenticated])
+def parcels(request):
+    """
+    GET /api/v1/parcels/ — List parcels of logged-in user.
+    POST /api/v1/parcels/ — Create a new parcel for logged-in user.
+    """
+    if request.method == "GET":
+        items = Parcel.objects.filter(user=request.user)
+        return Response({
+            "status": "ok",
+            "parcels": ParcelSerializer(items, many=True).data,
+        })
+
+    serializer = ParcelSerializer(data=request.data)
+    if serializer.is_valid():
+        parcel = serializer.save(user=request.user)
+        return Response({
+            "status": "ok",
+            "parcel": ParcelSerializer(parcel).data,
+        }, status=status.HTTP_201_CREATED)
+    return Response(
+        {"status": "error", "errors": serializer.errors},
+        status=status.HTTP_400_BAD_REQUEST,
+    )
+
+
+@api_view(["DELETE"])
+@permission_classes([IsAuthenticated])
+def parcel_detail(request, pk):
+    """
+    DELETE /api/v1/parcels/<id>/ — Delete a parcel owned by the user.
+    """
+    try:
+        item = Parcel.objects.get(pk=pk, user=request.user)
+    except Parcel.DoesNotExist:
+        return Response(
+            {"status": "error", "message": "Parcel not found"},
+            status=status.HTTP_404_NOT_FOUND,
+        )
+    item.delete()
+    return Response({"status": "ok", "message": "Parcel deleted"})

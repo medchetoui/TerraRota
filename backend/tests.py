@@ -13,7 +13,7 @@ import json
 import pytest
 from unittest.mock import patch, MagicMock
 from django.test import TestCase
-from rest_framework.test import APIClient
+from rest_framework.test import APIClient, APITestCase
 
 from indicators.calculator import calculate, InsufficientDataError
 from recommendation.engine import rank
@@ -515,3 +515,91 @@ class TestFullIntegration(TestCase):
             )
         self.assertEqual(response.status_code, 200)
         self.assertEqual(response.json()["data_status"], "insufficient_data")
+
+
+class TestAuthAndParcels(APITestCase):
+    def test_register_and_login(self):
+        # 1. Register
+        reg_resp = self.client.post("/api/v1/auth/register/", {
+            "username": "karim_farmer",
+            "email": "karim@example.com",
+            "password": "strongpassword123",
+        }, format="json")
+        self.assertEqual(reg_resp.status_code, 201)
+        data = reg_resp.json()
+        self.assertIn("access", data)
+        self.assertIn("refresh", data)
+        token = data["access"]
+
+        # 2. Access /auth/me/ with token
+        self.client.credentials(HTTP_AUTHORIZATION=f"Bearer {token}")
+        me_resp = self.client.get("/api/v1/auth/me/")
+        self.assertEqual(me_resp.status_code, 200)
+        self.assertEqual(me_resp.json()["user"]["username"], "karim_farmer")
+
+        # 3. Create parcel
+        parcel_resp = self.client.post("/api/v1/parcels/", {
+            "name": "Ferme Marrakech - Oliviers",
+            "latitude": 31.52,
+            "longitude": -8.75,
+            "water_access": "rainfed",
+            "soil_type": "clay_loam",
+            "field_size_ha": 5.5,
+        }, format="json")
+        self.assertEqual(parcel_resp.status_code, 201)
+        parcel_id = parcel_resp.json()["parcel"]["id"]
+
+        # 4. List parcels
+        list_resp = self.client.get("/api/v1/parcels/")
+        self.assertEqual(list_resp.status_code, 200)
+        self.assertEqual(len(list_resp.json()["parcels"]), 1)
+
+        # 5. Delete parcel
+        del_resp = self.client.delete(f"/api/v1/parcels/{parcel_id}/")
+        self.assertEqual(del_resp.status_code, 200)
+        list_resp2 = self.client.get("/api/v1/parcels/")
+        self.assertEqual(len(list_resp2.json()["parcels"]), 0)
+
+
+class TestPotatoAndAlmondRules(TestCase):
+    def test_potato_ineligible_rainfed_dry(self):
+        indicators = {
+            "annual_rain_mm": 215.0,
+            "mean_annual_temp_c": 19.5,
+            "gdd_base10": 2500.0,
+            "frost_days_per_year": 0,
+            "aridity_index": 0.18,
+            "dry_months": 7,
+        }
+        inputs = {"water_access": "rainfed"}
+        res = rank(indicators, inputs)
+        abstained_ids = [c["crop_id"] for c in res["abstained_crops"]]
+        self.assertIn("potato", abstained_ids)
+
+    def test_potato_eligible_irrigated(self):
+        indicators = {
+            "annual_rain_mm": 215.0,
+            "mean_annual_temp_c": 18.0,
+            "gdd_base10": 2500.0,
+            "frost_days_per_year": 0,
+            "aridity_index": 0.18,
+            "dry_months": 7,
+        }
+        inputs = {"water_access": "irrigated", "previous_crop": "wheat_hard"}
+        res = rank(indicators, inputs)
+        rec_ids = [c["crop_id"] for c in res["recommendations"]]
+        self.assertIn("potato", rec_ids)
+
+    def test_almond_ranks_well_semi_arid(self):
+        indicators = {
+            "annual_rain_mm": 350.0,
+            "mean_annual_temp_c": 17.5,
+            "gdd_base10": 2600.0,
+            "frost_days_per_year": 2,
+            "aridity_index": 0.28,
+            "dry_months": 5,
+        }
+        inputs = {"water_access": "rainfed"}
+        res = rank(indicators, inputs)
+        rec_ids = [c["crop_id"] for c in res["recommendations"]]
+        self.assertIn("almond", rec_ids)

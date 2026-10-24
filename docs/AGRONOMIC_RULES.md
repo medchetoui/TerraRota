@@ -97,6 +97,27 @@
 | CACTUS_ARIDITY_001 | Rank | AI < 0.35 | +25 pts | Provisional |
 | CACTUS_FROST_001 | Caution | frost_days > 30 | Warn: severe frost risk | Provisional |
 
+### POTATO (Pomme de terre / البطاطا)
+
+| Rule ID | Type | Condition | Action | Source |
+|---|---|---|---|---|
+| POTATO_WATER_001 | Eligibility | water_access = rainfed AND annual_rain < 450 mm | Ineligible (water deficit risk) | Provisional |
+| POTATO_TEMP_001 | Rank | 14 ≤ mean_temp ≤ 22°C | +22 pts (optimal tuberization) | Provisional |
+| POTATO_HEAT_001 | Caution | mean_temp > 23°C | Warn: heat inhibits tuber filling | Provisional |
+| POTATO_FROST_001 | Caution | frost_days > 5 | Warn: frost-sensitive foliage | Provisional |
+| POTATO_ROT_001 | Caution | previous_crop = tomato | Warn: Solanaceae consecutive risk | Provisional |
+| POTATO_ROT_002 | Rank | previous_crop in [wheat_hard, wheat_soft, barley] | +12 pts (break disease cycle) | Provisional |
+
+### ALMOND (Amandier / اللوز)
+
+| Rule ID | Type | Condition | Action | Source |
+|---|---|---|---|---|
+| ALMOND_TEMP_001 | Eligibility | mean_temp < 11°C | Ineligible | Provisional |
+| ALMOND_ARIDITY_001 | Rank | 0.10 ≤ AI ≤ 0.50 | +20 pts (Mediterranean drought tolerance) | Provisional |
+| ALMOND_RAIN_001 | Rank | 200 ≤ annual_rain ≤ 550 mm | +15 pts | Provisional |
+| ALMOND_FROST_001 | Caution | frost_days > 8 | Warn: early blooming (Jan-Feb) frost risk | Provisional |
+| ALMOND_NOTE_001 | Info | always | Note: 3–4 years to initial commercial harvest | N/A |
+
 ---
 
 ## Scoring System

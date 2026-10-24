@@ -10,7 +10,9 @@ export type CropId =
   | 'argan'
   | 'tomato'
   | 'chickpea'
-  | 'cactus_pear';
+  | 'cactus_pear'
+  | 'potato'
+  | 'almond';
 
 export type DataStatus = 'live' | 'cached' | 'sample' | 'insufficient_data';
 

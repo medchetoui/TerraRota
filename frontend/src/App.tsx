@@ -1,4 +1,4 @@
-import React, { useState, useCallback } from 'react';
+import React, { useState, useCallback, useEffect } from 'react';
 import './index.css';
 import { translations, type Lang } from './i18n/translations';
 import type {
@@ -8,9 +8,16 @@ import type {
   WaterAccess,
   SoilType,
 } from './types/api';
-import { getRecommendations } from './api/client';
+import {
+  getRecommendations,
+  getMe,
+  setToken,
+  getToken,
+  type UserProfile,
+  type ParcelItem,
+} from './api/client';
 
-// ─── Screens ───────────────────────────────────────────────
+// ─── Screens & Modals ───────────────────────────────────────
 import Landing from './components/Landing';
 import LocationStep from './components/LocationStep';
 import FarmDetailsStep from './components/FarmDetailsStep';
@@ -18,6 +25,8 @@ import ReviewStep from './components/ReviewStep';
 import LoadingScreen from './components/LoadingScreen';
 import ResultsScreen from './components/ResultsScreen';
 import ErrorScreen from './components/ErrorScreen';
+import AuthModal from './components/AuthModal';
+import ParcelsModal from './components/ParcelsModal';
 
 type Step = 'landing' | 'location' | 'details' | 'review' | 'loading' | 'results' | 'error';
 
@@ -47,12 +56,16 @@ export interface AppContextValue {
   t: (key: string) => string;
   lang: Lang;
   setLang: (l: Lang) => void;
+  user: UserProfile | null;
+  logout: () => void;
 }
 
 export const AppContext = React.createContext<AppContextValue>({
   t: (k) => k,
   lang: 'fr',
   setLang: () => {},
+  user: null,
+  logout: () => {},
 });
 
 function App() {
@@ -61,6 +74,31 @@ function App() {
   const [result, setResult] = useState<RecommendationResponse | null>(null);
   const [apiError, setApiError] = useState<string | null>(null);
   const [lang, setLang] = useState<Lang>('fr');
+
+  // Auth & Modals state
+  const [user, setUser] = useState<UserProfile | null>(null);
+  const [authModalOpen, setAuthModalOpen] = useState(false);
+  const [parcelsModalOpen, setParcelsModalOpen] = useState(false);
+
+  useEffect(() => {
+    // Check if user is already logged in
+    const token = getToken();
+    if (token) {
+      getMe()
+        .then((res) => {
+          if (res?.user) setUser(res.user);
+        })
+        .catch(() => {
+          setToken(null);
+          setUser(null);
+        });
+    }
+  }, []);
+
+  const logout = () => {
+    setToken(null);
+    setUser(null);
+  };
 
   const t = useCallback(
     (key: string): string => {
@@ -71,7 +109,21 @@ function App() {
     [lang],
   );
 
-  const ctxValue: AppContextValue = { t, lang, setLang };
+  const ctxValue: AppContextValue = { t, lang, setLang, user, logout };
+
+  const handleSelectParcel = (parcel: ParcelItem) => {
+    setForm({
+      latitude: parcel.latitude.toString(),
+      longitude: parcel.longitude.toString(),
+      previous_crop: '',
+      water_access: (parcel.water_access as WaterAccess) || '',
+      soil_type: (parcel.soil_type as SoilType) || 'unknown',
+      field_size_ha: parcel.field_size_ha ? parcel.field_size_ha.toString() : '',
+      preferred_crops: [],
+      notes: parcel.notes || '',
+    });
+    setStep('details');
+  };
 
   const handleSubmit = async () => {
     setStep('loading');
@@ -106,11 +158,15 @@ function App() {
   return (
     <AppContext.Provider value={ctxValue}>
       <div
-        className="min-h-screen"
+        className="min-h-screen bg-[#0a110a] text-slate-100 selection:bg-emerald-500 selection:text-slate-950"
         dir={lang === 'ar' ? 'rtl' : 'ltr'}
       >
         {step === 'landing' && (
-          <Landing onStart={() => setStep('location')} />
+          <Landing
+            onStart={() => setStep('location')}
+            onOpenAuth={() => setAuthModalOpen(true)}
+            onOpenParcels={() => setParcelsModalOpen(true)}
+          />
         )}
         {step === 'location' && (
           <LocationStep
@@ -118,6 +174,7 @@ function App() {
             setForm={setForm}
             onNext={() => setStep('details')}
             onBack={() => setStep('landing')}
+            onOpenParcels={() => setParcelsModalOpen(true)}
           />
         )}
         {step === 'details' && (
@@ -142,15 +199,31 @@ function App() {
             result={result}
             form={form}
             onRevise={() => setStep('location')}
+            onOpenAuth={() => setAuthModalOpen(true)}
           />
         )}
         {step === 'error' && (
           <ErrorScreen
             message={apiError || ''}
             onRetry={() => setStep('review')}
-            onReset={() => { setForm(initialForm); setStep('landing'); }}
+            onReset={() => {
+              setForm(initialForm);
+              setStep('landing');
+            }}
           />
         )}
+
+        {/* Global Modals */}
+        <AuthModal
+          isOpen={authModalOpen}
+          onClose={() => setAuthModalOpen(false)}
+          onSuccess={(u) => setUser(u)}
+        />
+        <ParcelsModal
+          isOpen={parcelsModalOpen}
+          onClose={() => setParcelsModalOpen(false)}
+          onSelectParcel={handleSelectParcel}
+        />
       </div>
     </AppContext.Provider>
   );

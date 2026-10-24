@@ -74,6 +74,20 @@ CROPS: dict[str, dict[str, Any]] = {
         "category": "cactus",
         "emoji": "🌵",
     },
+    "potato": {
+        "id": "potato",
+        "name_fr": "Pomme de terre",
+        "name_ar": "البطاطا",
+        "category": "vegetable",
+        "emoji": "🥔",
+    },
+    "almond": {
+        "id": "almond",
+        "name_fr": "Amandier",
+        "name_ar": "اللوز",
+        "category": "tree_crop",
+        "emoji": "🌰",
+    },
 }
 
 # ──────────────────────────────────────────────
@@ -91,6 +105,8 @@ def get_rules(crop_id: str) -> list[dict[str, Any]]:
         "tomato": _tomato_rules,
         "chickpea": _chickpea_rules,
         "cactus_pear": _cactus_pear_rules,
+        "potato": _potato_rules,
+        "almond": _almond_rules,
     }
     return registry.get(crop_id, [])
 
@@ -478,6 +494,118 @@ _cactus_pear_rules = [
         "condition": lambda ind, inp: ind.get("frost_days_per_year", 0) > 30,
         "caution": "Severe frost ({frost_days_per_year:.0f} days/year) can damage cactus pear pads.",
         "description": "Frost caution.",
+        "is_provisional": _PROVISIONAL,
+        "source": _SOURCE,
+    },
+]
+
+_potato_rules = [
+    {
+        "id": "POTATO_WATER_ELIG",
+        "type": "eligibility",
+        "condition": lambda ind, inp: not (
+            inp.get("water_access") == "rainfed"
+            and ind.get("annual_rain_mm", 0) < 450
+        ),
+        "fail_reason": "Potato requires substantial water (450–700 mm). Rainfed cultivation in this dry location is not viable.",
+        "description": "Water availability threshold for potato.",
+        "is_provisional": _PROVISIONAL,
+        "source": _SOURCE,
+    },
+    {
+        "id": "POTATO_TEMP_RANK",
+        "type": "rank",
+        "condition": lambda ind, inp: 14 <= ind.get("mean_annual_temp_c", 0) <= 22,
+        "points": 22,
+        "reason": "Mean temperature ({mean_annual_temp_c:.1f}°C) is favorable for tuber initiation and vegetative growth.",
+        "description": "Optimal temperature range bonus.",
+        "is_provisional": _PROVISIONAL,
+        "source": _SOURCE,
+    },
+    {
+        "id": "POTATO_HEAT_CAUTION",
+        "type": "caution",
+        "condition": lambda ind, inp: ind.get("mean_annual_temp_c", 0) > 23,
+        "caution": "Warm climate (mean > 23°C) may suppress tuberization. Plan for autumn/winter cycle.",
+        "description": "Heat stress caution.",
+        "is_provisional": _PROVISIONAL,
+        "source": _SOURCE,
+    },
+    {
+        "id": "POTATO_FROST_CAUTION",
+        "type": "caution",
+        "condition": lambda ind, inp: ind.get("frost_days_per_year", 0) > 5,
+        "caution": "Potato foliage is susceptible to frost ({frost_days_per_year:.0f} frost days detected).",
+        "description": "Frost caution.",
+        "is_provisional": _PROVISIONAL,
+        "source": _SOURCE,
+    },
+    {
+        "id": "POTATO_ROT_CAUTION",
+        "type": "caution",
+        "condition": lambda ind, inp: inp.get("previous_crop") == "tomato",
+        "caution": "Avoid consecutive Solanaceae (tomato -> potato) to prevent soil-borne pathogen and nematode buildup.",
+        "description": "Solanaceae rotation caution.",
+        "is_provisional": _PROVISIONAL,
+        "source": _SOURCE,
+    },
+    {
+        "id": "POTATO_ROT_RANK",
+        "type": "rank",
+        "condition": lambda ind, inp: inp.get("previous_crop") in ("wheat_hard", "wheat_soft", "barley"),
+        "points": 12,
+        "reason": "Rotating after cereal crops interrupts fungal lifecycles and improves tuber health.",
+        "description": "Post-cereal rotation bonus.",
+        "is_provisional": _PROVISIONAL,
+        "source": _SOURCE,
+    },
+]
+
+_almond_rules = [
+    {
+        "id": "ALMOND_TEMP_ELIG",
+        "type": "eligibility",
+        "condition": lambda ind, inp: ind.get("mean_annual_temp_c", 0) >= 11,
+        "fail_reason": "Mean temperature too low for almond development.",
+        "description": "Minimum mean temperature requirement.",
+        "is_provisional": _PROVISIONAL,
+        "source": _SOURCE,
+    },
+    {
+        "id": "ALMOND_ARIDITY_RANK",
+        "type": "rank",
+        "condition": lambda ind, inp: 0.10 <= ind.get("aridity_index", 0) <= 0.50,
+        "points": 20,
+        "reason": "Almond is well-adapted to semi-arid Mediterranean conditions (AI = {aridity_index:.3f}).",
+        "description": "Aridity tolerance bonus.",
+        "is_provisional": _PROVISIONAL,
+        "source": _SOURCE,
+    },
+    {
+        "id": "ALMOND_RAIN_RANK",
+        "type": "rank",
+        "condition": lambda ind, inp: 200 <= ind.get("annual_rain_mm", 0) <= 550,
+        "points": 15,
+        "reason": "Rainfall ({annual_rain_mm:.0f} mm) fits almond water requirements.",
+        "description": "Rainfall compatibility bonus.",
+        "is_provisional": _PROVISIONAL,
+        "source": _SOURCE,
+    },
+    {
+        "id": "ALMOND_FROST_CAUTION",
+        "type": "caution",
+        "condition": lambda ind, inp: ind.get("frost_days_per_year", 0) > 8,
+        "caution": "Almonds blossom early in January–February. Risk of late winter frost damage on flowers ({frost_days_per_year:.0f} frost days).",
+        "description": "Early flowering frost risk caution.",
+        "is_provisional": _PROVISIONAL,
+        "source": _SOURCE,
+    },
+    {
+        "id": "ALMOND_NOTE",
+        "type": "info",
+        "condition": lambda ind, inp: True,
+        "info": "Perennial tree crop: commercial production begins 3–4 years after planting.",
+        "description": "Investment horizon note.",
         "is_provisional": _PROVISIONAL,
         "source": _SOURCE,
     },

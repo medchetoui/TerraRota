@@ -1,118 +1,112 @@
-# Team Tasks — TerraRota
+# Roadmap & Task Distribution — TerraRota (Hackathon 24–28 Oct)
 
-> Provisional assignments — confirm with team before locking.
-
----
-
-## Member 1 — Technical Lead / Backend / Integration (Mohammed)
-
-**Deliverables**
-- [ ] Project repository set up and working on all members' machines
-- [ ] Django backend running with all endpoints
-- [ ] API contract documented and shared
-- [ ] NASA data service integrated and tested
-- [ ] End-to-end integration verified
-- [ ] Backend tests passing
-- [ ] Code review for all PRs
-
-**Acceptance criteria**
-- `pytest` passes with 0 failures
-- `POST /api/v1/recommendations/` returns valid JSON for Marrakech test case
-- All secrets in `.env` only
-
-**Blockers**
-- None currently
+> 🎯 **Objectif :** Livrer un produit complet, testé, sécurisé et prêt pour la présentation devant le Jury le **28 Octobre**.
 
 ---
 
-## Member 2 — NASA Data Specialist
+## 👥 Répartition des 4 Membres
 
-**Deliverables**
-- [ ] Document NASA POWER variable definitions and units for Morocco
-- [ ] Retrieve and validate real data for ≥3 Moroccan locations
-- [ ] Document percentage of missing values per location
-- [ ] Identify and document any data gaps or anomalies
-- [ ] Review and update `docs/NASA_DATA_SOURCES.md`
-- [ ] Verify SMAP and MODIS feasibility (optional)
+```mermaid
+graph LR
+    M1["Member 1 (Mohammed): Tech Lead & Auth"]
+    M2["Member 2: NASA Data & Validation"]
+    M3["Member 3: Agronomy & Rules Engine"]
+    M4["Member 4: Frontend & UX Design"]
 
-**How to work independently**
-- Use the NASA POWER API directly: https://power.larc.nasa.gov/api/temporal/daily/point
-- Run `python backend/scripts/check_nasa.py` to test connectivity
-- Document findings in `docs/NASA_DATA_SOURCES.md`
-
-**Acceptance criteria**
-- Data retrieved and validated for Marrakech, Agadir, and Fes
-- Missing value percentage documented for each location
-- No invented or estimated values in documentation
-
-**Blockers**
-- Depends on internet access to NASA POWER
+    M1 --> Core["Security, JWT, Saved Parcels, PR Reviews"]
+    M2 --> Data["NASA POWER, Multi-Zone Morocco, Data Cleaning"]
+    M3 --> Science["Potato, Almond, Agro Matrix, Jury Slides"]
+    M4 --> UI["Lucide Icons, Charts, RTL Moroccan Arabic"]
+```
 
 ---
 
-## Member 3 — Recommendation Engine / Agronomy
+### 👤 Member 1 — Mohammed (Tech Lead / Backend Architecture & Security)
+**Responsabilités principales :**
+1. **Sécurité & Auth :**
+   - Endpoints JWT opérationnels (`/api/v1/auth/register/`, `/api/v1/auth/login/`, `/api/v1/auth/me/`).
+   - Modèle de données `Parcel` pour la sauvegarde des parcelles par utilisateur.
+   - Gestion des tokens et autorisations Bearer.
+2. **Intégration & DevOps :**
+   - Orchestration du dépôt Git (`main` protégée, revues des branches).
+   - Validation que `pytest tests.py` reste à 100% vert (actuellement 43/43).
+   - Préparation du déploiement ou du pack de démo locale.
 
-**Deliverables**
-- [ ] Research ≥3 sources for each crop rule threshold
-- [ ] Update `docs/AGRONOMIC_RULES.md` with sources or mark provisional
-- [ ] Review and improve rule thresholds in `backend/recommendation/rules.py`
-- [ ] Write unit tests for each new or modified rule
-- [ ] Identify crops that should be added or removed from the list
-- [ ] Define the rotation compatibility matrix
-
-**How to work independently**
-- Edit `backend/recommendation/rules.py` (does not require NASA or frontend)
-- Run engine tests: `pytest backend/recommendation/tests/ -v`
-- Update docs in `docs/AGRONOMIC_RULES.md`
-
-**Acceptance criteria**
-- Every rule has either a cited source or is explicitly marked `[PROVISIONAL]`
-- Unit tests cover all new rules
-- No agronomic claim made without a basis
-
-**Blockers**
-- Depends on access to agricultural references (FAO, INRA Morocco, etc.)
+**Fichiers clés :**
+- `backend/terrarota/settings.py`
+- `backend/api/views.py` & `backend/api/urls.py`
+- `backend/fields/models.py`
+- `backend/tests.py`
 
 ---
 
-## Member 4 — Frontend / UX
+### 👤 Member 2 — Data Specialist (NASA Earth Observation Data)
+**Responsabilités principales :**
+1. **Validation multi-zones au Maroc :**
+   - Tester et documenter les réponses de NASA POWER sur 4 pôles agricoles clés :
+     - **Marrakech (Haouz)** : Aride / semi-aride (Bour)
+     - **Agadir (Souss-Massa)** : Climat chaud, zone de l'arganier
+     - **Fès / Meknès (Saïss)** : Zone céréalière & arboricole pluviale
+     - **Kénitra (Gharb)** : Zone irriguée, maraîchère
+2. **Robustesse de la donnée :**
+   - Vérifier le filtrage des valeurs manquantes (`-999`).
+   - Documenter la résolution spatiale (~50 km) et pourquoi TerraRota utilise une maille satellite régionale.
+   - *(Optionnel / Bonus Jury)* : Rédiger une note sur l'intégration future de **NASA SMAP** (humidité du sol).
 
-**Deliverables**
-- [ ] All screens implemented (see `docs/PROJECT_SCOPE.md` user journey)
-- [ ] Form validation working
-- [ ] API connected (can use mock data initially)
-- [ ] French UI complete
-- [ ] Arabic RTL structure in place (translations can be partial)
-- [ ] Mobile-responsive layout
-- [ ] Sample data warning displayed
-
-**How to work independently**
-- Use `frontend/src/mocks/sampleResponse.ts` for mock API responses
-- Set `VITE_USE_MOCK=true` in `frontend/.env.local` to bypass real API
-- Run: `cd frontend && npm run dev`
-
-**Acceptance criteria**
-- All screens render without console errors
-- Form validation catches missing coordinates
-- Recommendations display with score, reasons, and cautions
-- Sample data warning visible when `data_status === "sample"`
-- Responsive on 375px–1440px screen widths
-
-**Blockers**
-- Depends on API contract (Member 1) — use mock data until backend ready
+**Commandes utiles :**
+```powershell
+# Vérifier la connexion NASA en direct
+python backend/scripts/check_nasa.py
+```
 
 ---
 
-## Shared Timeline (Provisional)
+### 👤 Member 3 — Agronomist & Algorithm Specialist (Agronomie & Règles)
+**Responsabilités principales :**
+1. **Enrichissement du catalogue de cultures :**
+   - Déjà intégré : **Pomme de terre (البطاطا)** et **Amandier (اللوز)** en plus des 8 cultures initiales.
+   - Nouvelles cultures à évaluer si besoin : Maïs, Agrumes (Citrus), Dattiers (Phoenix dactylifera).
+2. **Validation des seuils scientifiques :**
+   - Vérifier les seuils de GDD, de pluie et de résistance au gel avec des données marocaines (références : INRA Maroc, IAV Hassan II, FAO).
+   - Valider la matrice de rotation culturale (ex: blé -> légumineuse / pois chiche -> pomme de terre).
+3. **Préparation du Pitch scientifique :**
+   - Préparer les diapositives expliquant pourquoi le moteur est **déterministe et transparent** (pas une boîte noire LLM) : le Jury adore la rigueur scientifique.
 
-| Milestone | Target | Owner |
+**Fichiers clés :**
+- `backend/recommendation/rules.py`
+- `docs/AGRONOMIC_RULES.md`
+
+---
+
+### 👤 Member 4 — Frontend & UX Designer (React / Vite)
+**Responsabilités principales :**
+1. **Design System "Pure & Modern Agro-Tech" :**
+   - 0 Emojis : Utilisation exclusive de la librairie **Lucide Icons** (`lucide-react`).
+   - Interface sombre ultra-moderne, badges contrastés et lisibles.
+2. **Parcours Utilisateur Complet :**
+   - Modale d'authentification (Connexion / Inscription).
+   - Sauvegarde et chargement direct des parcelles sauvegardées.
+   - Visualisation des indicateurs satellitaires (GDD, précipitations, jours de gel).
+3. **Support RTL Darija / Arabe :**
+   - S'assurer que le mode Arabe (`lang === 'ar'`) est parfait pour un agriculteur ou conseiller marocain.
+4. **Captures d'écran & Démo :**
+   - Réaliser un enregistrement vidéo fluide du parcours utilisateur complet pour le pitch.
+
+**Commandes utiles :**
+```powershell
+cd frontend
+npm run dev
+npm run build
+```
+
+---
+
+## 🗓️ Calendrier Sprint (24 au 28 Octobre)
+
+| Date | Milestone | Responsable |
 |---|---|---|
-| Backend running locally | Day 1 | Member 1 |
-| API contract shared | Day 1 | Member 1 |
-| Frontend skeleton + mock | Day 1–2 | Member 4 |
-| NASA data validated | Day 2 | Member 2 |
-| Agronomic rules v1 | Day 2–3 | Member 3 |
-| Full integration working | Day 3 | Member 1 |
-| Frontend connected to API | Day 3–4 | Member 4 |
-| All tests passing | Day 4 | All |
-| Demo rehearsal | Day 5 | All |
+| **24 Octobre** | ✅ JWT Auth, Modèle Parcelles, Ajout Pomme de Terre & Amandier, UI sans emojis | Mohammed & Claude |
+| **25 Octobre** | Validation NASA 4 zones marocaines + Ajustement seuils agronomiques | Member 2 & Member 3 |
+| **26 Octobre** | Peaufinage frontend + Relecture de l'arabe/français + Tests unitaires | Member 4 & Member 1 |
+| **27 Octobre** | Répétition générale du Demo Flow + Rédaction des slides de pitch | Toute l'équipe |
+| **28 Octobre** | **SOUMISSION & PRÉSENTATION FINALE DEVANT LE JURY** 🚀 | Toute l'équipe |
