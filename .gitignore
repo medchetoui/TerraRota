@@ -1,0 +1,66 @@
+# ============================================================
+# TerraRota — .gitignore
+# ============================================================
+
+# Python / Django
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+env/
+venv/
+ENV/
+.venv/
+backend/.venv/
+*.egg-info/
+dist/
+build/
+*.egg
+pip-wheel-metadata/
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+htmlcov/
+.coverage
+coverage.xml
+*.log
+
+# Django
+backend/db.sqlite3
+backend/media/
+backend/staticfiles/
+backend/.env
+backend/local_settings.py
+
+# Node / React / Vite
+node_modules/
+frontend/node_modules/
+frontend/dist/
+frontend/.env
+frontend/.env.local
+frontend/.env.*.local
+
+# Environment files with secrets
+.env
+.env.local
+.env.production
+*.env.local
+
+# OS
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# IDE
+.vscode/settings.json
+.idea/
+*.swp
+*.swo
+
+# Docker
+*.override.yml
+
+# Misc
+*.bak
+*.tmp

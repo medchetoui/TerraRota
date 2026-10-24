@@ -1,0 +1,107 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Amiri:wght@400;700&display=swap');
+@import "tailwindcss";
+
+:root {
+  --color-earth-900: #1a0f00;
+  --color-earth-800: #2d1a00;
+  --color-earth-700: #3d2400;
+  --color-terracotta: #c1440e;
+  --color-terracotta-light: #e05c28;
+  --color-gold: #d4a017;
+  --color-gold-light: #f0c040;
+  --color-sage: #6b9e6b;
+  --color-sage-light: #8ec98e;
+  --color-sky: #4a9ebe;
+  --color-surface: #0f1a0a;
+  --color-surface-2: #162111;
+  --color-surface-3: #1d2b16;
+  --color-border: rgba(255,255,255,0.08);
+  --color-text: #e8ead4;
+  --color-text-muted: #9aaa82;
+}
+
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+html {
+  font-size: 16px;
+  -webkit-font-smoothing: antialiased;
+}
+
+body {
+  font-family: 'Inter', sans-serif;
+  background-color: var(--color-surface);
+  color: var(--color-text);
+  min-height: 100vh;
+  background-image:
+    radial-gradient(ellipse at 20% 0%, rgba(193,68,14,0.12) 0%, transparent 60%),
+    radial-gradient(ellipse at 80% 100%, rgba(107,158,107,0.08) 0%, transparent 60%);
+}
+
+.font-arabic {
+  font-family: 'Amiri', serif;
+}
+
+/* ─── Glassmorphism card ─── */
+.glass-card {
+  background: rgba(22, 33, 17, 0.85);
+  backdrop-filter: blur(16px);
+  border: 1px solid var(--color-border);
+  border-radius: 16px;
+}
+
+/* ─── Gradient text ─── */
+.gradient-text {
+  background: linear-gradient(135deg, #c1440e 0%, #d4a017 50%, #8ec98e 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+/* ─── Animated border ─── */
+@keyframes borderGlow {
+  0%, 100% { border-color: rgba(193,68,14,0.4); box-shadow: 0 0 20px rgba(193,68,14,0.1); }
+  50% { border-color: rgba(212,160,23,0.4); box-shadow: 0 0 20px rgba(212,160,23,0.1); }
+}
+
+.glow-border {
+  animation: borderGlow 3s ease-in-out infinite;
+}
+
+/* ─── Score ring ─── */
+.score-ring {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* ─── Transitions ─── */
+.transition-all { transition: all 0.3s ease; }
+
+/* ─── Scrollbar ─── */
+::-webkit-scrollbar { width: 6px; }
+::-webkit-scrollbar-track { background: var(--color-surface); }
+::-webkit-scrollbar-thumb { background: var(--color-earth-700); border-radius: 3px; }
+
+/* ─── RTL support ─── */
+[dir="rtl"] { font-family: 'Amiri', serif; }
+
+/* ─── Step indicator ─── */
+.step-dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background: rgba(255,255,255,0.2);
+  transition: all 0.3s ease;
+}
+.step-dot.active {
+  background: var(--color-terracotta);
+  box-shadow: 0 0 10px rgba(193,68,14,0.6);
+}
+.step-dot.done {
+  background: var(--color-sage);
+}
