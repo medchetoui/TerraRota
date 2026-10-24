@@ -47,17 +47,22 @@ export default function ParcelsModal({ isOpen, onClose, onSelectParcel }: Parcel
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-md">
-      <div className="relative w-full max-w-lg p-6 glass-card border border-emerald-500/30 shadow-2xl rounded-2xl bg-gradient-to-b from-[#142314] to-[#0d160c] text-white max-h-[85vh] flex flex-col">
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-md animate-in fade-in duration-200">
+      <div className="relative w-full max-w-xl p-8 rounded-3xl bg-[#0b120c] border border-emerald-500/30 shadow-2xl shadow-emerald-950/60 text-white max-h-[85vh] flex flex-col">
         {/* Header */}
-        <div className="flex items-center justify-between pb-4 border-b border-white/10 mb-4">
-          <div className="flex items-center gap-2">
-            <BookmarkCheck className="w-5 h-5 text-emerald-400" />
-            <h2 className="text-lg font-bold">{t('myParcels')}</h2>
+        <div className="flex items-center justify-between pb-5 border-b border-white/10 mb-6">
+          <div className="flex items-center gap-3">
+            <div className="w-10 h-10 rounded-xl bg-emerald-500/10 border border-emerald-500/30 flex items-center justify-center text-emerald-400">
+              <BookmarkCheck className="w-5 h-5" />
+            </div>
+            <div>
+              <h2 className="text-xl font-black text-white">{t('myParcels')}</h2>
+              <p className="text-xs text-slate-400">Vos exploitations et parcelles sauvegardées</p>
+            </div>
           </div>
           <button
             onClick={onClose}
-            className="p-1.5 text-gray-400 hover:text-white rounded-lg transition-colors"
+            className="p-2 text-slate-400 hover:text-white rounded-xl bg-white/5 hover:bg-white/10 transition-colors cursor-pointer"
           >
             <X className="w-5 h-5" />
           </button>

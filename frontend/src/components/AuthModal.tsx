@@ -1,7 +1,7 @@
 import React, { useState, useContext } from 'react';
 import { AppContext } from '../App';
 import { loginUser, registerUser, getMe, type UserProfile } from '../api/client';
-import { LogIn, UserPlus, Lock, Mail, User, X, AlertCircle, CheckCircle2 } from 'lucide-react';
+import { LogIn, UserPlus, Lock, Mail, User, X, AlertCircle, CheckCircle2, ShieldCheck } from 'lucide-react';
 
 interface AuthModalProps {
   isOpen: boolean;
@@ -30,17 +30,15 @@ export default function AuthModal({ isOpen, onClose, onSuccess }: AuthModalProps
     try {
       if (mode === 'login') {
         await loginUser({ username, password });
-        // Retrieve profile
-        const { getMe } = await import('../api/client');
         const meRes = await getMe();
-        setSuccessMsg(t('login') + ' OK');
+        setSuccessMsg('Connexion réussie !');
         setTimeout(() => {
           onSuccess(meRes.user);
           onClose();
         }, 500);
       } else {
         const regRes = await registerUser({ username, email, password });
-        setSuccessMsg(t('register') + ' OK');
+        setSuccessMsg('Compte créé avec succès !');
         setTimeout(() => {
           onSuccess(regRes.user);
           onClose();
@@ -51,7 +49,7 @@ export default function AuthModal({ isOpen, onClose, onSuccess }: AuthModalProps
       const msg =
         e?.data?.detail ||
         e?.data?.message ||
-        (e?.data?.errors ? JSON.stringify(e.data.errors) : 'Erreur de connexion. Vérifiez vos identifiants.');
+        (e?.data?.errors ? JSON.stringify(e.data.errors) : 'Identifiants invalides ou erreur serveur.');
       setErrorMsg(msg);
     } finally {
       setLoading(false);
@@ -59,53 +57,69 @@ export default function AuthModal({ isOpen, onClose, onSuccess }: AuthModalProps
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/75 backdrop-blur-md">
-      <div className="relative w-full max-w-md p-6 glass-card border border-emerald-500/30 shadow-2xl rounded-2xl bg-gradient-to-b from-[#142314] to-[#0d160c] text-white">
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-md animate-in fade-in duration-200">
+      <div className="relative w-full max-w-lg p-8 sm:p-10 rounded-3xl bg-[#0b120c] border border-emerald-500/30 shadow-2xl shadow-emerald-950/60 text-white">
         {/* Close Button */}
         <button
+          type="button"
           onClick={onClose}
-          className="absolute top-4 right-4 p-2 text-gray-400 hover:text-white rounded-lg transition-colors"
+          className="absolute top-6 right-6 p-2 text-slate-400 hover:text-white rounded-xl bg-white/5 hover:bg-white/10 transition-colors cursor-pointer"
         >
           <X className="w-5 h-5" />
         </button>
 
-        {/* Tab switch */}
-        <div className="flex border-b border-white/10 mb-6">
+        {/* Header Icon & Title */}
+        <div className="text-center mb-8">
+          <div className="w-14 h-14 rounded-2xl bg-emerald-500/10 border border-emerald-500/30 flex items-center justify-center text-emerald-400 mx-auto mb-3 shadow-lg shadow-emerald-950">
+            <ShieldCheck className="w-7 h-7" />
+          </div>
+          <h2 className="text-2xl font-black tracking-tight text-white">
+            {mode === 'login' ? 'Espace Agriculteur' : 'Créer votre compte'}
+          </h2>
+          <p className="text-xs text-slate-400 mt-1">
+            {mode === 'login'
+              ? 'Connectez-vous pour retrouver vos parcelles et vos analyses sauvegardées'
+              : 'Enregistrez vos parcelles et suivez les recommandations dans le temps'}
+          </p>
+        </div>
+
+        {/* Tab Switcher */}
+        <div className="flex bg-black/50 p-1 rounded-xl border border-white/10 mb-6">
           <button
             type="button"
             onClick={() => { setMode('login'); setErrorMsg(null); }}
-            className={`flex-1 pb-3 text-center font-medium transition-all flex items-center justify-center gap-2 ${
+            className={`flex-1 py-2.5 rounded-lg text-xs font-bold transition-all flex items-center justify-center gap-2 cursor-pointer ${
               mode === 'login'
-                ? 'text-emerald-400 border-b-2 border-emerald-400'
-                : 'text-gray-400 hover:text-gray-200'
+                ? 'bg-emerald-500 text-slate-950 shadow-md'
+                : 'text-slate-400 hover:text-white'
             }`}
           >
             <LogIn className="w-4 h-4" />
-            {t('login')}
+            <span>{t('login')}</span>
           </button>
           <button
             type="button"
             onClick={() => { setMode('register'); setErrorMsg(null); }}
-            className={`flex-1 pb-3 text-center font-medium transition-all flex items-center justify-center gap-2 ${
+            className={`flex-1 py-2.5 rounded-lg text-xs font-bold transition-all flex items-center justify-center gap-2 cursor-pointer ${
               mode === 'register'
-                ? 'text-emerald-400 border-b-2 border-emerald-400'
-                : 'text-gray-400 hover:text-gray-200'
+                ? 'bg-emerald-500 text-slate-950 shadow-md'
+                : 'text-slate-400 hover:text-white'
             }`}
           >
             <UserPlus className="w-4 h-4" />
-            {t('register')}
+            <span>{t('register')}</span>
           </button>
         </div>
 
         {errorMsg && (
-          <div className="mb-4 p-3 rounded-lg bg-red-950/60 border border-red-500/40 text-red-200 text-sm flex items-center gap-2">
-            <AlertCircle className="w-4 h-4 shrink-0 text-red-400" />
+          <div className="mb-5 p-3.5 rounded-xl bg-rose-950/60 border border-rose-500/40 text-rose-200 text-xs flex items-center gap-2.5">
+            <AlertCircle className="w-4 h-4 shrink-0 text-rose-400" />
             <span>{errorMsg}</span>
           </div>
         )}
 
         {successMsg && (
-          <div className="mb-4 p-3 rounded-lg bg-emerald-950/60 border border-emerald-500/40 text-emerald-200 text-sm flex items-center gap-2">
+          <div className="mb-5 p-3.5 rounded-xl bg-emerald-950/60 border border-emerald-500/40 text-emerald-200 text-xs flex items-center gap-2.5">
             <CheckCircle2 className="w-4 h-4 shrink-0 text-emerald-400" />
             <span>{successMsg}</span>
           </div>
@@ -113,53 +127,53 @@ export default function AuthModal({ isOpen, onClose, onSuccess }: AuthModalProps
 
         <form onSubmit={handleSubmit} className="space-y-4">
           <div>
-            <label className="block text-xs font-semibold uppercase tracking-wider text-gray-300 mb-1">
+            <label className="block text-xs font-bold uppercase tracking-wider text-slate-300 mb-1.5">
               {t('username')}
             </label>
             <div className="relative">
-              <User className="absolute left-3 top-3 w-4 h-4 text-gray-400" />
+              <User className="absolute left-3.5 top-3.5 w-4 h-4 text-slate-500" />
               <input
                 type="text"
                 required
                 value={username}
                 onChange={(e) => setUsername(e.target.value)}
-                placeholder="ex: karim_farmer"
-                className="w-full pl-10 pr-4 py-2.5 rounded-xl bg-black/40 border border-white/10 text-white placeholder-gray-500 focus:outline-none focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500 text-sm"
+                placeholder="ex: mohammed_agri"
+                className="w-full pl-11 pr-4 py-3 rounded-xl bg-black/60 border border-white/10 text-white placeholder-slate-600 focus:outline-none focus:border-emerald-400 focus:ring-2 focus:ring-emerald-400/20 text-sm font-semibold transition-all"
               />
             </div>
           </div>
 
           {mode === 'register' && (
             <div>
-              <label className="block text-xs font-semibold uppercase tracking-wider text-gray-300 mb-1">
+              <label className="block text-xs font-bold uppercase tracking-wider text-slate-300 mb-1.5">
                 {t('email')}
               </label>
               <div className="relative">
-                <Mail className="absolute left-3 top-3 w-4 h-4 text-gray-400" />
+                <Mail className="absolute left-3.5 top-3.5 w-4 h-4 text-slate-500" />
                 <input
                   type="email"
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
-                  placeholder="ex: karim@example.com"
-                  className="w-full pl-10 pr-4 py-2.5 rounded-xl bg-black/40 border border-white/10 text-white placeholder-gray-500 focus:outline-none focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500 text-sm"
+                  placeholder="ex: contact@ferme.ma"
+                  className="w-full pl-11 pr-4 py-3 rounded-xl bg-black/60 border border-white/10 text-white placeholder-slate-600 focus:outline-none focus:border-emerald-400 focus:ring-2 focus:ring-emerald-400/20 text-sm font-semibold transition-all"
                 />
               </div>
             </div>
           )}
 
           <div>
-            <label className="block text-xs font-semibold uppercase tracking-wider text-gray-300 mb-1">
+            <label className="block text-xs font-bold uppercase tracking-wider text-slate-300 mb-1.5">
               {t('password')}
             </label>
             <div className="relative">
-              <Lock className="absolute left-3 top-3 w-4 h-4 text-gray-400" />
+              <Lock className="absolute left-3.5 top-3.5 w-4 h-4 text-slate-500" />
               <input
                 type="password"
                 required
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 placeholder="••••••••"
-                className="w-full pl-10 pr-4 py-2.5 rounded-xl bg-black/40 border border-white/10 text-white placeholder-gray-500 focus:outline-none focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500 text-sm"
+                className="w-full pl-11 pr-4 py-3 rounded-xl bg-black/60 border border-white/10 text-white placeholder-slate-600 focus:outline-none focus:border-emerald-400 focus:ring-2 focus:ring-emerald-400/20 text-sm font-semibold transition-all"
               />
             </div>
           </div>
@@ -167,19 +181,19 @@ export default function AuthModal({ isOpen, onClose, onSuccess }: AuthModalProps
           <button
             type="submit"
             disabled={loading}
-            className="w-full mt-2 py-3 px-4 rounded-xl font-semibold bg-emerald-600 hover:bg-emerald-500 disabled:opacity-50 text-white transition-all shadow-lg shadow-emerald-900/40 flex items-center justify-center gap-2 cursor-pointer"
+            className="w-full mt-4 py-4 px-6 rounded-xl font-bold text-sm bg-gradient-to-r from-emerald-500 to-amber-500 hover:from-emerald-400 hover:to-amber-400 text-slate-950 flex items-center justify-center gap-2 shadow-xl shadow-emerald-950/60 transition-all cursor-pointer disabled:opacity-50"
           >
             {loading ? (
-              <span className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+              <span className="w-5 h-5 border-2 border-slate-950/30 border-t-slate-950 rounded-full animate-spin" />
             ) : mode === 'login' ? (
               <>
                 <LogIn className="w-4 h-4" />
-                {t('login')}
+                <span>Se connecter</span>
               </>
             ) : (
               <>
                 <UserPlus className="w-4 h-4" />
-                {t('register')}
+                <span>Créer mon compte</span>
               </>
             )}
           </button>

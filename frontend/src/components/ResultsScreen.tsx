@@ -286,7 +286,7 @@ export default function ResultsScreen({ result, form, onRevise, onOpenAuth }: Re
   };
 
   return (
-    <div className="min-h-screen px-4 py-8 max-w-2xl mx-auto text-slate-100">
+    <div className="min-h-screen px-4 sm:px-6 lg:px-8 py-10 sm:py-16 max-w-4xl mx-auto text-slate-100">
       {/* Top Header */}
       <div className="flex items-center justify-between mb-6 pb-4 border-b border-white/5">
         <div>

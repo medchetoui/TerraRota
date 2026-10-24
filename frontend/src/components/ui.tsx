@@ -1,27 +1,67 @@
-import { useContext } from 'react';
+import React, { useContext } from 'react';
 import { AppContext } from '../App';
+import { ArrowLeft, ArrowRight, CheckCircle2 } from 'lucide-react';
 
 interface StepHeaderProps {
   currentStep: number;
   totalSteps: number;
   title: string;
+  subtitle?: string;
 }
 
-export function StepHeader({ currentStep, totalSteps, title }: StepHeaderProps) {
+export function StepHeader({ currentStep, totalSteps, title, subtitle }: StepHeaderProps) {
+  const steps = [
+    { num: 1, label: 'Localisation' },
+    { num: 2, label: 'Parcelle & Sols' },
+    { num: 3, label: 'Vérification' },
+  ];
+
   return (
     <div className="mb-8">
-      <div className="flex items-center gap-2 mb-4">
-        {Array.from({ length: totalSteps }).map((_, i) => (
-          <div
-            key={i}
-            className={`step-dot ${i + 1 < currentStep ? 'done' : ''} ${i + 1 === currentStep ? 'active' : ''}`}
-          />
-        ))}
+      {/* Visual Step Indicator */}
+      <div className="flex items-center justify-between max-w-xl mx-auto mb-6">
+        {steps.map((s, idx) => {
+          const isDone = s.num < currentStep;
+          const isActive = s.num === currentStep;
+
+          return (
+            <React.Fragment key={s.num}>
+              <div className="flex flex-col items-center">
+                <div
+                  className={`w-9 h-9 rounded-xl flex items-center justify-center font-bold text-xs transition-all ${
+                    isDone
+                      ? 'bg-emerald-500 text-slate-950 font-black shadow-lg shadow-emerald-950'
+                      : isActive
+                      ? 'bg-emerald-500/20 text-emerald-400 border-2 border-emerald-400 shadow-md shadow-emerald-950/40'
+                      : 'bg-white/5 text-slate-500 border border-white/10'
+                  }`}
+                >
+                  {isDone ? <CheckCircle2 className="w-4 h-4 stroke-[2.5]" /> : s.num}
+                </div>
+                <span
+                  className={`text-[11px] font-semibold mt-1.5 hidden sm:block ${
+                    isActive ? 'text-emerald-400' : isDone ? 'text-slate-300' : 'text-slate-500'
+                  }`}
+                >
+                  {s.label}
+                </span>
+              </div>
+              {idx < steps.length - 1 && (
+                <div
+                  className={`flex-1 h-0.5 mx-3 rounded-full transition-all ${
+                    idx + 1 < currentStep ? 'bg-emerald-500' : 'bg-white/10'
+                  }`}
+                />
+              )}
+            </React.Fragment>
+          );
+        })}
       </div>
-      <p className="text-sm mb-1" style={{ color: 'var(--color-text-muted)' }}>
-        Étape {currentStep} / {totalSteps}
-      </p>
-      <h2 className="text-2xl font-bold">{title}</h2>
+
+      <div className="text-center max-w-2xl mx-auto">
+        <h2 className="text-2xl sm:text-3xl font-black text-slate-100 tracking-tight">{title}</h2>
+        {subtitle && <p className="text-sm text-slate-400 mt-1.5">{subtitle}</p>}
+      </div>
     </div>
   );
 }
@@ -38,42 +78,23 @@ interface FormFieldProps {
 export function FormField({ label, error, children, required, help, id }: FormFieldProps) {
   return (
     <div className="mb-5">
-      <label
-        htmlFor={id}
-        className="block text-sm font-medium mb-1"
-        style={{ color: 'var(--color-text)' }}
-      >
-        {label} {required && <span style={{ color: 'var(--color-terracotta)' }}>*</span>}
-      </label>
+      <div className="flex items-center justify-between mb-1.5">
+        <label htmlFor={id} className="block text-xs font-bold uppercase tracking-wider text-slate-300">
+          {label} {required && <span className="text-emerald-400">*</span>}
+        </label>
+        {help && !error && (
+          <span className="text-[11px] text-slate-500">{help}</span>
+        )}
+      </div>
       {children}
-      {help && !error && (
-        <p className="text-xs mt-1" style={{ color: 'var(--color-text-muted)' }}>{help}</p>
-      )}
       {error && (
-        <p
-          id={`${id}-error`}
-          role="alert"
-          className="text-xs mt-1"
-          style={{ color: '#e05c28' }}
-        >
-          {error}
+        <p id={`${id}-error`} role="alert" className="text-xs mt-1.5 text-rose-400 font-medium flex items-center gap-1">
+          <span>•</span> {error}
         </p>
       )}
     </div>
   );
 }
-
-const inputClass = [
-  'w-full px-4 py-3 rounded-xl text-sm font-medium',
-  'bg-opacity-50 focus:outline-none focus:ring-2',
-  'transition-all',
-].join(' ');
-
-const inputStyle = {
-  background: 'rgba(255,255,255,0.07)',
-  border: '1px solid rgba(255,255,255,0.12)',
-  color: 'var(--color-text)',
-};
 
 export function TextInput({
   id,
@@ -101,11 +122,11 @@ export function TextInput({
       placeholder={placeholder}
       aria-describedby={error ? `${id}-error` : undefined}
       aria-invalid={!!error}
-      className={inputClass}
-      style={{
-        ...inputStyle,
-        borderColor: error ? 'rgba(224,92,40,0.5)' : 'rgba(255,255,255,0.12)',
-      }}
+      className={`w-full px-4 py-3 rounded-xl text-sm font-semibold bg-black/40 border text-slate-100 placeholder-slate-600 transition-all focus:outline-none focus:ring-2 ${
+        error
+          ? 'border-rose-500/50 focus:border-rose-400 focus:ring-rose-500/20'
+          : 'border-white/10 hover:border-white/20 focus:border-emerald-400 focus:ring-emerald-400/20'
+      }`}
       {...rest}
     />
   );
@@ -130,15 +151,14 @@ export function SelectInput({
       value={value}
       onChange={(e) => onChange(e.target.value)}
       aria-describedby={error ? `${id}-error` : undefined}
-      className={inputClass}
-      style={{
-        ...inputStyle,
-        borderColor: error ? 'rgba(224,92,40,0.5)' : 'rgba(255,255,255,0.12)',
-        cursor: 'pointer',
-      }}
+      className={`w-full px-4 py-3 rounded-xl text-sm font-semibold bg-[#0a110b] border text-slate-100 transition-all focus:outline-none focus:ring-2 cursor-pointer ${
+        error
+          ? 'border-rose-500/50 focus:border-rose-400 focus:ring-rose-500/20'
+          : 'border-white/10 hover:border-white/20 focus:border-emerald-400 focus:ring-emerald-400/20'
+      }`}
     >
       {options.map((o) => (
-        <option key={o.value} value={o.value} style={{ background: '#162111' }}>
+        <option key={o.value} value={o.value} className="bg-[#0f1712] text-slate-100 py-2">
           {o.label}
         </option>
       ))}
@@ -157,30 +177,28 @@ interface NavButtonsProps {
 export function NavButtons({ onBack, onNext, nextLabel = 'Suivant', nextId = 'next-btn', disabled }: NavButtonsProps) {
   const { t } = useContext(AppContext);
   return (
-    <div className="flex gap-3 mt-8">
+    <div className="flex items-center gap-3 mt-8">
       {onBack && (
         <button
           id="back-btn"
+          type="button"
           onClick={onBack}
-          className="flex-1 py-3 rounded-xl font-medium text-sm transition-all hover:opacity-80"
-          style={{ background: 'rgba(255,255,255,0.07)', border: '1px solid var(--color-border)', color: 'var(--color-text)' }}
+          className="px-6 py-3.5 rounded-xl font-bold text-xs uppercase tracking-wider bg-white/5 hover:bg-white/10 border border-white/10 text-slate-300 transition-colors flex items-center justify-center gap-2 cursor-pointer"
         >
-          ← {t('backBtn')}
+          <ArrowLeft className="w-4 h-4" />
+          <span>{t('backBtn')}</span>
         </button>
       )}
       {onNext && (
         <button
           id={nextId}
+          type="button"
           onClick={onNext}
           disabled={disabled}
-          className="flex-2 flex-grow py-3 rounded-xl font-bold text-sm transition-all hover:scale-[1.02] disabled:opacity-40 disabled:cursor-not-allowed"
-          style={{
-            background: 'linear-gradient(135deg, var(--color-terracotta) 0%, var(--color-terracotta-light) 100%)',
-            color: 'white',
-            boxShadow: '0 4px 16px rgba(193,68,14,0.3)',
-          }}
+          className="flex-1 py-3.5 px-6 rounded-xl font-bold text-sm bg-gradient-to-r from-emerald-500 to-amber-500 hover:from-emerald-400 hover:to-amber-400 text-slate-950 flex items-center justify-center gap-2 shadow-xl shadow-emerald-950/50 transition-all cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
         >
-          {nextLabel} →
+          <span>{nextLabel}</span>
+          <ArrowRight className="w-4 h-4" />
         </button>
       )}
     </div>
@@ -189,8 +207,8 @@ export function NavButtons({ onBack, onNext, nextLabel = 'Suivant', nextId = 'ne
 
 export function PageWrapper({ children }: { children: React.ReactNode }) {
   return (
-    <div className="min-h-screen flex items-start justify-center px-4 py-10">
-      <div className="w-full max-w-lg">
+    <div className="min-h-screen flex items-start justify-center px-4 sm:px-6 lg:px-8 py-10 sm:py-16">
+      <div className="w-full max-w-3xl">
         {children}
       </div>
     </div>

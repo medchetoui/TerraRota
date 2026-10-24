@@ -158,7 +158,7 @@ function App() {
   return (
     <AppContext.Provider value={ctxValue}>
       <div
-        className="min-h-screen bg-[#0a110a] text-slate-100 selection:bg-emerald-500 selection:text-slate-950"
+        className="w-full min-h-screen bg-[#070b08] text-slate-100 flex flex-col selection:bg-emerald-500 selection:text-slate-950"
         dir={lang === 'ar' ? 'rtl' : 'ltr'}
       >
         {step === 'landing' && (
