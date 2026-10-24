@@ -240,8 +240,8 @@ export function NavButtons({ onBack, onNext, nextLabel = 'Suivant', nextId = 'ne
 
 export function PageWrapper({ children }: { children: React.ReactNode }) {
   return (
-    <div className="w-full flex-1 flex flex-col items-center justify-center px-4 sm:px-8 py-8 sm:py-12">
-      <div className="w-full max-w-7xl flex flex-col my-auto">
+    <div className="w-full flex-1 flex flex-col items-center justify-center px-4 sm:px-8 lg:px-12 py-8">
+      <div className="w-full flex flex-col my-auto">
         {children}
       </div>
     </div>

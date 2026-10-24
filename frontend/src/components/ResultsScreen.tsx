@@ -286,7 +286,7 @@ export default function ResultsScreen({ result, form, onRevise, onOpenAuth }: Re
   };
 
   return (
-    <div className="w-full max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-8 sm:py-12 text-slate-100 flex-1 flex flex-col justify-start">
+    <div className="w-full px-4 sm:px-8 lg:px-12 py-8 text-slate-100 flex-1 flex flex-col justify-start">
       {/* Top Header */}
       <div className="flex items-center justify-between mb-6 pb-4 border-b border-white/5">
         <div>

@@ -2,18 +2,11 @@ import { useContext } from 'react';
 import { AppContext } from '../App';
 import {
   Satellite,
-  Sprout,
   BarChart3,
   ShieldCheck,
   ArrowRight,
   Globe2,
-  LogIn,
-  LogOut,
   User as UserIcon,
-  BookmarkCheck,
-  Sparkles,
-  MapPin,
-  Cpu,
 } from 'lucide-react';
 
 interface LandingProps {
@@ -22,30 +15,30 @@ interface LandingProps {
   onOpenParcels: () => void;
 }
 
-export default function Landing({ onStart, onOpenAuth, onOpenParcels }: LandingProps) {
-  const { t, lang, setLang, user, logout } = useContext(AppContext);
+export default function Landing({ onStart, onOpenAuth }: LandingProps) {
+  const { t, user } = useContext(AppContext);
 
   return (
-    <div className="w-full min-h-screen flex flex-col relative overflow-hidden bg-[#070b08] text-slate-100">
+    <div className="w-full flex-1 flex flex-col relative overflow-hidden bg-[#070b08] text-slate-100">
       {/* Dynamic Ambient Background Glows */}
       <div className="absolute inset-0 pointer-events-none overflow-hidden">
         <div
-          className="absolute -top-[15%] left-1/2 -translate-x-1/2 w-[1200px] h-[500px] rounded-full blur-[140px] opacity-20"
+          className="absolute -top-[15%] left-1/2 -translate-x-1/2 w-[1400px] h-[500px] rounded-full blur-[140px] opacity-20"
           style={{ background: 'radial-gradient(circle, #10b981 0%, #047857 50%, transparent 80%)' }}
         />
         <div
-          className="absolute top-[35%] -right-[10%] w-[700px] h-[700px] rounded-full blur-[160px] opacity-15"
+          className="absolute top-[35%] -right-[10%] w-[800px] h-[800px] rounded-full blur-[160px] opacity-15"
           style={{ background: 'radial-gradient(circle, #f59e0b 0%, transparent 70%)' }}
         />
         <div
-          className="absolute -bottom-[10%] -left-[10%] w-[600px] h-[600px] rounded-full blur-[140px] opacity-15"
+          className="absolute -bottom-[10%] -left-[10%] w-[800px] h-[800px] rounded-full blur-[140px] opacity-15"
           style={{ background: 'radial-gradient(circle, #0284c7 0%, transparent 70%)' }}
         />
       </div>
 
       {/* Main Full-Width Hero Section */}
-      <main className="w-full flex-1 max-w-7xl mx-auto px-4 sm:px-8 py-8 sm:py-12 relative z-10 flex flex-col justify-between">
-        <div className="text-center max-w-4xl mx-auto pt-2 sm:pt-6">
+      <main className="w-full flex-1 px-4 sm:px-8 lg:px-12 py-8 sm:py-12 relative z-10 flex flex-col justify-between">
+        <div className="text-center w-full max-w-5xl mx-auto pt-2 sm:pt-6">
           {/* Official Field Shift Challenge Badge */}
           <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full text-xs font-semibold bg-emerald-500/10 border border-emerald-500/30 text-emerald-300 mb-6 backdrop-blur-md">
             <Satellite className="w-3.5 h-3.5 text-emerald-400 animate-pulse" />
@@ -60,10 +53,10 @@ export default function Landing({ onStart, onOpenAuth, onOpenParcels }: LandingP
             </span>
           </h1>
 
-          <p className="text-base sm:text-xl text-slate-300 font-medium max-w-2xl mx-auto mb-3 leading-relaxed">
+          <p className="text-base sm:text-xl text-slate-300 font-medium max-w-3xl mx-auto mb-3 leading-relaxed">
             {t('tagline')}
           </p>
-          <p className="text-xs sm:text-sm text-slate-400 max-w-xl mx-auto mb-8 leading-relaxed">
+          <p className="text-xs sm:text-sm text-slate-400 max-w-2xl mx-auto mb-8 leading-relaxed">
             {t('subtitle')}
           </p>
 
@@ -89,28 +82,28 @@ export default function Landing({ onStart, onOpenAuth, onOpenParcels }: LandingP
           </div>
         </div>
 
-        {/* Live Metrics Ribbon Across Width */}
-        <div className="w-full grid grid-cols-2 sm:grid-cols-4 gap-3 p-4 rounded-2xl bg-white/[0.025] border border-white/10 backdrop-blur-md mb-8 max-w-5xl mx-auto">
-          <div className="text-center p-2 border-r border-white/5 last:border-r-0">
-            <div className="text-xl sm:text-2xl font-black text-emerald-400">1 826+</div>
-            <div className="text-[11px] text-slate-400 mt-0.5">Jours d'observations NASA</div>
+        {/* Live Metrics Ribbon Across Full Width */}
+        <div className="w-full grid grid-cols-2 sm:grid-cols-4 gap-4 p-5 rounded-2xl bg-white/[0.025] border border-white/10 backdrop-blur-md mb-8">
+          <div className="text-center p-3 border-r border-white/5 last:border-r-0">
+            <div className="text-2xl sm:text-3xl font-black text-emerald-400">1 826+</div>
+            <div className="text-xs text-slate-400 mt-1">Jours d'observations NASA</div>
           </div>
-          <div className="text-center p-2 border-r border-white/5 last:border-r-0">
-            <div className="text-xl sm:text-2xl font-black text-amber-400">10 Cultures</div>
-            <div className="text-[11px] text-slate-400 mt-0.5">Blé, Olivier, Arganier, etc.</div>
+          <div className="text-center p-3 border-r border-white/5 last:border-r-0">
+            <div className="text-2xl sm:text-3xl font-black text-amber-400">10 Cultures</div>
+            <div className="text-xs text-slate-400 mt-1">Blé, Olivier, Arganier, etc.</div>
           </div>
-          <div className="text-center p-2 border-r border-white/5 last:border-r-0">
-            <div className="text-xl sm:text-2xl font-black text-sky-400">0.5° × 0.5°</div>
-            <div className="text-[11px] text-slate-400 mt-0.5">Grille satellite (~50 km)</div>
+          <div className="text-center p-3 border-r border-white/5 last:border-r-0">
+            <div className="text-2xl sm:text-3xl font-black text-sky-400">0.5° × 0.5°</div>
+            <div className="text-xs text-slate-400 mt-1">Grille satellite (~50 km)</div>
           </div>
-          <div className="text-center p-2">
-            <div className="text-xl sm:text-2xl font-black text-slate-200">100%</div>
-            <div className="text-[11px] text-slate-400 mt-0.5">Règles agronomiques vérifiables</div>
+          <div className="text-center p-3">
+            <div className="text-2xl sm:text-3xl font-black text-slate-200">100%</div>
+            <div className="text-xs text-slate-400 mt-1">Règles agronomiques vérifiables</div>
           </div>
         </div>
 
-        {/* 4 Feature Cards Grid */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 w-full max-w-6xl mx-auto mb-8">
+        {/* 4 Feature Cards Grid Across Full Width */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 w-full mb-8">
           {[
             {
               icon: Satellite,
@@ -160,8 +153,8 @@ export default function Landing({ onStart, onOpenAuth, onOpenParcels }: LandingP
           })}
         </div>
 
-        {/* Footer info bar */}
-        <div className="w-full border-t border-white/5 pt-4 pb-2 flex flex-col sm:flex-row items-center justify-between text-[11px] text-slate-500 max-w-6xl mx-auto gap-2">
+        {/* Footer info bar Across Full Width */}
+        <div className="w-full border-t border-white/5 pt-4 pb-2 flex flex-col sm:flex-row items-center justify-between text-[11px] text-slate-500 gap-2">
           <div className="flex items-center gap-2">
             <span>Développé pour la communauté agricole marocaine</span>
             <span>•</span>

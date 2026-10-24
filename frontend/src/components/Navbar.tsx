@@ -44,7 +44,7 @@ export default function Navbar({
 
   return (
     <header className="w-full border-b border-white/10 bg-black/40 backdrop-blur-xl sticky top-0 z-40">
-      <div className="w-full max-w-7xl mx-auto px-4 sm:px-8 h-16 sm:h-20 flex items-center justify-between">
+      <div className="w-full px-4 sm:px-8 lg:px-12 h-16 sm:h-20 flex items-center justify-between">
         {/* Brand Logo & Back to Home */}
         <div className="flex items-center gap-3">
           <button
