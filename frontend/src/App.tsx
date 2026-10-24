@@ -19,6 +19,7 @@ import {
 
 // ─── Screens & Modals ───────────────────────────────────────
 import Landing from './components/Landing';
+import Navbar from './components/Navbar';
 import LocationStep from './components/LocationStep';
 import FarmDetailsStep from './components/FarmDetailsStep';
 import ReviewStep from './components/ReviewStep';
@@ -161,6 +162,12 @@ function App() {
         className="w-full min-h-screen bg-[#070b08] text-slate-100 flex flex-col selection:bg-emerald-500 selection:text-slate-950"
         dir={lang === 'ar' ? 'rtl' : 'ltr'}
       >
+        <Navbar
+          currentStep={step}
+          onGoHome={() => setStep('landing')}
+          onOpenAuth={() => setAuthModalOpen(true)}
+          onOpenParcels={() => setParcelsModalOpen(true)}
+        />
         {step === 'landing' && (
           <Landing
             onStart={() => setStep('location')}
