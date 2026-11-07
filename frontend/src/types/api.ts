@@ -47,6 +47,13 @@ export interface Indicators {
   missing_data_pct: number | null;
 }
 
+export interface ScientificEvidence {
+  parameter: string;
+  value: string;
+  scientific_rule: string;
+  source: string;
+}
+
 export interface CropRecommendation {
   crop_id: CropId;
   crop_name_fr: string;
@@ -58,6 +65,7 @@ export interface CropRecommendation {
   eligible: boolean;
   reasons: string[];
   cautions: string[];
+  evidences?: ScientificEvidence[];
   infos: string[];
   rules_applied: string[];
   is_provisional: boolean;

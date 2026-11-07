@@ -6,7 +6,7 @@ export default function LoadingScreen() {
   const { t } = useContext(AppContext);
 
   return (
-    <div className="min-h-screen flex items-center justify-center px-4 bg-[#0a110a] text-slate-100">
+    <div className="w-full min-h-[calc(100vh-5rem)] flex items-center justify-center px-4 bg-[#070b08] text-slate-100">
       <div className="text-center max-w-sm w-full">
         {/* Animated Satellite Visual */}
         <div className="flex justify-center mb-8">

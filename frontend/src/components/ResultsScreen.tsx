@@ -286,7 +286,8 @@ export default function ResultsScreen({ result, form, onRevise, onOpenAuth }: Re
   };
 
   return (
-    <div className="w-full px-4 sm:px-8 lg:px-12 py-8 text-slate-100 flex-1 flex flex-col justify-start">
+    <div className="w-full min-h-[calc(100vh-5rem)] px-4 sm:px-8 lg:px-12 py-8 text-slate-100">
+      <div className="max-w-6xl mx-auto">
       {/* Top Header */}
       <div className="flex items-center justify-between mb-6 pb-4 border-b border-white/5">
         <div>
@@ -443,6 +444,7 @@ export default function ResultsScreen({ result, form, onRevise, onOpenAuth }: Re
           <RotateCcw className="w-3.5 h-3.5" />
           <span>{t('reviseBtn')}</span>
         </button>
+      </div>
       </div>
     </div>
   );

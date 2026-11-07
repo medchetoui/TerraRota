@@ -85,7 +85,7 @@ export default function LocationStep({ form, setForm, onNext, onBack, onOpenParc
 
       <div className="w-full grid grid-cols-1 lg:grid-cols-12 gap-6">
         {/* Left Column: Moroccan Agricultural Hub Presets (7 cols) */}
-        <div className="lg:col-span-7 glass-panel p-5 sm:p-6 flex flex-col justify-between">
+        <div className="lg:col-span-7 glass-panel p-5 sm:p-6 flex flex-col">
           <div>
             <div className="flex items-center justify-between mb-4 pb-3 border-b border-white/5">
               <div className="flex items-center gap-2">
@@ -162,7 +162,7 @@ export default function LocationStep({ form, setForm, onNext, onBack, onOpenParc
         </div>
 
         {/* Right Column: GPS Inputs & Tools (5 cols) */}
-        <div className="lg:col-span-5 glass-panel p-5 sm:p-6 flex flex-col justify-between">
+        <div className="lg:col-span-5 glass-panel p-5 sm:p-6 flex flex-col">
           <div>
             <div className="flex items-center justify-between mb-4 pb-3 border-b border-white/5">
               <div className="flex items-center gap-2">
@@ -246,15 +246,17 @@ export default function LocationStep({ form, setForm, onNext, onBack, onOpenParc
             </div>
           </div>
 
-          <div className="mt-4 pt-3 border-t border-white/5">
-            <NavButtons
-              onBack={onBack}
-              onNext={handleNext}
-              nextLabel="Suivant : Parcelle & Sols"
-              nextId="location-next-btn"
-            />
-          </div>
         </div>
+      </div>
+
+      {/* Step Nav Footer */}
+      <div className="mt-5 pt-4 border-t border-white/10">
+        <NavButtons
+          onBack={onBack}
+          onNext={handleNext}
+          nextLabel="Suivant : Parcelle & Sols"
+          nextId="location-next-btn"
+        />
       </div>
     </PageWrapper>
   );

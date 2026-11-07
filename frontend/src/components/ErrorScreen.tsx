@@ -12,7 +12,7 @@ export default function ErrorScreen({ message, onRetry, onReset }: ErrorScreenPr
   const { t } = useContext(AppContext);
 
   return (
-    <div className="min-h-screen flex items-center justify-center px-4 bg-[#0a110a] text-slate-100">
+    <div className="w-full min-h-[calc(100vh-5rem)] flex items-center justify-center px-4 bg-[#070b08] text-slate-100">
       <div className="max-w-sm w-full text-center">
         <div className="w-16 h-16 rounded-2xl bg-rose-500/10 border border-rose-500/30 flex items-center justify-center text-rose-400 mx-auto mb-6 shadow-xl shadow-rose-950/40">
           <AlertTriangle className="w-8 h-8" />

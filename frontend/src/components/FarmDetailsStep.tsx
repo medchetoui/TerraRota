@@ -61,7 +61,7 @@ export default function FarmDetailsStep({ form, setForm, onNext, onBack }: FarmD
 
       <div className="w-full grid grid-cols-1 lg:grid-cols-12 gap-6">
         {/* Left Column: Water & Previous Crop */}
-        <div className="lg:col-span-6 glass-panel p-5 sm:p-6 flex flex-col justify-between">
+        <div className="lg:col-span-6 glass-panel p-5 sm:p-6 flex flex-col">
           <div>
             <div className="flex items-center gap-2 mb-4 pb-3 border-b border-white/5">
               <div className="w-7 h-7 rounded-lg bg-sky-500/10 border border-sky-500/20 flex items-center justify-center text-sky-400">
@@ -113,7 +113,7 @@ export default function FarmDetailsStep({ form, setForm, onNext, onBack }: FarmD
         </div>
 
         {/* Right Column: Soil & Preferred Crops */}
-        <div className="lg:col-span-6 glass-panel p-5 sm:p-6 flex flex-col justify-between">
+        <div className="lg:col-span-6 glass-panel p-5 sm:p-6 flex flex-col">
           <div>
             <div className="flex items-center gap-2 mb-4 pb-3 border-b border-white/5">
               <div className="w-7 h-7 rounded-lg bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-center text-emerald-400">
@@ -183,11 +183,12 @@ export default function FarmDetailsStep({ form, setForm, onNext, onBack }: FarmD
               </FormField>
             </div>
           </div>
-
-          <div className="mt-4 pt-3 border-t border-white/5">
-            <NavButtons onBack={onBack} onNext={onNext} nextLabel={t('nextBtn')} />
-          </div>
         </div>
+      </div>
+
+      {/* Step Nav Footer */}
+      <div className="mt-5 pt-4 border-t border-white/10">
+        <NavButtons onBack={onBack} onNext={onNext} nextLabel={t('nextBtn')} />
       </div>
     </PageWrapper>
   );

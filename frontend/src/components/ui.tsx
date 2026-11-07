@@ -206,14 +206,14 @@ interface NavButtonsProps {
 export function NavButtons({ onBack, onNext, nextLabel = 'Suivant', nextId = 'next-btn', disabled }: NavButtonsProps) {
   const { t } = useContext(AppContext);
   return (
-    <div className="flex items-center justify-between gap-3 mt-6 pt-4 border-t border-white/10">
+    <div className="flex items-center justify-between gap-3">
       <div>
         {onBack && (
           <button
             id="back-btn"
             type="button"
             onClick={onBack}
-            className="px-4 py-2 rounded-lg font-semibold text-xs uppercase tracking-wider bg-white/5 hover:bg-white/10 border border-white/10 text-slate-300 transition-colors inline-flex items-center gap-1.5 cursor-pointer"
+            className="px-4 py-2.5 rounded-xl font-semibold text-xs uppercase tracking-wider bg-white/5 hover:bg-white/10 border border-white/10 text-slate-300 transition-colors inline-flex items-center gap-1.5 cursor-pointer hover:-translate-y-0.5 active:translate-y-0"
           >
             <ArrowLeft className="w-3.5 h-3.5" />
             <span>{t('backBtn')}</span>
@@ -227,7 +227,7 @@ export function NavButtons({ onBack, onNext, nextLabel = 'Suivant', nextId = 'ne
             type="button"
             onClick={onNext}
             disabled={disabled}
-            className="px-5 py-2.5 rounded-lg font-bold text-xs uppercase tracking-wider bg-gradient-to-r from-emerald-400 to-amber-400 hover:from-emerald-300 hover:to-amber-300 text-slate-950 inline-flex items-center gap-2 shadow-md shadow-emerald-950/40 transition-all cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
+            className="px-5 py-2.5 rounded-xl font-bold text-xs uppercase tracking-wider bg-gradient-to-r from-emerald-400 to-amber-400 hover:from-emerald-300 hover:to-amber-300 text-slate-950 inline-flex items-center gap-2 shadow-lg shadow-emerald-950/50 transition-all cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed hover:-translate-y-0.5 active:translate-y-0"
           >
             <span>{nextLabel}</span>
             <ArrowRight className="w-3.5 h-3.5" />
@@ -240,8 +240,8 @@ export function NavButtons({ onBack, onNext, nextLabel = 'Suivant', nextId = 'ne
 
 export function PageWrapper({ children }: { children: React.ReactNode }) {
   return (
-    <div className="w-full flex-1 flex flex-col items-center justify-center px-4 sm:px-8 lg:px-12 py-8">
-      <div className="w-full flex flex-col my-auto">
+    <div className="w-full min-h-[calc(100vh-5rem)] px-4 sm:px-8 lg:px-12 py-6 sm:py-8">
+      <div className="w-full max-w-6xl mx-auto">
         {children}
       </div>
     </div>
