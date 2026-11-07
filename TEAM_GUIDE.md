@@ -44,34 +44,26 @@ TerraRota/
 
 ### A. Lancer le Backend (Django)
 
-1. Ouvrez un terminal dans le dossier `backend` :
-   ```bash
-   cd backend
-   ```
-2. Créez et activez votre environnement virtuel :
-   ```powershell
-   # Windows PowerShell
-   python -m venv .venv
-   .\.venv\Scripts\Activate.ps1
-   ```
-3. Installez les dépendances :
-   ```bash
-   pip install -r requirements.txt
-   ```
-4. Configuration de la base de données :
-   - **Option 1 (XAMPP MySQL - Recommandé)** : Lancez Apache & MySQL sur XAMPP, créez la base `terrarota`.
-   - **Option 2 (SQLite rapide)** : Dans `backend/.env`, mettez simplement :
-     ```env
-     DB_ENGINE=sqlite
-     ```
-5. Appliquez les migrations :
-   ```bash
-   python manage.py migrate
-   ```
-6. Lancez le serveur :
-   ```bash
-   python manage.py runserver 8000
-   ```
+Chaque membre peut choisir **l'Option 1 (avec environnement virtuel)** ou **l'Option 2 (directement sans environnement virtuel)** :
+
+#### Option 1 (Recommandée : avec environnement virtuel)
+```powershell
+cd backend
+python -m venv .venv
+.\.venv\Scripts\Activate.ps1
+pip install -r requirements.txt
+python manage.py migrate
+python manage.py runserver 8000
+```
+
+#### Option 2 (Directe : sans environnement virtuel sur votre Python global)
+Si vous ne voulez pas créer de virtualenv, installez simplement les dépendances sur votre machine :
+```powershell
+cd backend
+pip install -r requirements.txt
+python manage.py migrate
+python manage.py runserver 8000
+```
    > 📍 API disponible sur : `http://127.0.0.1:8000/api/v1/`
 
 ---
@@ -149,7 +141,7 @@ L'application intègre un système d'authentification complet et sécurisé par 
 
 2. **Créer et basculer sur sa propre branche personnelle** :
    ```bash
-   # Remplacez <votre-nom> par votre prénom (ex: member/amine, member/sarah, etc.)
+   # Remplacez <votre-nom> par votre prénom (ex: member/amine, member/hiba, etc.)
    git checkout -b member/<votre-nom>
    ```
 
