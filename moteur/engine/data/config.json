@@ -1,0 +1,33 @@
+{
+  "weights": {
+    "temp_c": 0.35,
+    "rain_mm": 0.40,
+    "ph": 0.15,
+    "salinity_dsm": 0.10
+  },
+  "verdict_thresholds": {
+    "viable": 70,
+    "risky": 40
+  },
+    "rotation": {
+    "window_years": 3,
+    "same_crop_penalty": 0.5,
+    "same_family_penalty": 0.3,
+    "repeated_family_penalty": 0.2,
+    "exhausting_after_exhausting_penalty": 0.2
+  },
+    "plan": {
+    "max_family_share": 0.7,
+    "min_gain_for_ok_lines": 10,
+    "soil_bonus": 10
+  },
+    "confidence": {
+    "high": 0.75,
+    "medium": 0.5,
+    "unverified_crop_penalty": 0.15,
+    "rotation_unknown_penalty": 0.1,
+    "irrigation_unknown_penalty": 0.1,
+    "unvalidated_crop_penalty": 0.15
+  }
+     
+}

@@ -1,0 +1,68 @@
+{
+  "aliases": {"LEGUME": "pois_chiche", "LEGUME2": "lentille", "BULBE": "oignon"},
+  "scenarios": [
+    {"id": "cereales_apres_cereale",
+     "description": "Blé tendre + orge après du blé tendre : à corriger",
+     "parcels": {"P1": {"conditions": {"temp_c": 18, "rain_mm": 500, "ph": 7, "salinity_dsm": 2},
+                        "irrigated": false, "history": [{"crop": "ble_tendre", "year": 2025}]}},
+     "plan": [{"parcel": "P1", "crop": "ble_tendre", "area_ha": 2},
+              {"parcel": "P1", "crop": "orge", "area_ha": 1}],
+     "expect": {"farmer_verdict_in": ["partially_viable", "not_viable"], "has_better": true,
+                 "tip_rules": ["une_seule_famille"]}},
+
+    {"id": "cereales_apres_legumineuse",
+     "description": "Que des céréales, après une légumineuse : bien noté, mais pas diversifié",
+     "parcels": {"P1": {"conditions": {"temp_c": 18, "rain_mm": 500, "ph": 7, "salinity_dsm": 2},
+                        "irrigated": false, "history": [{"crop": "LEGUME", "year": 2025}]}},
+     "plan": [{"parcel": "P1", "crop": "ble_tendre", "area_ha": 2},
+              {"parcel": "P1", "crop": "orge", "area_ha": 1}],
+     "expect": {"plan_issue_rules_include": ["concentration_famille"],
+                "tip_rules": ["une_seule_famille"], "has_better": true}},
+
+    {"id": "legumineuses_seules",
+     "description": "Que des légumineuses après du blé",
+     "parcels": {"P1": {"conditions": {"temp_c": 18, "rain_mm": 500, "ph": 7, "salinity_dsm": 2},
+                        "irrigated": false, "history": [{"crop": "ble_tendre", "year": 2025}]}},
+     "plan": [{"parcel": "P1", "crop": "LEGUME", "area_ha": 1},
+              {"parcel": "P1", "crop": "LEGUME2", "area_ha": 1}],
+     "expect": {"plan_issue_rules_include": ["concentration_famille"],
+                "tip_rules": ["une_seule_famille"], "next_year_excludes_families": ["fabaceae"]}},
+
+    {"id": "plan_equilibre",
+     "description": "Céréale + légumineuse après un oignon : rien à corriger",
+     "parcels": {"P1": {"conditions": {"temp_c": 18, "rain_mm": 500, "ph": 7, "salinity_dsm": 2},
+                        "irrigated": false, "history": [{"crop": "BULBE", "year": 2025}]}},
+     "plan": [{"parcel": "P1", "crop": "ble_tendre", "area_ha": 1},
+              {"parcel": "P1", "crop": "LEGUME", "area_ha": 1}],
+     "expect": {"tip_rules": [], "has_better": false}},
+
+    {"id": "sans_historique",
+     "description": "Aucun historique : pas d'erreur, l'app doit poser la question",
+     "parcels": {"P1": {"conditions": {"temp_c": 18, "rain_mm": 500, "ph": 7, "salinity_dsm": 2},
+                        "irrigated": false}},
+     "plan": [{"parcel": "P1", "crop": "ble_tendre", "area_ha": 2}],
+     "expect": {"missing_history": ["P1"]}},
+
+    {"id": "culture_inconnue",
+     "description": "Culture hors catalogue : ligne ignorée, pas de crash",
+     "allow_unknown": true,
+     "parcels": {"P1": {"conditions": {"temp_c": 18, "rain_mm": 500, "ph": 7, "salinity_dsm": 2},
+                        "irrigated": false, "history": []}},
+     "plan": [{"parcel": "P1", "crop": "quinoa", "area_ha": 1}],
+     "expect": {"farmer_verdict": "not_evaluated"}},
+
+    {"id": "parcelle_inconnue",
+     "description": "Plan sur une parcelle sans données : ligne ignorée, pas de crash",
+     "parcels": {"P1": {"conditions": {"temp_c": 18, "rain_mm": 500, "ph": 7, "salinity_dsm": 2},
+                        "irrigated": false, "history": []}},
+     "plan": [{"parcel": "PX", "crop": "ble_tendre", "area_ha": 1}],
+     "expect": {"farmer_verdict": "not_evaluated"}},
+
+    {"id": "forte_chaleur",
+     "description": "35 °C : blé tendre éliminé",
+     "parcels": {"P1": {"conditions": {"temp_c": 35, "rain_mm": 500, "ph": 7, "salinity_dsm": 2},
+                        "irrigated": false, "history": []}},
+     "plan": [{"parcel": "P1", "crop": "ble_tendre", "area_ha": 1}],
+     "expect": {"farmer_verdict": "not_viable", "has_better": true}}
+  ]
+}

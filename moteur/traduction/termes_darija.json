@@ -1,0 +1,37 @@
+{
+ 
+  "termes": {
+    "Adéquation au terrain": "ملاءمة الأرض للزرع",
+    "Fiabilité des données": "نسبة الثقة فالمعطيات",
+    "rotation": "تناوب الزراعات",
+    "points": "نقاط",
+    "bon choix": "اختيار مزيان",
+    "choix à risque": "اختيار فيه مخاطرة",
+    "à éviter": "ما كيتنصحش",
+    "acceptable, avec une réserve": "مقبول ولكن خاصك تحتاط",
+    "maladies du sol": "أمراض التربة",
+    "légumineuses": "القطاني",
+    "céréales": "الحبوب",
+    "azote": "الأزوت",
+    "La température": "الحرارة",
+    "La pluie": "الشتا",
+    "Le pH du sol": "درجة حموضة التربة (pH)",
+    "La salinité du sol": "ملوحة التربة",
+    "parcelle": "القطعة"
+    
+  },
+  "cultures": {
+    "Blé tendre": "القمح اللين",
+    "Blé dur": "القمح الصلب",
+    "Orge": "الشعير",
+    "Pois chiche": "الحمص",
+    "Fève": "الفول",
+    "Lentille": "العدس",
+    "Oignon": "البصلة",
+    "Pomme de terre": "البطاطا",
+    "Olivier": "الزيتون",
+    "Oranger": "البرتقال",
+    "Clémentinier": "الكليمونتين",
+    "Câprier": "الكبار"
+  }
+}

@@ -1,0 +1,30 @@
+{
+  "_label": "FICTIF - donnees de demonstration, pas de vraies observations NASA",
+  "inputs": {
+    "field": "champ_demo",
+    "previous_crop": "culture_precedente (FICTIF)",
+    "constraints": {
+      "irrigation": "inconnue",
+      "soil": null
+    }
+  },
+  "indicators": [
+    {
+      "name": "indicateur_fictif",
+      "value": null,
+      "unit": "FICTIF",
+      "period": "FICTIF",
+      "source": "FICTIF",
+      "limitations": "valeur non disponible"
+    }
+  ],
+  "recommendation": {
+    "recommended_crop": "culture_recommandee (FICTIF)",
+    "score": null,
+    "reasons": ["Raison fictive 1", "Raison fictive 2"],
+    "cautions": ["Precaution fictive"],
+    "missing_information": ["Type de sol non renseigne"]
+  },
+  "data_status": "donnees NASA non disponibles (FICTIF)",
+  "sources": ["Source fictive"]
+}

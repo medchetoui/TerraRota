@@ -1,0 +1,11 @@
+observation,value,unit,date,source,latitude,longitude,resolution,quality_flag
+precipitation,12.4,mm,2026-10-01,FICTIF,33.57,-7.58,0.5deg,good
+precipitation,8.1,mm,2026-10-02,FICTIF,33.57,-7.58,0.5deg,good
+precipitation,,mm,2026-10-03,FICTIF,33.57,-7.58,0.5deg,good
+precipitation,5.0,mm,2026-13-45,FICTIF,33.57,-7.58,0.5deg,good
+precipitation,12.4,mm,2026-10-01,FICTIF,33.57,-7.58,0.5deg,good
+precipitation,7.2,mm,2026-10-04,FICTIF,200,-7.58,0.5deg,good
+precipitation,6.3,kg,2026-10-05,FICTIF,33.57,-7.58,0.5deg,good
+precipitation,4.0,mm,2010-01-01,FICTIF,33.57,-7.58,0.5deg,good
+temperature,21.5,C,2026-10-01,FICTIF,33.57,-7.58,0.5deg,good
+temperature,19.8,C,2026-10-02,FICTIF,33.57,-7.58,0.5deg,good
