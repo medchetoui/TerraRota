@@ -100,15 +100,15 @@ const CROP_IMAGES: Record<string, string> = {
 
 // 5 Moroccan agricultural regions
 const REGIONS = [
-  { name_ar: 'جهة فاس - مكناس (حوض سايس)', name_fr: 'Fès - Meknès (Saïss)', lat: 33.89, lon: -5.00, soil: 'clay_loam', desc_ar: 'تيرس غني، عمق خصب > 90 سم', desc_fr: 'Tirs fertile > 90cm' },
-  { name_ar: 'جهة سوس - ماسة (تارودانت / هوارة)', name_fr: 'Souss - Massa (Taroudant)', lat: 30.42, lon: -8.87, soil: 'sandy_loam', desc_ar: 'حمري خفيف رملي نصف جاف', desc_fr: 'Hamri sableux semi-aride' },
-  { name_ar: 'جهة مراكش - الحوز (تانسيفت)', name_fr: 'Marrakech - Tensift', lat: 31.62, lon: -8.00, soil: 'clay', desc_ar: 'تربة طينية متماسكة خصبة', desc_fr: 'Argileux profond' },
-  { name_ar: 'جهة الشاوية - ورديغة (سطات)', name_fr: 'Chaouia - Settat', lat: 33.00, lon: -7.60, soil: 'clay_loam', desc_ar: 'أراضي التيرس الكبرى للحبوب', desc_fr: 'Grande zone céréalière' },
-  { name_ar: 'جهة الغرب - شراردة بني حسن', name_fr: 'Gharb - Kénitra', lat: 34.26, lon: -6.58, soil: 'clay', desc_ar: 'أراضي الرمل والغرين الغنية بالمياه', desc_fr: 'Sols alluviaux riches' },
+  { name_ar: 'جهة فاس - مكناس (حوض سايس)', name_fr: 'Fès - Meknès (Saïss)', name_en: 'Fes - Meknes (Saïss)', lat: 33.89, lon: -5.00, soil: 'clay_loam', desc_ar: 'تيرس غني، عمق خصب > 90 سم', desc_fr: 'Tirs fertile > 90cm', desc_en: 'Rich Tirs soil, depth > 90cm' },
+  { name_ar: 'جهة سوس - ماسة (تارودانت / هوارة)', name_fr: 'Souss - Massa (Taroudant)', name_en: 'Souss - Massa (Taroudant)', lat: 30.42, lon: -8.87, soil: 'sandy_loam', desc_ar: 'حمري خفيف رملي نصف جاف', desc_fr: 'Hamri sableux semi-aride', desc_en: 'Sandy Hamri, semi-arid' },
+  { name_ar: 'جهة مراكش - الحوز (تانسيفت)', name_fr: 'Marrakech - Tensift', name_en: 'Marrakech - Tensift', lat: 31.62, lon: -8.00, soil: 'clay', desc_ar: 'تربة طينية متماسكة خصبة', desc_fr: 'Argileux profond', desc_en: 'Deep fertile clay soil' },
+  { name_ar: 'جهة الشاوية - ورديغة (سطات)', name_fr: 'Chaouia - Settat', name_en: 'Chaouia - Settat', lat: 33.00, lon: -7.60, soil: 'clay_loam', desc_ar: 'أراضي التيرس الكبرى للحبوب', desc_fr: 'Grande zone céréalière', desc_en: 'Major cereal Tirs plain' },
+  { name_ar: 'جهة الغرب - شراردة بني حسن', name_fr: 'Gharb - Kénitra', name_en: 'Gharb - Kenitra', lat: 34.26, lon: -6.58, soil: 'clay', desc_ar: 'أراضي الرمل والغرين الغنية بالمياه', desc_fr: 'Sols alluviaux riches', desc_en: 'Water-rich alluvial soil' },
 ];
 
 function MainLayout() {
-  const [lang, setLang] = useState<'ar' | 'fr'>('ar');
+  const [lang, setLang] = useState<Lang>('ar');
   const [isAudioPlaying, setIsAudioPlaying] = useState(false);
   const [isAuthOpen, setIsAuthOpen] = useState(false);
   const [isParcelsOpen, setIsParcelsOpen] = useState(false);
@@ -136,7 +136,20 @@ function MainLayout() {
   const [saveSuccessMsg, setSaveSuccessMsg] = useState<string | null>(null);
 
   const isAr = lang === 'ar';
+  const isEn = lang === 'en';
   const currentRegion = REGIONS[selectedRegionIndex];
+
+  const getRegionName = (r: typeof REGIONS[0]) => {
+    if (lang === 'ar') return r.name_ar;
+    if (lang === 'en') return r.name_en;
+    return r.name_fr;
+  };
+
+  const getRegionDesc = (r: typeof REGIONS[0]) => {
+    if (lang === 'ar') return r.desc_ar;
+    if (lang === 'en') return r.desc_en;
+    return r.desc_fr;
+  };
 
   const t = (key: string): string => {
     const dict = (translations as Record<string, Record<string, string>>)[lang] || (translations as Record<string, Record<string, string>>)['fr'];
@@ -285,8 +298,8 @@ function MainLayout() {
                 <div className="mt-5 p-3 rounded-2xl bg-[#E4DCCB] border border-[#D5C4AC] flex items-center gap-2.5 text-xs text-[#524430]">
                   <ShieldCheck className="w-4 h-4 text-[#2D4A27] shrink-0" />
                   <div>
-                    <div className="font-bold">{isAr ? 'التعاونية الفلاحية' : 'Coopérative Agricole'}</div>
-                    <div className="text-[11px] text-[#7A6B53]">{isAr ? 'شبكة الفلاحين بالمغرب' : 'Réseau Agricole Marocain'}</div>
+                    <div className="font-bold">{isAr ? 'التعاونية الفلاحية' : isEn ? 'Agricultural Cooperative' : 'Coopérative Agricole'}</div>
+                    <div className="text-[11px] text-[#7A6B53]">{isAr ? 'شبكة الفلاحين بالمغرب' : isEn ? 'Morocco Farmers Network' : 'Réseau Agricole Marocain'}</div>
                   </div>
                 </div>
               </div>
@@ -300,7 +313,7 @@ function MainLayout() {
                   }`}
                 >
                   <Layers className="w-4 h-4" />
-                  <span>{isAr ? 'الرئيسية والمحاصيل' : 'Accueil & Cultures'}</span>
+                  <span>{isAr ? 'الرئيسية والمحاصيل' : isEn ? 'Home & Crops' : 'Accueil & Cultures'}</span>
                 </Link>
 
                 <Link 
@@ -310,7 +323,7 @@ function MainLayout() {
                   }`}
                 >
                   <TrendingUp className="w-4 h-4" />
-                  <span>{isAr ? 'توصية المحصول' : 'Recommandation'}</span>
+                  <span>{isAr ? 'توصية المحصول' : isEn ? 'Crop Recommendation' : 'Recommandation'}</span>
                 </Link>
 
                 <Link 
@@ -320,7 +333,7 @@ function MainLayout() {
                   }`}
                 >
                   <Sun className="w-4 h-4" />
-                  <span>{isAr ? 'حالة الأرض والطقس' : 'Sol & Climat (NASA)'}</span>
+                  <span>{isAr ? 'حالة الأرض والطقس' : isEn ? 'NASA Soil & Climate' : 'Sol & Climat (NASA)'}</span>
                 </Link>
 
                 <Link 
@@ -330,7 +343,7 @@ function MainLayout() {
                   }`}
                 >
                   <Mic className="w-4 h-4" />
-                  <span>{isAr ? 'المرشد الفلاحي الصوتي' : 'Conseiller Vocal'}</span>
+                  <span>{isAr ? 'المرشد الفلاحي الصوتي' : isEn ? 'Voice Advisor' : 'Conseiller Vocal'}</span>
                 </Link>
               </nav>
 
@@ -342,7 +355,7 @@ function MainLayout() {
                   >
                     <span className="flex items-center gap-2">
                       <BookmarkPlus className="w-4 h-4 text-[#8C3A27]" />
-                      <span>{isAr ? 'أراضيي المحفوظة' : 'Mes Parcelles'}</span>
+                      <span>{isAr ? 'أراضيي المحفوظة' : isEn ? 'My Saved Fields' : 'Mes Parcelles'}</span>
                     </span>
                     <span className="text-[10px] bg-[#2D4A27] text-white px-2 py-0.5 rounded-full">✓</span>
                   </button>
@@ -357,7 +370,7 @@ function MainLayout() {
               >
                 <div className="flex items-center gap-2">
                   <Volume2 className="w-4 h-4 text-[#8C3A27]" />
-                  <span className="font-bold">{isAr ? 'إرشاد فلاحي بالصوت' : 'Audio Guide'}</span>
+                  <span className="font-bold">{isAr ? 'إرشاد فلاحي بالصوت' : isEn ? 'Audio Guide' : 'Audio Guide'}</span>
                 </div>
                 <span className="text-[10px] bg-[#2D4A27] text-white px-2 py-0.5 rounded-full font-bold">
                   {isAr ? 'عمي أحمد' : 'Ami Ahmed'}
@@ -365,7 +378,7 @@ function MainLayout() {
               </div>
 
               <div className="text-[11px] text-center text-[#8C7A60] font-semibold">
-                {isAr ? 'المملكة المغربية • تحدي ناسا 2026' : 'Royaume du Maroc • NASA Space Apps'}
+                {isAr ? 'المملكة المغربية • تحدي ناسا 2026' : isEn ? 'Kingdom of Morocco • NASA Space Apps' : 'Royaume du Maroc • NASA Space Apps'}
               </div>
             </div>
           </aside>
@@ -382,14 +395,14 @@ function MainLayout() {
                     className="bg-transparent border-none outline-none cursor-pointer text-xs font-bold text-[#3B3020]"
                   >
                     {REGIONS.map((r, i) => (
-                      <option key={r.name_fr} value={i}>{isAr ? r.name_ar : r.name_fr}</option>
+                      <option key={r.name_fr} value={i}>{getRegionName(r)}</option>
                     ))}
                   </select>
                 </div>
 
                 <div className="flex items-center gap-1.5 bg-[#EFE9DC] px-3 py-1.5 rounded-full border border-[#D5C4AC] text-[11px] text-[#61513C] font-semibold">
                   <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
-                  <span>{apiResponse?.data_status === 'live' ? (isAr ? 'متصل بأقمار ناسا مباشرة' : 'NASA Direct Live') : (isAr ? 'بيانات ناسا المناخية' : 'NASA POWER Connecté')}</span>
+                  <span>{apiResponse?.data_status === 'live' ? (isAr ? 'متصل بأقمار ناسا مباشرة' : isEn ? 'NASA Live Connection' : 'NASA Direct Live') : (isAr ? 'بيانات ناسا المناخية' : isEn ? 'NASA Climate Data' : 'NASA POWER Connecté')}</span>
                 </div>
               </div>
 
@@ -399,16 +412,30 @@ function MainLayout() {
                   className="flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-[#8C3A27] text-white text-xs font-bold shadow-sm hover:bg-[#732F1F] transition-colors cursor-pointer"
                 >
                   <Volume2 className="w-3.5 h-3.5" />
-                  <span>{isAr ? 'بالدارجة المغربية' : 'En Français'}</span>
+                  <span>{isAr ? 'بالدارجة المغربية' : isEn ? 'Audio Guide' : 'En Français'}</span>
                 </button>
 
-                <button
-                  onClick={() => setLang(l => l === 'ar' ? 'fr' : 'ar')}
-                  className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-[#EFE9DC] border border-[#D5C4AC] text-xs font-bold text-[#4D3F2C] hover:bg-[#E5DDCF] transition-colors cursor-pointer"
-                >
-                  <Languages className="w-3.5 h-3.5 text-[#2D4A27]" />
-                  <span>{isAr ? 'Français' : 'العربية'}</span>
-                </button>
+                {/* 3-Language Switcher (AR / FR / EN) */}
+                <div className="flex items-center bg-[#EFE9DC] border border-[#D5C4AC] rounded-full p-0.5 text-xs font-bold text-[#4D3F2C]">
+                  <button
+                    onClick={() => setLang('ar')}
+                    className={`px-2.5 py-1 rounded-full transition-all cursor-pointer ${lang === 'ar' ? 'bg-[#2D4A27] text-white shadow-xs' : 'hover:bg-[#E5DDCF]'}`}
+                  >
+                    عربي
+                  </button>
+                  <button
+                    onClick={() => setLang('fr')}
+                    className={`px-2.5 py-1 rounded-full transition-all cursor-pointer ${lang === 'fr' ? 'bg-[#2D4A27] text-white shadow-xs' : 'hover:bg-[#E5DDCF]'}`}
+                  >
+                    FR
+                  </button>
+                  <button
+                    onClick={() => setLang('en')}
+                    className={`px-2.5 py-1 rounded-full transition-all cursor-pointer ${lang === 'en' ? 'bg-[#2D4A27] text-white shadow-xs' : 'hover:bg-[#E5DDCF]'}`}
+                  >
+                    EN
+                  </button>
+                </div>
 
                 {user ? (
                   <div className="flex items-center gap-2">
@@ -460,7 +487,7 @@ function MainLayout() {
                         }`}
                       >
                         <span className="w-5 h-5 rounded-full bg-white/20 flex items-center justify-center text-xs">1</span>
-                        <span>{isAr ? 'تحديد الأرض' : '1. Parcelle'}</span>
+                        <span>{isAr ? 'تحديد الأرض' : isEn ? '1. Field' : '1. Parcelle'}</span>
                       </button>
 
                       <span className="text-[#DECAB3] font-bold">←</span>
@@ -472,7 +499,7 @@ function MainLayout() {
                         }`}
                       >
                         <span className="w-5 h-5 rounded-full bg-white/20 flex items-center justify-center text-xs">2</span>
-                        <span>{isAr ? 'الزرعة الفايتة' : '2. Précédent'}</span>
+                        <span>{isAr ? 'الزرعة الفايتة' : isEn ? '2. Previous Crop' : '2. Précédent'}</span>
                       </button>
 
                       <span className="text-[#DECAB3] font-bold">←</span>
@@ -484,7 +511,7 @@ function MainLayout() {
                         }`}
                       >
                         <span className="w-5 h-5 rounded-full bg-white/20 flex items-center justify-center text-xs">3</span>
-                        <span>{isAr ? 'النتيجة المباشرة' : '3. Résultat'}</span>
+                        <span>{isAr ? 'النتيجة المباشرة' : isEn ? '3. Recommendation' : '3. Résultat'}</span>
                       </button>
                     </div>
 
@@ -498,11 +525,13 @@ function MainLayout() {
                           </div>
                           <div>
                             <h2 className="text-2xl sm:text-3xl font-black">
-                              {isAr ? 'أين توجد أرضك الفلاحية؟' : 'Où se situe votre terrain agricole ?'}
+                              {isAr ? 'أين توجد أرضك الفلاحية؟' : isEn ? 'Where is your agricultural field located?' : 'Où se situe votre terrain agricole ?'}
                             </h2>
                             <p className="text-xs sm:text-sm text-white/80 mt-1 max-w-lg mx-auto">
                               {isAr 
                                 ? 'اضغط أسفله لتحديد موقعك تلقائياً بالقمر الاصطناعي بنقرة واحدة، أو اختر إقليمك من القائمة.'
+                                : isEn
+                                ? 'Click below to detect your field location automatically via satellite GPS, or select your region.'
                                 : 'Cliquez ci-dessous pour localiser automatiquement votre parcelle par GPS ou choisissez votre région.'}
                             </p>
                           </div>
@@ -513,14 +542,14 @@ function MainLayout() {
                               className="w-full sm:w-auto px-8 py-4 bg-[#8C3A27] hover:bg-[#732F1F] text-white font-extrabold text-sm rounded-2xl flex items-center justify-center gap-3 shadow-lg transition-all cursor-pointer"
                             >
                               <Zap className="w-5 h-5 text-amber-300" />
-                              <span>{isAr ? 'تحديد موقع حقلي الحالي تلقائياً (GPS)' : 'Localiser mon champ en 1 clic'}</span>
+                              <span>{isAr ? 'تحديد موقع حقلي الحالي تلقائياً (GPS)' : isEn ? 'Locate My Field in 1-Click (GPS)' : 'Localiser mon champ en 1 clic'}</span>
                             </button>
 
                             <button
                               onClick={() => setStep(2)}
                               className="w-full sm:w-auto px-6 py-4 bg-white/10 hover:bg-white/20 text-white font-bold text-sm rounded-2xl flex items-center justify-center gap-2 transition-all cursor-pointer"
                             >
-                              <span>{isAr ? 'أنا في ' + currentRegion.name_ar : 'Continuer avec ' + currentRegion.name_fr}</span>
+                              <span>{isAr ? 'أنا في ' + currentRegion.name_ar : isEn ? 'Continue with ' + currentRegion.name_en : 'Continuer avec ' + currentRegion.name_fr}</span>
                               {isAr ? <ArrowLeft className="w-4 h-4" /> : <ArrowRight className="w-4 h-4" />}
                             </button>
                           </div>
@@ -529,7 +558,7 @@ function MainLayout() {
                         {/* Visual Region Cards (Easy Tap) */}
                         <div>
                           <h3 className="text-sm font-bold text-[#7A6B53] mb-3">
-                            {isAr ? 'أو اختر منطقتك الفلاحية مباشرة:' : 'Ou sélectionnez votre région :'}
+                            {isAr ? 'أو اختر منطقتك الفلاحية مباشرة:' : isEn ? 'Or select your agricultural region directly:' : 'Ou sélectionnez votre région :'}
                           </h3>
                           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
                             {REGIONS.map((r, i) => (
@@ -546,10 +575,10 @@ function MainLayout() {
                                 }`}
                               >
                                 <div className="flex items-center justify-between mb-1">
-                                  <span className="font-extrabold text-sm text-[#1E331A]">{isAr ? r.name_ar : r.name_fr}</span>
+                                  <span className="font-extrabold text-sm text-[#1E331A]">{getRegionName(r)}</span>
                                   <MapPin className="w-4 h-4 text-[#8C3A27]" />
                                 </div>
-                                <p className="text-[11px] text-[#7A6B53]">{isAr ? r.desc_ar : r.desc_fr}</p>
+                                <p className="text-[11px] text-[#7A6B53]">{getRegionDesc(r)}</p>
                               </button>
                             ))}
                           </div>
@@ -562,24 +591,28 @@ function MainLayout() {
                       <div className="space-y-6 animate-in fade-in duration-200">
                         <div className="bg-[#FAF7F2] p-6 sm:p-8 rounded-3xl border border-[#DECAB3] shadow-sm space-y-6">
                           <div>
-                            <div className="text-xs font-bold text-[#8C3A27]">{isAr ? 'الخطوة الثانية • الدورة الزراعية' : 'Étape 2 • Rotation'}</div>
+                            <div className="text-xs font-bold text-[#8C3A27]">{isAr ? 'الخطوة الثانية • الدورة الزراعية' : isEn ? 'Step 2 • Crop Rotation' : 'Étape 2 • Rotation'}</div>
                             <h2 className="text-2xl font-black text-[#1E331A] mt-1">
-                              {isAr ? 'شنو كنتي زارع فـ هاد الأرض الموسم الفايت؟' : 'Qu\'avez-vous cultivé la saison dernière ?'}
+                              {isAr ? 'شنو كنتي زارع فـ هاد الأرض الموسم الفايت؟' : isEn ? 'What did you cultivate last season?' : 'Qu\'avez-vous cultivé la saison dernière ?'}
                             </h2>
                             <p className="text-xs text-[#7A6B53] mt-1">
-                              {isAr ? 'باش خوارزمية ناسا تعرف شنو خاص الأرض من نيتروجين وخصوبة وما تنهكش التربة.' : 'Pour adapter la rotation des nutriments et reposer le sol.'}
+                              {isAr 
+                                ? 'باش خوارزمية ناسا تعرف شنو خاص الأرض من نيتروجين وخصوبة وما تنهكش التربة.' 
+                                : isEn 
+                                ? 'To calculate soil nutrient rotation, nitrogen fixation, and prevent soil depletion.'
+                                : 'Pour adapter la rotation des nutriments et reposer le sol.'}
                             </p>
                           </div>
 
                           {/* Big Visual Buttons for Crop */}
                           <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
                             {[
-                              { id: 'wheat_hard', name_ar: 'القمح الصلب 🌾', name_fr: 'Blé Dur' },
-                              { id: 'wheat_soft', name_ar: 'القمح الطري 🍞', name_fr: 'Blé Tendre' },
-                              { id: 'barley', name_ar: 'الشعير 🌾', name_fr: 'Orge' },
-                              { id: 'chickpea', name_ar: 'الحمص / قطاني 🫘', name_fr: 'Pois chiche' },
-                              { id: 'potato', name_ar: 'البطاطس 🥔', name_fr: 'Pomme de terre' },
-                              { id: 'fallow', name_ar: 'أرض مريحة (بور) 🌿', name_fr: 'Jachère' },
+                              { id: 'wheat_hard', name_ar: 'القمح الصلب 🌾', name_fr: 'Blé Dur 🌾', name_en: 'Durum Wheat 🌾' },
+                              { id: 'wheat_soft', name_ar: 'القمح الطري 🍞', name_fr: 'Blé Tendre 🍞', name_en: 'Soft Wheat 🍞' },
+                              { id: 'barley', name_ar: 'الشعير 🌾', name_fr: 'Orge 🌾', name_en: 'Barley 🌾' },
+                              { id: 'chickpea', name_ar: 'الحمص / قطاني 🫘', name_fr: 'Pois chiche 🫘', name_en: 'Chickpea / Legumes 🫘' },
+                              { id: 'potato', name_ar: 'البطاطس 🥔', name_fr: 'Pomme de terre 🥔', name_en: 'Potato 🥔' },
+                              { id: 'fallow', name_ar: 'أرض مريحة (بور) 🌿', name_fr: 'Jachère 🌿', name_en: 'Fallow land 🌿' },
                             ].map((c) => (
                               <button
                                 key={c.id}
@@ -590,7 +623,7 @@ function MainLayout() {
                                     : 'bg-[#EFE9DC] text-[#4D3F2C] border-[#DECAB3] hover:bg-[#E5DDCF]'
                                 }`}
                               >
-                                {isAr ? c.name_ar : c.name_fr}
+                                {isAr ? c.name_ar : isEn ? c.name_en : c.name_fr}
                               </button>
                             ))}
                           </div>
@@ -598,7 +631,7 @@ function MainLayout() {
                           {/* Water Option */}
                           <div className="pt-4 border-t border-[#DECAB3]">
                             <label className="block text-xs font-bold text-[#1E331A] mb-2">
-                              {isAr ? 'واش عندك السقي ولا معول غير على الشتا؟' : 'Disponibilité de l\'eau :'}
+                              {isAr ? 'واش عندك السقي ولا معول غير على الشتا؟' : isEn ? 'Water availability / Irrigation access:' : 'Disponibilité de l\'eau :'}
                             </label>
                             <div className="grid grid-cols-2 gap-3 max-w-md">
                               <button
@@ -609,7 +642,7 @@ function MainLayout() {
                                     : 'bg-[#EFE9DC] text-[#4D3F2C] border-[#DECAB3]'
                                 }`}
                               >
-                                {isAr ? '🌧️ بور (مياه الشتاء فقط)' : '🌧️ Pluvial seul'}
+                                {isAr ? '🌧️ بور (مياه الشتاء فقط)' : isEn ? '🌧️ Rainfed (Rain only)' : '🌧️ Pluvial seul'}
                               </button>
                               <button
                                 onClick={() => setWaterAccess('irrigated')}
@@ -619,7 +652,7 @@ function MainLayout() {
                                     : 'bg-[#EFE9DC] text-[#4D3F2C] border-[#DECAB3]'
                                 }`}
                               >
-                                {isAr ? '💧 مسقي (بئر / كوت-آ-كوت)' : '💧 Irrigué / Puits'}
+                                {isAr ? '💧 مسقي (بئر / كوت-آ-كوت)' : isEn ? '💧 Irrigated (Well / Drip)' : '💧 Irrigué / Puits'}
                               </button>
                             </div>
                           </div>
@@ -630,7 +663,7 @@ function MainLayout() {
                               onClick={() => setStep(1)}
                               className="px-5 py-3 rounded-xl bg-[#EFE9DC] text-[#61513C] font-bold text-xs hover:bg-[#E5DDCF] cursor-pointer"
                             >
-                              {isAr ? 'رجوع لتحديد الأرض' : 'Retour'}
+                              {isAr ? 'رجوع لتحديد الأرض' : isEn ? 'Back to Location' : 'Retour'}
                             </button>
 
                             <button
@@ -640,7 +673,7 @@ function MainLayout() {
                               }}
                               className="px-8 py-3.5 rounded-2xl bg-[#2D4A27] hover:bg-[#1E331A] text-white font-extrabold text-sm flex items-center gap-2 shadow-md cursor-pointer"
                             >
-                              <span>{isAr ? 'أرني الزرعة الأنسب لأرضي دابا' : 'Voir ma recommandation'}</span>
+                              <span>{isAr ? 'أرني الزرعة الأنسب لأرضي دابا' : isEn ? 'View My Crop Recommendation' : 'Voir ma recommandation'}</span>
                               {isAr ? <ArrowLeft className="w-4 h-4" /> : <ArrowRight className="w-4 h-4" />}
                             </button>
                           </div>
