@@ -1,5 +1,17 @@
 // API client for TerraRota backend
-import type { RecommendationRequest, RecommendationResponse, CropsResponse } from '../types/api';
+import type { 
+  RecommendationRequest, 
+  RecommendationResponse, 
+  CropsResponse,
+  CropsDetailResponse,
+  ScenariosResponse,
+  WhatIfResponse,
+  DataSourcesResponse,
+  FarmPlan,
+  FarmPlanResponse,
+  FarmPlansListResponse,
+  DecisionReportResponse,
+} from '../types/api';
 
 const BASE_URL = import.meta.env.VITE_API_BASE_URL || '/api/v1';
 
@@ -52,8 +64,51 @@ export async function getRecommendations(
   });
 }
 
+export async function getScenarios(
+  payload: RecommendationRequest,
+): Promise<ScenariosResponse> {
+  return request<ScenariosResponse>('/scenarios/', {
+    method: 'POST',
+    body: JSON.stringify(payload),
+  });
+}
+
+export async function runWhatIf(
+  payload: {
+    latitude: number;
+    longitude: number;
+    previous_crop?: string | null;
+    water_access?: string | null;
+    soil_type?: string;
+    field_size_ha?: number;
+    simulated_changes: Record<string, any>;
+  },
+): Promise<WhatIfResponse> {
+  return request<WhatIfResponse>('/whatif/', {
+    method: 'POST',
+    body: JSON.stringify(payload),
+  });
+}
+
 export async function getCrops(): Promise<CropsResponse> {
   return request<CropsResponse>('/crops/');
+}
+
+export async function getCropsDetail(): Promise<CropsDetailResponse> {
+  return request<CropsDetailResponse>('/crops/detail/');
+}
+
+export async function getDataSources(): Promise<DataSourcesResponse> {
+  return request<DataSourcesResponse>('/data-sources/');
+}
+
+export async function getDecisionReport(
+  payload: RecommendationRequest,
+): Promise<DecisionReportResponse> {
+  return request<DecisionReportResponse>('/reports/decision-report/', {
+    method: 'POST',
+    body: JSON.stringify(payload),
+  });
 }
 
 export async function getHealth(): Promise<{ status: string; nasa_power_reachable: boolean }> {
@@ -73,6 +128,7 @@ export interface ParcelItem {
   name: string;
   latitude: number;
   longitude: number;
+  region?: string;
   water_access: string;
   soil_type: string;
   field_size_ha: number | null;
@@ -115,6 +171,32 @@ export async function createParcel(parcel: Partial<ParcelItem>): Promise<{ statu
 
 export async function deleteParcel(id: number): Promise<{ status: string }> {
   return request(`/parcels/${id}/`, {
+    method: 'DELETE',
+  });
+}
+
+// ─── Plans ───────────────────────────────────────────────────
+
+export async function getPlans(): Promise<FarmPlansListResponse> {
+  return request<FarmPlansListResponse>('/plans/');
+}
+
+export async function createPlan(plan: Partial<FarmPlan>): Promise<FarmPlanResponse> {
+  return request<FarmPlanResponse>('/plans/', {
+    method: 'POST',
+    body: JSON.stringify(plan),
+  });
+}
+
+export async function updatePlan(id: number, patch: Partial<FarmPlan>): Promise<FarmPlanResponse> {
+  return request<FarmPlanResponse>(`/plans/${id}/`, {
+    method: 'PATCH',
+    body: JSON.stringify(patch),
+  });
+}
+
+export async function deletePlan(id: number): Promise<{ status: string }> {
+  return request(`/plans/${id}/`, {
     method: 'DELETE',
   });
 }
