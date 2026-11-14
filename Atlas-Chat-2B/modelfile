@@ -1,0 +1,8 @@
+FROM .
+TEMPLATE """
+<bos>{{ if .Prompt }}<start_of_turn>user
+{{ .Prompt }}<end_of_turn>
+{{ end }}<end_of_turn>assistant
+{{ .Response }}<end_of_turn>
+"""
+PARAMETER stop <end_of_turn>

@@ -1,0 +1,42 @@
+{
+  "_commentaire": "English translations of the agricultural engine's standard phrases.",
+  "titres": {
+    "=== PLAN DE L'AGRICULTEUR ({0}) ===": "=== FARMER'S PLAN ({0}) ===",
+    "=== PLAN CORRIGÉ POUR {0} ===": "=== CORRECTED PLAN FOR {0} ===",
+    "=== PLAN SUGGÉRÉ POUR {0} (à partir du plan corrigé) ===": "=== SUGGESTED PLAN FOR {0} (based on the corrected plan) ==="
+  },
+  "resume_plan": {
+    "Plan : en partie viable.": "Plan: partly viable.",
+    "Plan proposé : viable.": "Proposed plan: viable.",
+    "Lignes évaluées : {0} (bons choix : {1}, à risque : {2}, à éviter : {3}).": "Lines evaluated: {0} (good choices: {1}, risky choices: {2}, choices to avoid: {3}).",
+    "Fiabilité du plan : {0} % ({1}), égale à celle de la ligne la plus fragile.": "Plan reliability: {0}% ({1}), equal to that of the weakest line.",
+    "Composition du plan : céréales {0} %.": "Plan composition: {0}% cereals.",
+    "Composition du plan : légumineuses {0} %, famille de l'oignon {1} %.": "Plan composition: {0}% legumes, {1}% onion family.",
+    "Composition du plan : céréales {0} %, famille de l'oignon {1} %.": "Plan composition: {0}% cereals, {1}% onion family.",
+    "Attention : 100 % du plan est dans la même famille de cultures ({0}), ce qui peut favoriser les maladies du sol.": "Warning: 100% of the plan belongs to the same crop family ({0}), which may promote soil-borne diseases.",
+    "Remarque : Seuils pas encore validés localement pour : {0}.": "Note: The thresholds have not yet been locally validated for: {0}.",
+    "Astuce : Votre plan ne contient que des céréales. Ajouter une légumineuse réduit les maladies du sol et enrichit la terre en azote pour la saison suivante. Légumineuses adaptées à {0} : {1}.": "Tip: Your plan contains only cereals. Adding a legume can reduce soil-borne diseases and enrich the soil with nitrogen for the next season. Suitable legumes for {0}: {1}.",
+    "Astuce : Aucune légumineuse dans le plan. En ajouter une, cette saison ou la suivante, enrichit le sol en azote.": "Tip: There are no legumes in the plan. Adding one this season or next season enriches the soil with nitrogen."
+  },
+  "lignes_cultures": {
+    "Ligne {0} - {1} sur {2} : bon choix.": "Line {0} - {1} on {2}: good choice.",
+    "Ligne {0} - {1} sur {2} : à éviter.": "Line {0} - {1} on {2}: avoid this choice.",
+    "Ligne {0} - {1} sur {2} : acceptable, avec une réserve.": "Line {0} - {1} on {2}: acceptable, with some reservations.",
+    "Adéquation au terrain : {0} sur 100 ; après prise en compte de la rotation : {1} sur 100.": "Land suitability: {0} out of 100; after considering crop rotation: {1} out of 100.",
+    "Adéquation au terrain : {0} sur 100.": "Land suitability: {0} out of 100."
+  },
+  "raisons": {
+    "Raison : La température ({0} °C) est dans la plage idéale de cette culture (de {1} °C à {2} °C).": "Reason: The temperature ({0} °C) is within the ideal range for this crop ({1} °C to {2} °C).",
+    "Raison : La pluie ({0} mm) est dans la plage idéale de cette culture (de {1} mm à {2} mm).": "Reason: Rainfall ({0} mm) is within the ideal range for this crop ({1} mm to {2} mm).",
+    "Raison : La pluie ({0} mm) est acceptable pour cette culture, mais pas idéale (idéal : de {1} mm à {2} mm).": "Reason: Rainfall ({0} mm) is acceptable for this crop, but not ideal (ideal range: {1} mm to {2} mm).",
+    "Raison : Le pH du sol ({0}) est dans la plage idéale de cette culture (de {1} à {2}).": "Reason: The soil pH ({0}) is within the ideal range for this crop ({1} to {2}).",
+    "Raison : La salinité du sol ({0} dS/m) est dans la plage idéale de cette culture (de {1} dS/m à {2} dS/m).": "Reason: Soil salinity ({0} dS/m) is within the ideal range for this crop ({1} dS/m to {2} dS/m).",
+    "Raison : Cette culture a déjà été cultivée sur la parcelle la saison précédente.": "Reason: This crop was already grown on this plot during the previous season.",
+    "Raison : La saison précédente, une culture de la même famille a été cultivée, ce qui peut favoriser les maladies du sol.": "Reason: A crop from the same family was grown during the previous season, which may promote soil-borne diseases.",
+    "Raison : La culture précédente enrichit le sol en azote, ce qui aide celle-ci.": "Reason: The previous crop enriches the soil with nitrogen, which benefits the current crop."
+  },
+  "alternatives": {
+    "À envisager à la place : {0} (score {1} sur 100, +{2} points).": "Consider as an alternative: {0} (score: {1} out of 100, +{2} points).",
+    "Une meilleure option existe : {0} (score {1} sur 100, +{2} points), {3} (score {4} sur 100, +{5} points).": "A better option is available: {0} (score: {1} out of 100, +{2} points), {3} (score: {4} out of 100, +{5} points)."
+  }
+}

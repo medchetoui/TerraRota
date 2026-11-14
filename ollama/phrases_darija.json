@@ -1,0 +1,42 @@
+{
+  "_commentaire": "Fichier de traduction des phrases types du moteur agricole en Darija.",
+  "titres": {
+    "=== PLAN DE L'AGRICULTEUR ({0}) ===": "=== خطة الفلاح ({0}) ===",
+    "=== PLAN CORRIGÉ POUR {0} ===": "=== الخطة المصححة لعام {0} ===",
+    "=== PLAN SUGGÉRÉ POUR {0} (à partir du plan corrigé) ===": "=== الخطة المقترحة لعام {0} (انطلاقاً من الخطة المصححة) ==="
+  },
+  "resume_plan": {
+    "Plan : en partie viable.": "الخطة: قابلة للتنفيذ جزئياً.",
+    "Plan proposé : viable.": "الخطة المقترحة: قابلة للتنفيذ.",
+    "Lignes évaluées : {0} (bons choix : {1}, à risque : {2}, à éviter : {3}).": "السطور المُقيَّمة: {0} (اختيارات جيدة: {1}، محفوفة بالمخاطر: {2}، يجب تجنبها: {3}).",
+    "Fiabilité du plan : {0} % ({1}), égale à celle de la ligne la plus fragile.": "موثوقية الخطة: {0} % ({1})، مساوية لتلك الخاصة بالسطر الأكثر هشاشة.",
+    "Composition du plan : céréales {0} %.": "تكوين الخطة: حبوب {0} %.",
+    "Composition du plan : légumineuses {0} %, famille de l'oignon {1} %.": "تكوين الخطة: بقوليات {0} %، فصيلة البصل {1} %.",
+    "Composition du plan : céréales {0} %, famille de l'oignon {1} %.": "تكوين الخطة: حبوب {0} %، فصيلة البصل {1} %.",
+    "Attention : 100 % du plan est dans la même famille de cultures ({0}), ce qui peut favoriser les maladies du sol.": "تحذير: 100% من الخطة في نفس فصيلة الزرع ({0})، وهذا يمكن أن يزيد من أمراض التربة.",
+    "Remarque : Seuils pas encore validés localement pour : {0}.": "ملاحظة: العتبات لم يتم التحقق منها محلياً بعد بالنسبة لـ: {0}.",
+    "Astuce : Votre plan ne contient que des céréales. Ajouter une légumineuse réduit les maladies du sol et enrichit la terre en azote pour la saison suivante. Légumineuses adaptées à {0} : {1}.": "نصيحة: خطتك فيها غير الحبوب. زيادة البقوليات كتنقص من أمراض التربة وكتغني الأرض بالنيتروجين للموسم الجاي. بقوليات مناسبة لـ {0}: {1}.",
+    "Astuce : Aucune légumineuse dans le plan. En ajouter une, cette saison ou la suivante, enrichit le sol en azote.": "نصيحة: ما كاينش بقوليات في الخطة. زيادة وحدة، هاد الموسم ولا اللي جاي، كتغني التربة بالنيتروجين."
+  },
+  "lignes_cultures": {
+    "Ligne {0} - {1} sur {2} : bon choix.": "السطر {0} - {1} في {2}: اختيار جيد.",
+    "Ligne {0} - {1} sur {2} : à éviter.": "السطر {0} - {1} في {2}: يجب تجنبه.",
+    "Ligne {0} - {1} sur {2} : acceptable, avec une réserve.": "السطر {0} - {1} في {2}: مقبول، مع تحفظ.",
+    "Adéquation au terrain : {0} sur 100 ; après prise en compte de la rotation : {1} sur 100.": "الملاءمة مع الأرض: {0} من 100؛ بعد مراعاة تناوب الزراعات: {1} من 100.",
+    "Adéquation au terrain : {0} sur 100.": "الملاءمة مع الأرض: {0} من 100."
+  },
+  "raisons": {
+    "Raison : La température ({0} °C) est dans la plage idéale de cette culture (de {1} °C à {2} °C).": "السبب: الحرارة ({0} °C) كاينة في المدى المثالي لهاد الزرع (من {1} °C إلى {2} °C).",
+    "Raison : La pluie ({0} mm) est dans la plage idéale de cette culture (de {1} mm à {2} mm).": "السبب: الشتا ({0} mm) كاينة في المدى المثالي لهاد الزرع (من {1} mm إلى {2} mm).",
+    "Raison : La pluie ({0} mm) est acceptable pour cette culture, mais pas idéale (idéal : de {1} mm à {2} mm).": "السبب: الشتا ({0} mm) مقبولة لهاد الزرع، ولكن ماشي مثالية (المثالي: من {1} mm إلى {2} mm).",
+    "Raison : Le pH du sol ({0}) est dans la plage idéale de cette culture (de {1} à {2}).": "السبب: درجة حموضة التربة ({0}) كاينة في المدى المثالي لهاد الزرع (من {1} إلى {2}).",
+    "Raison : La salinité du sol ({0} dS/m) est dans la plage idéale de cette culture (de {1} dS/m à {2} dS/m).": "السبب: ملوحة التربة ({0} dS/m) كاينة في المدى المثالي لهاد الزرع (من {1} dS/m إلى {2} dS/m).",
+    "Raison : Cette culture a déjà été cultivée sur la parcelle la saison précédente.": "السبب: هاد الزرع تزرع من قبل في هاد القطعة في الموسم اللي فات.",
+    "Raison : La saison précédente, une culture de la même famille a été cultivée, ce qui peut favoriser les maladies du sol.": "السبب: الموسم اللي فات، تزرع زرع من نفس الفصيلة، وهذا يمكن يزيد من أمراض التربة.",
+    "Raison : La culture précédente enrichit le sol en azote, ce qui aide celle-ci.": "السبب: الزرع اللي فات غنى التربة بالنيتروجين، وهذا كيعاون هاد الزرع."
+  },
+  "alternatives": {
+    "À envisager à la place : {0} (score {1} sur 100, +{2} points).": "نقدر نفكر في: {0} (النقطة {1} من 100، +{2} نقطة).",
+    "Une meilleure option existe : {0} (score {1} sur 100, +{2} points), {3} (score {4} sur 100, +{5} points).": "كاينة خيار أحسن: {0} (النقطة {1} من 100، +{2} نقطة)، {3} (النقطة {4} من 100، +{5} نقطة)."
+  }
+}
