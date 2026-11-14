@@ -45,9 +45,9 @@ def numbers_preserved(french, translated):
     return not (numbers(french) - numbers(translated))      # aucun nombre ne manque
 
 
-def ask(prompt):
+def ask(prompt, temperature=0):
     body = json.dumps({"model": MODEL, "prompt": prompt, "stream": False,
-                       "options": {"temperature": 0}}).encode("utf-8")
+                       "options": {"temperature": temperature, "num_ctx": 4096}}).encode("utf-8")
     req = urllib.request.Request(OLLAMA_URL, data=body,
                                  headers={"Content-Type": "application/json"})
     with urllib.request.urlopen(req, timeout=120) as resp:
@@ -66,7 +66,8 @@ def translate(text, lang="darija marocaine (écriture arabe)", terms_file=TERMS_
         prompt = PROMPT.format(lang=lang, glossary=GLOSSARY, terms=terms, text=section)
         result = ask(prompt)
         if not numbers_preserved(section, result):          # un seul nouvel essai
-            result = ask(prompt)
+            result = ask(prompt + "\nATTENTION : recopie tous les nombres du texte source.",
+                         temperature=0.3)
             if not numbers_preserved(section, result):
                 raise ValueError("nombres perdus dans la traduction")
         out.append(result)

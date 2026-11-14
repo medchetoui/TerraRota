@@ -44,7 +44,8 @@ def test_text_for_ollama_has_no_glossary_and_splits_into_sections():
 
 def test_translate_keeps_all_numbers_with_a_faithful_model(monkeypatch, tmp_path):
     # faux modele : renvoie le texte de la section tel quel
-    monkeypatch.setattr(tr, "ask", lambda prompt: prompt.rsplit("Texte à traduire :\n", 1)[1])
+    monkeypatch.setattr(tr, "ask",
+                        lambda prompt, temperature=0: prompt.rsplit("Texte à traduire :\n", 1)[1])
     terms = make_terms(tmp_path)
     for scenario_id, text in french_texts():
         assert tr.numbers_preserved(text, tr.translate(text, terms_file=terms)), scenario_id
@@ -53,7 +54,7 @@ def test_translate_keeps_all_numbers_with_a_faithful_model(monkeypatch, tmp_path
 def test_translate_raises_when_numbers_are_lost(monkeypatch, tmp_path):
     calls = []
 
-    def lossy(prompt):
+    def lossy(prompt, temperature=0):
         calls.append(1)
         return "ترجمة بدون أرقام"
 
@@ -68,7 +69,7 @@ def test_translate_raises_when_numbers_are_lost(monkeypatch, tmp_path):
 
 def test_translate_retries_once_and_accepts_a_good_second_answer(monkeypatch, tmp_path):
     answers = iter(["بدون أرقام", "النقطة 87 من 100"])
-    monkeypatch.setattr(tr, "ask", lambda prompt: next(answers))
+    monkeypatch.setattr(tr, "ask", lambda prompt, temperature=0: next(answers))
     out = tr.translate("=== PLAN ===\nScore 87 sur 100.", terms_file=make_terms(tmp_path))
     assert "87" in out
 
@@ -76,7 +77,7 @@ def test_translate_retries_once_and_accepts_a_good_second_answer(monkeypatch, tm
 def test_glossary_goes_in_the_prompt_not_in_the_text(monkeypatch, tmp_path):
     seen = []
 
-    def spy(prompt):
+    def spy(prompt, temperature=0):
         seen.append(prompt)
         return "النقطة 87"
 
