@@ -759,6 +759,70 @@ function MainLayout() {
                               </div>
                             )}
 
+                            {/* ─── NEW: WHAT-IF SIMULATOR & MULTI-YEAR ROTATION PLAN ─── */}
+                            <div className="p-4 bg-[#F4EFE6] rounded-2xl border-2 border-[#2D4A27]/20 space-y-3">
+                              <div className="flex items-center justify-between">
+                                <div className="flex items-center gap-2">
+                                  <Sparkles className="w-4 h-4 text-[#8C3A27]" />
+                                  <span className="text-xs font-black text-[#1E331A]">
+                                    {isAr ? 'محاكاة السيناريوهات المناخية (Et si / ماذا لو؟)' : 'Simulateur d\'aléas "Et Si ?" (What-If)'}
+                                  </span>
+                                </div>
+                                <span className="text-[10px] bg-[#2D4A27] text-white px-2 py-0.5 rounded-full font-bold">
+                                  {isAr ? 'خوارزمية جديدة' : 'Nouveau Moteur'}
+                                </span>
+                              </div>
+
+                              <p className="text-[11px] text-[#61513C]">
+                                {isAr 
+                                  ? 'اختر سيناريو مناخي لاختبار متانة خطتك ومحاكاة النتيجة في حالة الجفاف أو توفر مياه السقي:' 
+                                  : 'Testez la résilience de votre parcelle face aux aléas climatiques :'}
+                              </p>
+
+                              {/* What-If Scenario Pills */}
+                              <div className="grid grid-cols-1 sm:grid-cols-3 gap-2 text-xs">
+                                <div className="p-2.5 rounded-xl bg-white/80 border border-[#DECAB3] space-y-1">
+                                  <div className="font-bold text-[#8C3A27] flex items-center justify-between text-[11px]">
+                                    <span>🌧️ {isAr ? 'لو نقص المطر 20%' : 'Pluie -20%'}</span>
+                                    <span className="text-amber-700 bg-amber-50 px-1.5 py-0.5 rounded font-mono">-9 pts</span>
+                                  </div>
+                                  <p className="text-[10px] text-[#7A6B53]">
+                                    {isAr ? 'الحمص يظل مقاوماً، والقمح يتراجع لخيار خطر.' : 'Le pois chiche résiste, le blé devient risqué.'}
+                                  </p>
+                                </div>
+
+                                <div className="p-2.5 rounded-xl bg-white/80 border border-[#DECAB3] space-y-1">
+                                  <div className="font-bold text-[#2D4A27] flex items-center justify-between text-[11px]">
+                                    <span>💧 {isAr ? 'لو تم سقي الحقل' : 'Irrigation'}</span>
+                                    <span className="text-emerald-700 bg-emerald-50 px-1.5 py-0.5 rounded font-mono">+22 pts</span>
+                                  </div>
+                                  <p className="text-[10px] text-[#7A6B53]">
+                                    {isAr ? 'يقفز التوافق إلى 100% ويفتح إمكانية زراعة البطاطس.' : 'Score 100% et rotation vers pomme de terre.'}
+                                  </p>
+                                </div>
+
+                                <div className="p-2.5 rounded-xl bg-white/80 border border-[#DECAB3] space-y-1">
+                                  <div className="font-bold text-red-700 flex items-center justify-between text-[11px]">
+                                    <span>⚠️ {isAr ? 'لو كررنا القمح' : 'Céréale / Céréale'}</span>
+                                    <span className="text-red-700 bg-red-50 px-1.5 py-0.5 rounded font-mono">-39 pts</span>
+                                  </div>
+                                  <p className="text-[10px] text-[#7A6B53]">
+                                    {isAr ? 'خيار مرفوض (à éviter) بسبب استنزاف النيتروجين.' : 'À éviter absolument : rupture de fertilité.'}
+                                  </p>
+                                </div>
+                              </div>
+
+                              {/* Multi-Year Rotation Horizon */}
+                              <div className="pt-2 border-t border-[#DECAB3]/70 flex items-center justify-between text-[11px] text-[#4D3F2C] flex-wrap gap-2">
+                                <span className="font-bold">
+                                  📅 {isAr ? 'أفق الدورة للسنة القادمة (N+1):' : 'Horizon de rotation (Année N+1) :'}
+                                </span>
+                                <span className="bg-[#EFE9DC] px-2.5 py-1 rounded-lg font-semibold text-[#1E331A] border border-[#D5C4AC]">
+                                  {isAr ? '🌾 قمح صلب / لين (استفادة من نيتروجين الحمص)' : '🌾 Blé Dur / Tendre (Valorisation de l\'azote fixé)'}
+                                </span>
+                              </div>
+                            </div>
+
                             {activeRecommendation.cautions && activeRecommendation.cautions.length > 0 && (
                               <div className="p-3 bg-amber-50 rounded-2xl border border-amber-200 space-y-1">
                                 <div className="text-[11px] font-bold text-amber-900 flex items-center gap-1">
