@@ -1241,7 +1241,20 @@ useEffect(() => {
                       </h3>
                     </div>
 
-                    <FellahQuestion />
+                    <FellahQuestion
+                      regionName={activeRegionName}
+                      parcelle={apiResponse && apiResponse.status === 'ok' ? {
+                        latitude: activeLat,
+                        longitude: activeLon,
+                        previous_crop: previousCrop,
+                        water_access: waterAccess,
+                        soil_type: soilType,
+                        field_size_ha: parseFloat(fieldSize) || null,
+                        data_status: apiResponse.data_status,
+                        annual_rain_mm: apiResponse.indicators?.annual_rain_mm ?? null,
+                        mean_annual_temp_c: apiResponse.indicators?.mean_annual_temp_c ?? null,
+                      } : null}
+                    />
 
                     <div className="bg-[#FAF7F2] p-8 rounded-3xl border border-[#DECAB3] shadow-sm max-w-2xl mx-auto text-center space-y-6">
                       <div className="w-20 h-20 rounded-full bg-[#8C3A27]/10 text-[#8C3A27] flex items-center justify-center font-bold mx-auto">

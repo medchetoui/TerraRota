@@ -100,3 +100,79 @@ def test_greetings_and_noise_get_a_clean_answer(client, texte):
     r = poser(client, texte)
     assert r.status_code == 200 and r.json()["intention"] == "HORS_PERIMETRE"
     assert "سول المستشار" in r.json()["texte"] and not re.search(r"[0-9]", r.json()["texte"])
+
+
+# ─── Parcelle du formulaire → moteur du Membre 2 ───
+
+PARCELLES = {
+    "A": dict(previous_crop="wheat_hard", water_access="rainfed", soil_type="clay_loam", field_size_ha=4.8,
+              data_status="live", annual_rain_mm=350, mean_annual_temp_c=18),
+    "B": dict(previous_crop="chickpea", water_access="irrigated", soil_type="loam", field_size_ha=2,
+              data_status="live", annual_rain_mm=450, mean_annual_temp_c=17),
+    "C": dict(previous_crop="barley", water_access="rainfed", soil_type="sandy", field_size_ha=10,
+              data_status="cached", annual_rain_mm=180, mean_annual_temp_c=24),
+}
+INCOMPLETE = dict(previous_crop="tomato", water_access="partial", soil_type="unknown", data_status="sample",
+                  annual_rain_mm=300, mean_annual_temp_c=19)
+
+
+def sur_parcelle(client, question, parcelle):
+    r = client.post(URL, {"question": question, "parcelle": parcelle}, format="json")
+    assert r.status_code == 200
+    return r.json()
+
+
+def ids(r):
+    return [p["id"] for g in r["phrases"] for p in g]
+
+
+def test_form_mapping_never_invents_values():
+    from fellah.parcelle import entree_moteur
+    parcels, plan, corr = entree_moteur(INCOMPLETE, annee=2026)
+    p = parcels["P1"]
+    assert p["conditions"] == {"temp_c": None, "rain_mm": None, "ph": None, "salinity_dsm": None}
+    assert p["irrigated"] is None and p["history"] == [] and plan == []
+    assert corr["rain_mm"] == corr["ph"] == corr["irrigated"] == corr["history"] == "inconnu"
+    parcels, plan, corr = entree_moteur(PARCELLES["A"], culture="lentille", annee=2026)
+    p = parcels["P1"]
+    assert p["conditions"] == {"temp_c": 18.0, "rain_mm": 350.0, "ph": None, "salinity_dsm": None}
+    assert p["irrigated"] is False and p["history"] == [{"crop": "ble_dur", "year": 2025}]
+    assert plan == [{"parcel": "P1", "crop": "lentille", "area_ha": 4.8}]
+
+
+def test_three_plots_give_different_coherent_answers(client):
+    q = "شنو نزرع هاد العام؟"
+    a, b, c = (sur_parcelle(client, q, PARCELLES[k]) for k in "ABC")
+    assert len({a["texte"], b["texte"], c["texte"]}) == 3
+    assert a["scenario"] == "parcelle" and a["parcelle"]["history"] == "ble_dur"
+    assert "hiba_conseil_changer" in ids(a) and "hiba_conseil_changer" in ids(b)
+    assert ids(c)[0] == "hiba_rien_conseille"
+    assert sur_parcelle(client, "واش خاصني نسقي؟", PARCELLES["A"])["phrases"][0][0]["id"] == "hiba_eau_bour"
+    assert sur_parcelle(client, "واش خاصني نسقي؟", PARCELLES["B"])["phrases"][0][0]["id"] == "hiba_eau_sqi"
+    ble = sur_parcelle(client, "واش نبقى نزرع القمح؟", PARCELLES["A"])
+    assert ble["culture"] == "ble_dur" and ids(ble)[:2] == ["hiba_culture_ble_dur", "hiba_culture_non"]
+    assert ids(sur_parcelle(client, "واش نزرع العدس؟", PARCELLES["C"]))[:3] == [
+        "hiba_culture_lentille", "hiba_culture_non", "hiba_raison_pluie_peu"]
+
+
+def test_incomplete_plot_gives_clean_answer_and_advisor(client):
+    for q in ("شنو نزرع هاد العام؟", "علاش هاد النصيحة؟", "واش الشتا غادي تكفي؟", "واش الأرض ديالي مزيانة؟",
+              "واش خاصني نسقي؟", "واش نتيق فهاد النصيحة؟", "واش نزرع العدس؟"):
+        r = sur_parcelle(client, q, INCOMPLETE)
+        assert ids(r)[-1] == "hiba_mostachar" and ids(r).count("hiba_mostachar") == 1, q
+        assert not re.search(r"[0-9٠-٩]", r["texte"]), q
+    assert ids(sur_parcelle(client, "شنو نزرع هاد العام؟", INCOMPLETE))[0] == "hiba_raison_parcelle_inconnue"
+    assert ids(sur_parcelle(client, "واش الشتا غادي تكفي؟", INCOMPLETE))[0] == "hiba_pluie_inconnue"
+    assert ids(sur_parcelle(client, "واش خاصني نسقي؟", INCOMPLETE))[0] == "hiba_eau_inconnue"
+    assert ids(sur_parcelle(client, "واش الأرض ديالي مزيانة؟", PARCELLES["A"]))[0] == "hiba_raison_parcelle_inconnue"
+
+
+@pytest.mark.parametrize("parcelle", [{}, {"previous_crop": "???", "annual_rain_mm": "beaucoup", "data_status": "live"},
+                                      {"field_size_ha": -3, "water_access": None}])
+def test_odd_plot_inputs_never_crash(client, parcelle):
+    r = sur_parcelle(client, "شنو نزرع هاد العام؟", parcelle)
+    assert ids(r)[-1] == "hiba_mostachar"
+
+
+def test_plot_must_be_an_object(client):
+    assert client.post(URL, {"question": "واش؟", "parcelle": "P1"}, format="json").status_code == 400

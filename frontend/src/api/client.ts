@@ -210,9 +210,22 @@ export interface FellahPhrase {
   audio: string | null;
 }
 
+export interface FellahParcelle {
+  latitude: number;
+  longitude: number;
+  previous_crop: string;
+  water_access: string;
+  soil_type: string;
+  field_size_ha: number | null;
+  data_status: string;
+  annual_rain_mm: number | null;
+  mean_annual_temp_c: number | null;
+}
+
 export interface FellahAnswer {
   question: string;
   scenario: string;
+  parcelle: Record<string, string | number | boolean> | null;
   intention: string;
   culture: string | null;
   phrases: FellahPhrase[][];
@@ -242,10 +255,14 @@ export async function getFellahSetup(): Promise<FellahSetup> {
   return request<FellahSetup>('/fellah/scenarios/');
 }
 
-export async function askFellah(question: string, scenario: string): Promise<FellahAnswer> {
+export async function askFellah(
+  question: string,
+  scenario: string,
+  parcelle?: FellahParcelle | null,
+): Promise<FellahAnswer> {
   return request<FellahAnswer>('/fellah/question/', {
     method: 'POST',
-    body: JSON.stringify({ question, scenario }),
+    body: JSON.stringify(parcelle ? { question, parcelle } : { question, scenario }),
   });
 }
 

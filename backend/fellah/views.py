@@ -19,6 +19,7 @@ from rest_framework.decorators import api_view
 from rest_framework.response import Response
 
 from .darija import repondre_darija as RD
+from .parcelle import CHAMPS_PARCELLE, scenario_parcelle
 
 DARIJA_DIR = Path(RD.__file__).resolve().parent
 AUDIO_DIR = Path(os.environ.get("FELLAH_AUDIO_DIR")
@@ -67,18 +68,30 @@ def scenarios(request):
 
 @api_view(["POST"])
 def question(request):
+    """Question du fellah. Avec « parcelle » (champs du formulaire et indicateurs NASA déjà calculés) : le moteur
+    du Membre 2 est lancé sur CETTE parcelle ; sans « parcelle » : un des 2 scénarios de démo."""
     texte = str(request.data.get("question") or "").strip()
+    formulaire = request.data.get("parcelle")
     scenario = request.data.get("scenario") or SCENARIO_DEFAUT
     if not texte or len(texte) > LONGUEUR_MAX:
         return Response({"status": "error", "message": "question vide ou trop longue"}, status=status.HTTP_400_BAD_REQUEST)
-    if scenario not in SCENARIOS:
+    if formulaire is not None and not isinstance(formulaire, dict):
+        return Response({"status": "error", "message": "parcelle invalide"}, status=status.HTTP_400_BAD_REQUEST)
+    if formulaire is None and scenario not in SCENARIOS:
         return Response({"status": "error", "message": "scénario inconnu"}, status=status.HTTP_400_BAD_REQUEST)
     t0 = time.perf_counter()
-    r = RD.repondre_darija(texte, scenario)
+    correspondance = None
+    if formulaire is not None:
+        sc = scenario_parcelle({k: formulaire.get(k) for k in CHAMPS_PARCELLE}, RD.culture_citee(texte), question=texte)
+        correspondance, scenario = sc["correspondance"], "parcelle"
+        r = RD.repondre_darija(texte, sc)
+    else:
+        r = RD.repondre_darija(texte, scenario)
     phrases = _phrases(r)
     return Response({
         "question": texte,
         "scenario": scenario,
+        "parcelle": correspondance,
         "intention": r["intention"],
         "culture": r["culture_citee"],
         "phrases": phrases,

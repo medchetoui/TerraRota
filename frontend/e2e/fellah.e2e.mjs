@@ -2,7 +2,8 @@
 // DevTools (WebSocket intégré à Node, aucune dépendance).
 //
 // Prérequis : backend (python manage.py runserver 8000) et frontend (npm run dev) lancés.
-// L'appel /api/v1/recommendations/ (qui interroge NASA POWER en ligne) est bloqué pendant le test.
+// L'appel /api/v1/recommendations/ (qui interroge NASA POWER en ligne) n'atteint jamais le backend : il est bloqué,
+// ou remplacé par une réponse fictive (FAUSSE_RECO) pour tester les questions sur la parcelle du formulaire.
 // Utilisation :
 //   npm run test:e2e
 //   npm run test:e2e -- --wav chemin/question.wav   (micro simulé ; expérimental : dans Chrome sans interface,
@@ -107,6 +108,16 @@ async function suggestionsMarchent() {
   }
   return { ok: textes.length > 0, detail: `${textes.length} suggestions` };
 }
+const FAUSSE_REPONSE_RECO = {
+  status: 'ok', data_status: 'live', provenance: null,
+  indicators: { annual_rain_mm: 350, mean_annual_temp_c: 18, gdd_base10: 2100, frost_days_per_year: 6,
+    aridity_index: 0.25, dry_months: 6, missing_data_pct: 0 },
+  recommendations: [{ crop_id: 'barley', crop_name_fr: 'Orge', crop_name_ar: 'الشعير', crop_name_en: 'Barley',
+    crop_category: 'cereal', crop_emoji: '🌾', score: 80, rank: 1, eligible: true, reasons: ['test'],
+    reasons_fr: ['test'], reasons_en: ['test'], cautions: [], cautions_fr: [], cautions_en: [] }],
+  abstained_crops: [], abstention_reason: null, insufficient_data_reason: null,
+};
+let recommandation = 'bloquee';
 const erreursInattendues = () => erreursConsole.filter((e) => !ATTENDUES.test(e));
 const FAUSSE_RECO = (erreur) => `window.SpeechRecognition = undefined;
   window.webkitSpeechRecognition = class { start() { setTimeout(() => { this.onerror && this.onerror({ error: '${erreur}' }); this.onend && this.onend(); }, 50); } stop() {} };`;
@@ -129,6 +140,15 @@ try {
       const { ok, ko } = enAttente.get(d.id);
       enAttente.delete(d.id);
       d.error ? ko(new Error(d.error.message)) : ok(d.result);
+    } else if (d.method === 'Fetch.requestPaused') {
+      const requestId = d.params.requestId;
+      if (recommandation === 'fictive') {
+        cdp('Fetch.fulfillRequest', { requestId, responseCode: 200,
+          responseHeaders: [{ name: 'Content-Type', value: 'application/json' }],
+          body: Buffer.from(JSON.stringify(FAUSSE_REPONSE_RECO)).toString('base64') }).catch(() => undefined);
+      } else {
+        cdp('Fetch.failRequest', { requestId, errorReason: 'BlockedByClient' }).catch(() => undefined);
+      }
     } else if (d.method === 'Runtime.exceptionThrown') {
       erreursConsole.push('exception : ' + (d.params.exceptionDetails.exception?.description || d.params.exceptionDetails.text));
     } else if (d.method === 'Runtime.consoleAPICalled' && d.params.type === 'error') {
@@ -141,7 +161,7 @@ try {
   await cdp('Runtime.enable');
   await cdp('Log.enable');
   await cdp('Network.enable');
-  await cdp('Network.setBlockedURLs', { urls: ['*/api/v1/recommendations*'] });
+  await cdp('Fetch.enable', { patterns: [{ urlPattern: '*/api/v1/recommendations*' }] });
 
   // 1. Page /advisor : chargement, champ texte, micro, réponses
   await ouvrirAdvisor();
@@ -198,6 +218,23 @@ try {
     verifier(`micro en erreur « ${erreur} » → message clair`, notice.includes(message) && notice.includes('اكتب سؤالك'), notice);
     verifier(`… puis la question écrite marche`, (await poserEcrit('علاش هاد النصيحة؟')).length > 0);
   }
+
+  // 2b. Questions sur la parcelle du formulaire (réponse de /recommendations fictive : 350 mm, 18 °C)
+  recommandation = 'fictive';
+  await ouvrirAdvisor();
+  await attendreQue(`!!document.querySelector('[data-testid=resume-parcelle]')`);
+  verifier('parcelle du formulaire : mode « الأرض ديالي » actif et résumé affiché',
+    (await evaluer(`document.querySelector('[data-testid=resume-parcelle]').innerText`)).includes('350 mm'));
+  const surParcelle = await poserEcrit('شنو نزرع هاد العام؟');
+  verifier('… réponse calculée sur la parcelle, sans chiffre', surParcelle.length > 0 && !/[0-9٠-٩]/.test(surParcelle), surParcelle);
+  const sol = await poserEcrit('واش الأرض ديالي مزيانة؟');
+  verifier('… sol inconnu du formulaire → « aucune information », pas de valeur inventée', sol.includes('ما عندنا حتى معلومة'), sol);
+  await evaluer(`document.querySelector('[data-testid=mode-demo]').click()`);
+  await attendreQue(`!document.querySelector('[data-testid=resume-parcelle]')`);
+  const demo = await poserEcrit('شنو نزرع هاد العام؟');
+  verifier('… bascule « أمثلة » → scénario de démo, autre réponse', demo !== surParcelle && demo.length > 0, demo);
+  verifier('… sans erreur dans la console', erreursInattendues().length === 0, erreursInattendues().join(' | '));
+  recommandation = 'bloquee';
 
   // 3. Le reste de l'application s'affiche comme avant (sans appel NASA : endpoint bloqué)
   for (const chemin of ['/', '/recommendation', '/weather']) {

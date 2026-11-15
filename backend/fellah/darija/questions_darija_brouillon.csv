@@ -1,0 +1,21 @@
+id,question,texte_avant,ecriture,type_attendu,culture_attendue,traduction_fr,statut
+Q01,شنو نزرع هاد العام؟,شنو نزرع هاد العام؟,arabe,QUOI_PLANTER,,Que planter cette année ?,corrigé – à valider par Ranya
+Q02,واش نبقى نزرع القمح؟,واش نكمل بالقمح؟,arabe,AVIS_CULTURE,ble_tendre,Est-ce que je continue avec le blé ?,corrigé – à valider par Ranya
+Q03,علاش ما نزرعش القمح؟,علاش ما نزرعش القمح؟,arabe,AVIS_CULTURE,ble_tendre,Pourquoi ne pas planter le blé ?,corrigé – à valider par Ranya
+Q04,واش الشتا غادي تكفي؟,واش الشتا كافية؟,arabe,PLUIE_METEO,,La pluie suffit-elle ?,corrigé – à valider par Ranya
+Q05,واش الأرض ديالي كتصلاح لهاد الزريعة؟,واش الأرض ديالي مزيانة لهاد الزريعة؟,arabe,SOL,,Ma terre est-elle bonne pour cette culture ?,corrigé – à valider par Ranya
+Q06,واش خاصني نسقي؟,خاصني نسقي؟,arabe,EAU_IRRIGATION,,Dois-je irriguer ?,corrigé – à valider par Ranya
+Q07,شحال من السماد نحط؟,شحال من السماد نحط؟,arabe,HORS_PERIMETRE,,Combien d'engrais mettre ?,corrigé – à valider par Ranya
+Q08,شحال غادي نجمع؟,شحال غادي نجمع؟,arabe,HORS_PERIMETRE,,Combien vais-je récolter ?,corrigé – à valider par Ranya
+Q09,واش نزرع العدس؟,واش نزرع العدس؟,arabe,AVIS_CULTURE,lentille,Est-ce que je plante des lentilles ?,corrigé – à valider par Ranya
+Q10,واش نتيق فهاد النصيحة؟,واش نتيق فهاد النصيحة؟,arabe,FIABILITE,,Puis-je faire confiance à ce conseil ?,corrigé – à valider par Ranya
+Q11,آش نزرع هاد العام؟,chno nzre3 had l3am?,arabe,QUOI_PLANTER,,Que planter cette année ?,corrigé – à valider par Ranya
+Q12,واش نكمل فالقمح؟,wach nkemel b l9am7?,arabe,AVIS_CULTURE,ble_tendre,Est-ce que je continue avec le blé ?,corrigé – à valider par Ranya
+Q13,علاش هاد النصيحة؟,3lach had nasi7a?,arabe,POURQUOI,,Pourquoi ce conseil ?,corrigé – à valider par Ranya
+Q14,واش غادي تصب الشتا بزاف؟,wach ghadi tchta bzaf?,arabe,PLUIE_METEO,,Va-t-il beaucoup pleuvoir ?,corrigé – à valider par Ranya
+Q15,واش التراب ديالي مزيان؟,wach trab dyali mzyan?,arabe,SOL,,Ma terre est-elle bonne ?,corrigé – à valider par Ranya
+Q16,ما عنديش الما، آش ندير؟,ma 3ndich sqi chno ndir?,arabe,EAU_IRRIGATION,,Je n'ai pas d'irrigation : que faire ?,corrigé – à valider par Ranya
+Q17,واش نحط الغبار؟,wach n7et zbel?,arabe,HORS_PERIMETRE,,Est-ce que je mets du fumier ?,corrigé – à valider par Ranya
+Q18,شحال غادي نحصد؟,ch7al ghadi njma3?,arabe,HORS_PERIMETRE,,Combien vais-je récolter ?,corrigé – à valider par Ranya
+Q19,واش نزرع الحمص؟,wach nzre3 l7ems?,arabe,AVIS_CULTURE,pois_chiche,Est-ce que je plante des pois chiches ?,corrigé – à valider par Ranya
+Q20,السلام، لاباس؟,salam labas?,arabe,HORS_PERIMETRE,,"Bonjour, ça va ?",corrigé – à valider par Ranya

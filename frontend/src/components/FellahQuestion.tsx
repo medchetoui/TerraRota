@@ -7,6 +7,7 @@ import {
   getFellahSetup,
   logFellahVoiceTry,
   type FellahAnswer,
+  type FellahParcelle,
   type FellahSetup,
 } from '../api/client';
 
@@ -37,7 +38,14 @@ const MESSAGES: Record<string, string> = {
   network: 'خاص الأنترنيت باش نسمعك. اكتب سؤالك.',
 };
 
-export default function FellahQuestion() {
+const EAU_FR: Record<string, string> = { rainfed: 'pluvial', irrigated: 'irrigué', partial: 'irrigation partielle' };
+
+interface Props {
+  parcelle?: FellahParcelle | null;
+  regionName?: string;
+}
+
+export default function FellahQuestion({ parcelle = null, regionName = '' }: Props) {
   const [setup, setSetup] = useState<FellahSetup | null>(null);
   const [scenario, setScenario] = useState('');
   const [question, setQuestion] = useState('');
@@ -46,6 +54,8 @@ export default function FellahQuestion() {
   const [notice, setNotice] = useState('');
   const [playing, setPlaying] = useState(false);
   const [testId, setTestId] = useState('');
+  const [surParcelle, setSurParcelle] = useState(true);
+  const useParcelle = surParcelle && parcelle !== null;
   const audioRef = useRef<HTMLAudioElement | null>(null);
   const supported = recognitionCtor() !== null;
   const testMode = new URLSearchParams(window.location.search).has('test-voix');
@@ -80,7 +90,7 @@ export default function FellahQuestion() {
     stopAudio();
     setQuestion(q);
     try {
-      const r = await askFellah(q, scenario);
+      const r = await askFellah(q, scenario, useParcelle ? parcelle : null);
       setAnswer(r);
       setNotice('');
       if (voix) {
@@ -151,7 +161,27 @@ export default function FellahQuestion() {
     <div className="bg-[#FAF7F2] p-6 rounded-3xl border border-[#DECAB3] shadow-sm max-w-2xl mx-auto space-y-4" dir="rtl">
       <div className="flex items-center justify-between gap-3 flex-wrap">
         <h4 className="text-xl font-bold text-[#1E331A]">سول بالدارجة</h4>
-        {setup && (
+        {parcelle && (
+          <div className="flex rounded-xl border border-[#DECAB3] overflow-hidden text-sm" role="group">
+            <button
+              type="button"
+              data-testid="mode-parcelle"
+              onClick={() => { setSurParcelle(true); setAnswer(null); }}
+              className={`px-3 py-2 cursor-pointer ${useParcelle ? 'bg-[#2D4A27] text-white' : 'bg-white text-[#1E331A]'}`}
+            >
+              الأرض ديالي
+            </button>
+            <button
+              type="button"
+              data-testid="mode-demo"
+              onClick={() => { setSurParcelle(false); setAnswer(null); }}
+              className={`px-3 py-2 cursor-pointer ${!useParcelle ? 'bg-[#2D4A27] text-white' : 'bg-white text-[#1E331A]'}`}
+            >
+              أمثلة
+            </button>
+          </div>
+        )}
+        {setup && !useParcelle && (
           <select
             aria-label="البلان"
             value={scenario}
@@ -164,6 +194,17 @@ export default function FellahQuestion() {
           </select>
         )}
       </div>
+
+      {useParcelle && parcelle && (
+        <div className="text-xs text-[#61513C] bg-[#EFE9DC] rounded-xl px-3 py-2" dir="ltr" data-testid="resume-parcelle">
+          Parcelle : {regionName || `${parcelle.latitude.toFixed(2)}, ${parcelle.longitude.toFixed(2)}`} · précédent {parcelle.previous_crop}
+          {' · '}{EAU_FR[parcelle.water_access] || 'eau inconnue'}
+          {parcelle.data_status === 'live' || parcelle.data_status === 'cached'
+            ? ` · NASA : ${parcelle.annual_rain_mm != null ? `${Math.round(parcelle.annual_rain_mm)} mm/an` : 'pluie inconnue'}, ${
+                parcelle.mean_annual_temp_c != null ? `${Math.round(parcelle.mean_annual_temp_c)} °C` : 'température inconnue'}`
+            : ' · climat NASA indisponible'}
+        </div>
+      )}
 
       {testMode && setup && (
         <select
