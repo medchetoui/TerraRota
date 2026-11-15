@@ -251,6 +251,11 @@ export interface DataSource {
   limitations_ar: string;
   limitations_en: string;
 }
+
+export interface DataSourcesResponse {
+  status: string;
+  data_sources: DataSource[];
+}
 // ─── Farm Plans ─────────────────────────────────────────────
 
 export interface FarmPlan {
