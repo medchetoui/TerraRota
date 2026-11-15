@@ -20,14 +20,8 @@ import sys
 from pathlib import Path
 
 # Import Darija understanding module
-try:
-    from fellah.darija import comprendre
-    from fellah.darija import repondre_darija as RD
-except ImportError:
-    DARIJA_DIR = Path(__file__).resolve().parent.parent / "fellah" / "darija"
-    sys.path.insert(0, str(DARIJA_DIR))
-    import comprendre
-    import repondre_darija as RD
+from fellah.darija import comprendre
+from fellah.darija import repondre_darija as RD
 
 from recommendation import engine as rec_engine
 from recommendation.whatif import simulate_whatif
