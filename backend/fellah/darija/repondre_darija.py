@@ -63,7 +63,14 @@ def modeles(chemin=TEMPLATES_FILE):
 
 
 def scenario(scenario_id):
+    """Scenario de demo (nom) ou scenario deja calcule (dict avec parcels, plan, rapport : parcelle du formulaire)."""
+    if isinstance(scenario_id, dict):
+        return scenario_id
     return donnees_membre2()["scenarios"][scenario_id]
+
+
+def nom_scenario(scenario_id):
+    return scenario_id.get("id", "parcelle") if isinstance(scenario_id, dict) else scenario_id
 
 
 def _normaliser(texte):
@@ -137,6 +144,11 @@ def raison(ligne):
         if pire:
             acceptable = {"rain_mm": "hiba_pluie_tolerable", "ph": "hiba_sol_limite", "salinity_dsm": "hiba_sol_limite"}
             return acceptable.get(pire["criterion"], "hiba_raison_bonne"), f"criteria: {pire['criterion']} {pire['position']} (ligne ok)"
+        manquants = set(ligne.get("missing") or [])
+        if manquants & {"ph", "salinity_dsm"}:
+            if _critere(ligne, "rain_mm"):
+                return "hiba_pluie_optimal", "criteria: rain_mm optimal, sol inconnu"
+            return "hiba_mostachar", "criteria: donnees manquantes"
         return "hiba_raison_bonne", "criteria: optimal"
     if pire and pire["position"] == "out":
         bas = pire["value"] < pire["optimal"][0]
@@ -148,6 +160,15 @@ def raison(ligne):
         bas = pire["value"] < pire["optimal"][0]
         return CRITERE_RAISON[pire["criterion"]][0 if bas else 1], f"criteria: {pire['criterion']} {pire['position']}"
     return "hiba_mostachar", f"status: {statut}, sans raison detaillee"
+
+
+def donnees_connues(sc):
+    return any(v is not None for p in sc["parcels"].values() for v in (p.get("conditions") or {}).values())
+
+
+def sans_conseil(sc):
+    """Phrase quand le moteur n'a ni plan a evaluer ni culture a proposer."""
+    return "hiba_rien_conseille" if donnees_connues(sc) else "hiba_raison_parcelle_inconnue"
 
 
 def _critere(ligne, nom):
@@ -208,10 +229,10 @@ def repondre_templates(question, scenario_id):
     sc = scenario(scenario_id)
     r = sc["rapport"]
     ev = r["farmer"]["evaluation"]
-    utilisees = [f"scenario: {scenario_id}", f"verdict agriculteur: {ev['verdict']}", f"plan retenu: {r['retained']}"]
+    utilisees = [f"scenario: {nom_scenario(scenario_id)}", f"verdict agriculteur: {ev['verdict']}", f"plan retenu: {r['retained']}"]
     c = comprendre.classer(question, "mots_cles")
     intention = c["intention"]
-    culture = culture_citee(question)
+    culture = sc.get("culture_question") or culture_citee(question)
     phrases = []
     conseil, origine = plan_conseille(sc)
     principal = conseil[0] if conseil else None
@@ -225,8 +246,9 @@ def repondre_templates(question, scenario_id):
             phrases = [[f"hiba_culture_{culture}", "hiba_culture_pas_evaluee"]]
             utilisees.append(f"{culture}: absente du rapport")
         elif ligne["status"] == "ok":
-            phrases = [[f"hiba_culture_{culture}", "hiba_culture_ok"], [raison(ligne)[0]]]
-            utilisees += [f"{partie}.{culture}.status: ok", raison(ligne)[1]]
+            cle, src = raison(ligne)
+            phrases = [[f"hiba_culture_{culture}", "hiba_culture_ok"]] + ([[cle]] if cle != "hiba_mostachar" else [])
+            utilisees += [f"{partie}.{culture}.status: ok", src]
         else:
             alt = [a for a in (ligne.get("alternatives") or []) if f"hiba_culture_{a['crop']}" in modeles()]
             if alt:
@@ -239,9 +261,14 @@ def repondre_templates(question, scenario_id):
         intention_finale = intention
         verdict_clip = {"viable": "hiba_verdict_viable", "partially_viable": "hiba_verdict_partiel",
                         "not_viable": "hiba_verdict_non"}.get(ev["verdict"], "hiba_verdict_non_evalue")
-        phrases = [[verdict_clip]]
-        if origine == "farmer":
-            phrases.append(["hiba_conseil_garder"])
+        plan_vide = not sc.get("plan")
+        phrases = [] if plan_vide and conseil else [[verdict_clip]]
+        if plan_vide and not conseil:
+            phrases = [[sans_conseil(sc)]]
+            utilisees.append("plan vide, aucune culture proposee")
+        elif origine == "farmer":
+            if conseil:
+                phrases.append(["hiba_conseil_garder"])
         else:
             crops = [l["crop"] for l in conseil if f"hiba_culture_{l['crop']}" in modeles()][:2]
             phrases.append(["hiba_conseil_changer"] + _crops_clips(crops))
@@ -257,36 +284,65 @@ def repondre_templates(question, scenario_id):
             cle, src = raison(principal)
             phrases = [[f"hiba_culture_{principal['crop']}", "hiba_culture_ok"], [cle]]
             utilisees.append(src)
+        if not phrases and not sc.get("plan"):
+            phrases = [[sans_conseil(sc)]]
+            utilisees.append("plan vide, aucune culture proposee")
         if any(t.get("rule") == "une_seule_famille" for t in ev.get("tips", [])) and len(phrases) < MAX_PHRASES:
             phrases.append(["hiba_raison_legumineuse"])
             utilisees.append("tips: une_seule_famille")
-    elif intention in ("PLUIE_METEO", "SOL") and principal and f"hiba_culture_{principal['crop']}" in modeles():
+    elif intention in ("PLUIE_METEO", "SOL") and not (principal and f"hiba_culture_{principal['crop']}" in modeles()):
+        intention_finale = intention
+        conditions = [p.get("conditions") or {} for p in sc["parcels"].values()]
+        if intention == "PLUIE_METEO":
+            connue = any(c.get("rain_mm") is not None for c in conditions)
+            phrases = [[sans_conseil(sc) if connue else "hiba_pluie_inconnue"]]
+            utilisees.append(f"parcels.conditions.rain_mm: {'connue, aucune culture proposee' if connue else 'inconnu'}")
+        else:
+            phrases = [["hiba_raison_parcelle_inconnue"]]
+            utilisees.append("aucune culture proposee : sol non evalue")
+    elif intention in ("PLUIE_METEO", "SOL"):
         intention_finale = intention
         if intention == "PLUIE_METEO":
             crit = _critere(principal, "rain_mm")
-            pos = crit["position"] if crit else "out"
-            phrases = [[f"hiba_culture_{principal['crop']}", f"hiba_pluie_{pos}"]]
-            utilisees.append(f"{origine}.{principal['crop']}.criteria.rain_mm: {pos}")
+            irrigue = any(p.get("irrigated") is True for p in sc["parcels"].values())
+            if crit:
+                phrases = [[f"hiba_culture_{principal['crop']}", f"hiba_pluie_{crit['position']}"]]
+            else:
+                phrases = [["hiba_eau_sqi" if irrigue else "hiba_pluie_inconnue"]]
+            utilisees.append(f"{origine}.{principal['crop']}.criteria.rain_mm: "
+                             f"{crit['position'] if crit else ('non notee (irrigue)' if irrigue else 'inconnu')}")
         else:
-            positions = [(_critere(principal, n) or {}).get("position", "optimal") for n in ("ph", "salinity_dsm")]
-            pos = max(positions, key=lambda p: ORDRE_POSITION.get(p, 0))
-            cle = {"optimal": "hiba_sol_ok", "tolerable": "hiba_sol_limite", "out": "hiba_sol_non"}[pos]
-            phrases = [[f"hiba_culture_{principal['crop']}", cle]]
+            positions = [c["position"] for c in (_critere(principal, n) for n in ("ph", "salinity_dsm")) if c]
+            if positions:
+                pos = max(positions, key=lambda p: ORDRE_POSITION.get(p, 0))
+                cle = {"optimal": "hiba_sol_ok", "tolerable": "hiba_sol_limite", "out": "hiba_sol_non"}[pos]
+                phrases = [[f"hiba_culture_{principal['crop']}", cle]]
+            else:
+                pos = "inconnu"
+                phrases = [["hiba_raison_parcelle_inconnue"]]
             utilisees.append(f"{origine}.{principal['crop']}.criteria.ph/salinity_dsm: {pos}")
     elif intention == "EAU_IRRIGATION":
         intention_finale = intention
-        irrigue = any(p.get("irrigated") for p in sc["parcels"].values())
-        phrases = [["hiba_eau_sqi" if irrigue else "hiba_eau_bour"]]
+        valeurs = [p.get("irrigated") for p in sc["parcels"].values()]
+        if any(v is True for v in valeurs):
+            irrigue, cle = True, "hiba_eau_sqi"
+        elif valeurs and all(v is False for v in valeurs):
+            irrigue, cle = False, "hiba_eau_bour"
+        else:
+            irrigue, cle = None, "hiba_eau_inconnue"
+        phrases = [[cle]]
         utilisees.append(f"parcels.irrigated: {irrigue}")
     elif intention == "FIABILITE":
         intention_finale = intention
         niveau = (ev.get("confidence") or {}).get("level")
+        if niveau is None and not sc.get("plan") and r.get("better"):
+            niveau = (r["better"]["evaluation"].get("confidence") or {}).get("level")
         phrases = [[{"high": "hiba_fiab_haute", "medium": "hiba_fiab_moyenne"}.get(niveau, "hiba_fiab_basse")]]
         utilisees.append(f"farmer.confidence.level: {niveau}")
     else:
         intention_finale = "HORS_PERIMETRE"
         phrases = [["hiba_hors_sujet"]]
-    if intention_finale != "HORS_PERIMETRE" and precaution(sc):
+    if intention_finale != "HORS_PERIMETRE" and precaution(sc) and ["hiba_mostachar"] not in phrases:
         phrases = phrases[:MAX_PHRASES - 1] + [["hiba_mostachar"]]
     phrases = phrases[:MAX_PHRASES]
     m = modeles()

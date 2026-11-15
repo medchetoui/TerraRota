@@ -9,6 +9,9 @@ import {
   type FellahAnswer,
   type FellahSetup,
 } from '../api/client';
+import type { FellahParcelle } from '../api/client';
+import FellahEnregistrement from './FellahEnregistrement';
+import FellahRelecture from './FellahRelecture';
 
 interface RecognitionResult { 0: { transcript: string } }
 interface RecognitionEvent { results: { 0: RecognitionResult } & ArrayLike<RecognitionResult> }
@@ -45,7 +48,10 @@ const UI_STRINGS = {
     stopVoice: 'إيقاف الصوت',
     listenAnswer: 'سمع الجواب بالصوت',
     synthesizedVoice: 'صوت افتراضي (مباشر)',
-    recordedVoice: 'تسجيل استوديو',
+    recordedVoice: 'صوت مسجل',
+    aiVoice: 'صوت اصطناعي · voix de synthèse',
+    myPlot: 'الأرض ديالي',
+    examples: 'أمثلة',
     errors: {
       'not-allowed': 'الميكرو ما خدامش أو مرفوض. اكتب سؤالك.',
       'service-not-allowed': 'الميكرو ما خدامش. اكتب سؤالك.',
@@ -70,7 +76,10 @@ const UI_STRINGS = {
     stopVoice: 'Arrêter la voix',
     listenAnswer: 'Écouter la réponse vocale',
     synthesizedVoice: 'Synthèse vocale directe',
-    recordedVoice: 'Voix studio',
+    recordedVoice: 'Voix enregistrée',
+    aiVoice: 'voix de synthèse',
+    myPlot: 'Ma parcelle',
+    examples: 'Exemples',
     errors: {
       'not-allowed': 'Accès micro refusé. Veuillez taper votre question.',
       'service-not-allowed': 'Service micro non disponible. Tapez votre question.',
@@ -95,7 +104,10 @@ const UI_STRINGS = {
     stopVoice: 'Stop Voice',
     listenAnswer: 'Listen to Spoken Advice',
     synthesizedVoice: 'Live Web Voice',
-    recordedVoice: 'Studio Voice',
+    recordedVoice: 'Recorded voice',
+    aiVoice: 'synthetic voice',
+    myPlot: 'My plot',
+    examples: 'Examples',
     errors: {
       'not-allowed': 'Microphone permission denied. Please type your question.',
       'service-not-allowed': 'Microphone service unavailable. Please type your question.',
@@ -110,9 +122,20 @@ const UI_STRINGS = {
 interface FellahQuestionProps {
   lang?: 'ar' | 'fr' | 'en';
   persona?: 'ami_ahmed' | 'mi_fatima';
+  parcelle?: FellahParcelle | null;
+  regionName?: string;
 }
 
-export default function FellahQuestion({ lang = 'ar', persona = 'ami_ahmed' }: FellahQuestionProps) {
+const EAU_FR: Record<string, string> = { rainfed: 'pluvial', irrigated: 'irrigué', partial: 'irrigation partielle' };
+
+export default function FellahQuestion(props: FellahQuestionProps) {
+  const params = new URLSearchParams(window.location.search);
+  if (params.has('enregistrer')) return <FellahEnregistrement />;
+  if (params.has('relire')) return <FellahRelecture />;
+  return <FellahQuestionPanel {...props} />;
+}
+
+function FellahQuestionPanel({ lang = 'ar', persona = 'ami_ahmed', parcelle = null, regionName = '' }: FellahQuestionProps) {
   const [setup, setSetup] = useState<FellahSetup | null>(null);
   const [scenario, setScenario] = useState('');
   const [question, setQuestion] = useState('');
@@ -122,6 +145,9 @@ export default function FellahQuestion({ lang = 'ar', persona = 'ami_ahmed' }: F
   const [playing, setPlaying] = useState(false);
   const [testId, setTestId] = useState('');
   const audioRef = useRef<HTMLAudioElement | null>(null);
+  const derniereDemande = useRef(0);
+  const [surParcelle, setSurParcelle] = useState(true);
+  const useParcelle = surParcelle && parcelle !== null;
   const supported = recognitionCtor() !== null;
   const testMode = new URLSearchParams(window.location.search).has('test-voix');
 
@@ -215,11 +241,13 @@ export default function FellahQuestion({ lang = 'ar', persona = 'ami_ahmed' }: F
 
   const ask = async (texte: string, voix?: { langue: string; t0: number }) => {
     const q = texte.trim();
-    if (!q || !scenario) return;
+    if (!q || (!scenario && !useParcelle)) return;
     stopAudio();
     setQuestion(q);
+    const demande = ++derniereDemande.current;
     try {
-      const r = await askFellah(q, scenario);
+      const r = await askFellah(q, scenario, useParcelle ? parcelle : null);
+      if (demande !== derniereDemande.current) return;
       setAnswer(r);
       setNotice('');
       if (voix) {
@@ -227,13 +255,13 @@ export default function FellahQuestion({ lang = 'ar', persona = 'ami_ahmed' }: F
           langue: voix.langue, transcription: q, intention: r.intention, culture: r.culture,
           reponse: r.texte, erreur: null, ms: Math.round(performance.now() - voix.t0),
         });
-        // Farmer spoke with voice -> AI automatically replies with voice!
+        // Question dite à voix haute -> réponse lue automatiquement (clips darija en arabe, voix de Mohamed sinon)
         setTimeout(() => {
-          playAnswerAudio(r);
+          lire(r);
         }, 150);
       }
     } catch {
-      setNotice(ui.cannotAnswer);
+      if (demande === derniereDemande.current) setNotice(ui.cannotAnswer);
     }
   };
 
@@ -271,7 +299,9 @@ export default function FellahQuestion({ lang = 'ar', persona = 'ami_ahmed' }: F
     rec.start();
   };
 
-  const clips = (answer?.phrases.flat().map((p) => p.audio).filter(Boolean) as string[]) || [];
+  const clipsDe = (ans: FellahAnswer | null) => (ans?.phrases.flat().map((p) => p.audio).filter(Boolean) as string[]) || [];
+  const clips = clipsDe(answer);
+  const synthese = !!answer?.phrases.flat().some((p) => p.audio && p.voix === 'synthese');
 
   const playWithTTS = (customText?: string) => {
     if (!('speechSynthesis' in window) || !answer) {
@@ -300,32 +330,37 @@ export default function FellahQuestion({ lang = 'ar', persona = 'ami_ahmed' }: F
     window.speechSynthesis.speak(utterance);
   };
 
+  const lire = (ans: FellahAnswer) => {
+    if (!isAr) {
+      playAnswerAudio(ans);
+      return;
+    }
+    // Darija : clips des phrases fixes, l'un après l'autre ; un clip absent ou illisible est sauté (texte seul)
+    const liste = clipsDe(ans);
+    if (liste.length === 0) return;
+    stopAudio();
+    let i = 0;
+    const next = () => {
+      if (i >= liste.length) {
+        stopAudio();
+        return;
+      }
+      const a = new Audio(liste[i++]);
+      audioRef.current = a;
+      a.onended = next;
+      a.onerror = next;
+      a.play().catch(next);
+    };
+    setPlaying(true);
+    next();
+  };
+
   const play = () => {
     if (playing) {
       stopAudio();
       return;
     }
-    if (!answer) return;
-
-    // If pre-recorded clips exist, play them; otherwise synthesize with neural voice
-    if (clips.length > 0) {
-      let i = 0;
-      const next = () => {
-        if (i >= clips.length) {
-          stopAudio();
-          return;
-        }
-        const a = new Audio(clips[i++]);
-        audioRef.current = a;
-        a.onended = next;
-        a.onerror = () => playAnswerAudio(answer);
-        a.play().catch(() => playAnswerAudio(answer));
-      };
-      setPlaying(true);
-      next();
-    } else {
-      playAnswerAudio(answer);
-    }
+    if (answer) lire(answer);
   };
 
   return (
@@ -341,7 +376,27 @@ export default function FellahQuestion({ lang = 'ar', persona = 'ami_ahmed' }: F
           </h4>
           <p className="text-xs text-[#7A6B53] mt-0.5">{ui.subtitle}</p>
         </div>
-        {setup && (
+        {parcelle && (
+          <div className="flex rounded-xl border border-[#DECAB3] overflow-hidden text-xs" role="group">
+            <button
+              type="button"
+              data-testid="mode-parcelle"
+              onClick={() => { setSurParcelle(true); setAnswer(null); }}
+              className={`px-3 py-2 cursor-pointer ${useParcelle ? 'bg-[#2D4A27] text-white' : 'bg-white text-[#1E331A]'}`}
+            >
+              {ui.myPlot}
+            </button>
+            <button
+              type="button"
+              data-testid="mode-demo"
+              onClick={() => { setSurParcelle(false); setAnswer(null); }}
+              className={`px-3 py-2 cursor-pointer ${!useParcelle ? 'bg-[#2D4A27] text-white' : 'bg-white text-[#1E331A]'}`}
+            >
+              {ui.examples}
+            </button>
+          </div>
+        )}
+        {setup && !useParcelle && (
           <select
             aria-label={ui.scenarioLabel}
             value={scenario}
@@ -356,6 +411,17 @@ export default function FellahQuestion({ lang = 'ar', persona = 'ami_ahmed' }: F
           </select>
         )}
       </div>
+
+      {useParcelle && parcelle && (
+        <div className="text-xs text-[#61513C] bg-[#EFE9DC] rounded-xl px-3 py-2" dir="ltr" data-testid="resume-parcelle">
+          Parcelle : {regionName || `${parcelle.latitude.toFixed(2)}, ${parcelle.longitude.toFixed(2)}`} · précédent {parcelle.previous_crop}
+          {' · '}{EAU_FR[parcelle.water_access] || 'eau inconnue'}
+          {parcelle.data_status === 'live' || parcelle.data_status === 'cached'
+            ? ` · NASA : ${parcelle.annual_rain_mm != null ? `${Math.round(parcelle.annual_rain_mm)} mm/an` : 'pluie inconnue'}, ${
+                parcelle.mean_annual_temp_c != null ? `${Math.round(parcelle.mean_annual_temp_c)} °C` : 'température inconnue'}`
+            : ' · climat NASA indisponible'}
+        </div>
+      )}
 
       {testMode && setup && (
         <select
@@ -442,26 +508,29 @@ export default function FellahQuestion({ lang = 'ar', persona = 'ami_ahmed' }: F
           <button
             type="button"
             onClick={play}
-            disabled={clips.length === 0}
+            disabled={isAr && clips.length === 0}
             className={`w-full py-3 rounded-2xl font-bold flex items-center justify-center gap-2 transition-all cursor-pointer ${
-              clips.length === 0 ? 'bg-[#EFE9DC] text-[#1E331A] opacity-50 cursor-not-allowed' : playing ? 'bg-[#8C3A27] text-white animate-pulse' : 'bg-[#2D4A27] hover:bg-[#1E331A] text-white shadow-md'
+              isAr && clips.length === 0 ? 'bg-[#EFE9DC] text-[#1E331A] opacity-50 cursor-not-allowed' : playing ? 'bg-[#8C3A27] text-white animate-pulse' : 'bg-[#2D4A27] hover:bg-[#1E331A] text-white shadow-md'
             }`}
           >
-            {clips.length === 0 ? <VolumeX className="w-5 h-5" /> : playing ? <VolumeX className="w-5 h-5" /> : <Volume2 className="w-5 h-5" />}
-            <span>{clips.length === 0 ? 'الصوت مازال ما تسجلش' : playing ? ui.stopVoice : ui.listenAnswer}</span>
-            {clips.length > 0 && (
-              <span className="text-[11px] font-normal opacity-80">
-                ({ui.recordedVoice})
-              </span>
-            )}
+            {isAr && clips.length === 0 ? <VolumeX className="w-5 h-5" /> : playing ? <VolumeX className="w-5 h-5" /> : <Volume2 className="w-5 h-5" />}
+            <span>{isAr && clips.length === 0 ? 'الصوت مازال ما تسجلش' : playing ? ui.stopVoice : ui.listenAnswer}</span>
           </button>
-
-          {setup && (
-            <div className="text-[10px] text-[#7A6B53] flex justify-between" dir="ltr">
-              <span>{setup.badge}</span>
-              <span>{answer.ms} ms</span>
+          {isAr && clips.length > 0 && (
+            <div className="text-[10px] text-[#7A6B53] text-center" data-testid={synthese ? 'voix-synthese' : 'voix-enregistree'}>
+              {synthese ? ui.aiVoice : ui.recordedVoice}
             </div>
           )}
+          {!isAr && <div className="text-[10px] text-[#7A6B53] text-center">{ui.synthesizedVoice}</div>}
+
+          <div className="text-[10px] text-[#7A6B53] flex justify-between" dir="ltr" data-testid="badge-source">
+            <span>
+              {answer.scenario === 'parcelle'
+                ? `Votre parcelle — moteur du Membre 2, climat NASA (${parcelle?.data_status ?? 'inconnu'})`
+                : setup?.badge}
+            </span>
+            <span>{answer.ms} ms</span>
+          </div>
         </div>
       )}
     </div>

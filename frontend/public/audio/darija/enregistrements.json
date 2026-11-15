@@ -1,0 +1,306 @@
+{
+  "hiba_alternative": {
+    "quand": "2026-11-15T17:11:23",
+    "source": "synthese",
+    "texte": "حسن ليك:",
+    "voix": "ar-MA-MounaNeural"
+  },
+  "hiba_conseil_changer": {
+    "quand": "2026-11-15T17:11:14",
+    "source": "synthese",
+    "texte": "هاد العام، الأحسن ليك تزرع:",
+    "voix": "ar-MA-MounaNeural"
+  },
+  "hiba_conseil_garder": {
+    "quand": "2026-11-15T17:11:12",
+    "source": "synthese",
+    "texte": "تقدر تبقى على البلان ديالك.",
+    "voix": "ar-MA-MounaNeural"
+  },
+  "hiba_culture_ble_dur": {
+    "quand": "2026-11-15T17:10:37",
+    "source": "synthese",
+    "texte": "القمح الصلب",
+    "voix": "ar-MA-MounaNeural"
+  },
+  "hiba_culture_ble_tendre": {
+    "quand": "2026-11-15T17:10:36",
+    "source": "synthese",
+    "texte": "القمح الطري",
+    "voix": "ar-MA-MounaNeural"
+  },
+  "hiba_culture_caprier": {
+    "quand": "2026-11-15T17:11:00",
+    "source": "synthese",
+    "texte": "الكبار",
+    "voix": "ar-MA-MounaNeural"
+  },
+  "hiba_culture_clementinier": {
+    "quand": "2026-11-15T17:11:02",
+    "source": "synthese",
+    "texte": "الكليمونتين",
+    "voix": "ar-MA-MounaNeural"
+  },
+  "hiba_culture_feve": {
+    "quand": "2026-11-15T17:10:43",
+    "source": "synthese",
+    "texte": "الفول",
+    "voix": "ar-MA-MounaNeural"
+  },
+  "hiba_culture_lentille": {
+    "quand": "2026-11-15T17:10:42",
+    "source": "synthese",
+    "texte": "العدس",
+    "voix": "ar-MA-MounaNeural"
+  },
+  "hiba_culture_non": {
+    "quand": "2026-11-15T17:11:20",
+    "source": "synthese",
+    "texte": "ماشي هاد العام.",
+    "voix": "ar-MA-MounaNeural"
+  },
+  "hiba_culture_oignon": {
+    "quand": "2026-11-15T17:10:44",
+    "source": "synthese",
+    "texte": "البصل",
+    "voix": "ar-MA-MounaNeural"
+  },
+  "hiba_culture_ok": {
+    "quand": "2026-11-15T17:11:18",
+    "source": "synthese",
+    "texte": "مزيان هاد العام.",
+    "voix": "ar-MA-MounaNeural"
+  },
+  "hiba_culture_olivier": {
+    "quand": "2026-11-15T17:10:48",
+    "source": "synthese",
+    "texte": "الزيتون",
+    "voix": "ar-MA-MounaNeural"
+  },
+  "hiba_culture_oranger": {
+    "quand": "2026-11-15T17:10:49",
+    "source": "synthese",
+    "texte": "الليمون",
+    "voix": "ar-MA-MounaNeural"
+  },
+  "hiba_culture_orge": {
+    "quand": "2026-11-15T17:10:39",
+    "source": "synthese",
+    "texte": "الشعير",
+    "voix": "ar-MA-MounaNeural"
+  },
+  "hiba_culture_pas_evaluee": {
+    "quand": "2026-11-15T17:11:21",
+    "source": "synthese",
+    "texte": "ما عندنا ما نقولو ليك فهاد الأرض.",
+    "voix": "ar-MA-MounaNeural"
+  },
+  "hiba_culture_pois_chiche": {
+    "quand": "2026-11-15T17:10:40",
+    "source": "synthese",
+    "texte": "الحمص",
+    "voix": "ar-MA-MounaNeural"
+  },
+  "hiba_culture_pomme_de_terre": {
+    "quand": "2026-11-15T17:10:46",
+    "source": "synthese",
+    "texte": "البطاطا",
+    "voix": "ar-MA-MounaNeural"
+  },
+  "hiba_eau_bour": {
+    "quand": "2026-11-15T17:11:59",
+    "source": "synthese",
+    "texte": "هاد النصيحة على أرض بور، بلا سقي.",
+    "voix": "ar-MA-MounaNeural"
+  },
+  "hiba_eau_inconnue": {
+    "quand": "2026-11-15T17:12:06",
+    "source": "synthese",
+    "texte": "ما عرفناش واش عندك السقي.",
+    "voix": "ar-MA-MounaNeural"
+  },
+  "hiba_eau_sqi": {
+    "quand": "2026-11-15T17:12:02",
+    "source": "synthese",
+    "texte": "هاد النصيحة على أرض فيها السقي.",
+    "voix": "ar-MA-MounaNeural"
+  },
+  "hiba_et": {
+    "quand": "2026-11-15T17:11:03",
+    "source": "synthese",
+    "texte": "و",
+    "voix": "ar-MA-MounaNeural"
+  },
+  "hiba_fiab_basse": {
+    "quand": "2026-11-15T17:12:11",
+    "source": "synthese",
+    "texte": "كتنقصنا بزاف ديال المعلومات.",
+    "voix": "ar-MA-MounaNeural"
+  },
+  "hiba_fiab_haute": {
+    "quand": "2026-11-15T17:12:08",
+    "source": "synthese",
+    "texte": "عندنا تقريبا كلشي باش ننصحوك.",
+    "voix": "ar-MA-MounaNeural"
+  },
+  "hiba_fiab_moyenne": {
+    "quand": "2026-11-15T17:12:09",
+    "source": "synthese",
+    "texte": "كتنقصنا شي معلومات.",
+    "voix": "ar-MA-MounaNeural"
+  },
+  "hiba_hors_sujet": {
+    "quand": "2026-11-15T17:12:12",
+    "source": "synthese",
+    "texte": "هادي ما عنديش عليها جواب، سول المستشار.",
+    "voix": "ar-MA-MounaNeural"
+  },
+  "hiba_mostachar": {
+    "quand": "2026-11-15T17:10:27",
+    "source": "synthese",
+    "texte": "سول المستشار قبل ما تزرع.",
+    "voix": "ar-MA-MounaNeural"
+  },
+  "hiba_pluie_inconnue": {
+    "quand": "2026-11-15T17:12:04",
+    "source": "synthese",
+    "texte": "ما عندناش معلومات على الشتا عندكم.",
+    "voix": "ar-MA-MounaNeural"
+  },
+  "hiba_pluie_optimal": {
+    "quand": "2026-11-15T17:11:48",
+    "source": "synthese",
+    "texte": "الشتا اللي كتطيح عندكم كافية لهاد الزريعة.",
+    "voix": "ar-MA-MounaNeural"
+  },
+  "hiba_pluie_out": {
+    "quand": "2026-11-15T17:11:51",
+    "source": "synthese",
+    "texte": "الشتا ما كتصلاحش لهاد الزريعة.",
+    "voix": "ar-MA-MounaNeural"
+  },
+  "hiba_pluie_tolerable": {
+    "quand": "2026-11-15T17:11:49",
+    "source": "synthese",
+    "texte": "الشتا ماشي هي هاديك لهاد الزريعة، ولكن كتدوز.",
+    "voix": "ar-MA-MounaNeural"
+  },
+  "hiba_raison_bonne": {
+    "quand": "2026-11-15T17:11:44",
+    "source": "synthese",
+    "texte": "هاد الزريعة كتجي مزيانة مع الأرض ديالك ومع الشتا.",
+    "voix": "ar-MA-MounaNeural"
+  },
+  "hiba_raison_chaleur": {
+    "quand": "2026-11-15T17:11:31",
+    "source": "synthese",
+    "texte": "السخانة بزاف على هاد الزريعة.",
+    "voix": "ar-MA-MounaNeural"
+  },
+  "hiba_raison_froid": {
+    "quand": "2026-11-15T17:11:33",
+    "source": "synthese",
+    "texte": "البرد بزاف على هاد الزريعة.",
+    "voix": "ar-MA-MounaNeural"
+  },
+  "hiba_raison_historique_absent": {
+    "quand": "2026-11-15T17:11:29",
+    "source": "synthese",
+    "texte": "ما عرفناش شنو كنتي زارع قبل، داكشي علاش النصيحة ماشي مضمونة بزاف.",
+    "voix": "ar-MA-MounaNeural"
+  },
+  "hiba_raison_legumineuse": {
+    "quand": "2026-11-15T17:11:46",
+    "source": "synthese",
+    "texte": "القطاني كتعاون الأرض ترتاح.",
+    "voix": "ar-MA-MounaNeural"
+  },
+  "hiba_raison_meme_culture": {
+    "quand": "2026-11-15T17:11:25",
+    "source": "synthese",
+    "texte": "زرعتيها العام اللي فات، خاصك تبدل.",
+    "voix": "ar-MA-MounaNeural"
+  },
+  "hiba_raison_meme_famille": {
+    "quand": "2026-11-15T17:11:27",
+    "source": "synthese",
+    "texte": "زرعتي بحالها العام اللي فات، خاصك تبدل.",
+    "voix": "ar-MA-MounaNeural"
+  },
+  "hiba_raison_parcelle_inconnue": {
+    "quand": "2026-11-15T17:12:14",
+    "source": "synthese",
+    "texte": "ما عندنا حتى معلومة على هاد الأرض.",
+    "voix": "ar-MA-MounaNeural"
+  },
+  "hiba_raison_ph": {
+    "quand": "2026-11-15T17:11:42",
+    "source": "synthese",
+    "texte": "الأرض ديالك ما جاياش مزيان مع هاد الزريعة.",
+    "voix": "ar-MA-MounaNeural"
+  },
+  "hiba_raison_pluie_peu": {
+    "quand": "2026-11-15T17:11:35",
+    "source": "synthese",
+    "texte": "الشتا قليلة على هاد الزريعة.",
+    "voix": "ar-MA-MounaNeural"
+  },
+  "hiba_raison_pluie_trop": {
+    "quand": "2026-11-15T17:11:38",
+    "source": "synthese",
+    "texte": "الشتا بزاف على هاد الزريعة.",
+    "voix": "ar-MA-MounaNeural"
+  },
+  "hiba_raison_sel": {
+    "quand": "2026-11-15T17:11:40",
+    "source": "synthese",
+    "texte": "الأرض مالحة بزاف على هاد الزريعة.",
+    "voix": "ar-MA-MounaNeural"
+  },
+  "hiba_rien_conseille": {
+    "quand": "2026-11-15T17:11:16",
+    "source": "synthese",
+    "texte": "ما لقينا حتى زريعة كتصلاح لهاد الأرض هاد العام.",
+    "voix": "ar-MA-MounaNeural"
+  },
+  "hiba_sol_limite": {
+    "quand": "2026-11-15T17:11:55",
+    "source": "synthese",
+    "texte": "الأرض ديالك كتدوز مع هاد الزريعة، ولكن ماشي هي هاديك.",
+    "voix": "ar-MA-MounaNeural"
+  },
+  "hiba_sol_non": {
+    "quand": "2026-11-15T17:11:57",
+    "source": "synthese",
+    "texte": "الأرض ديالك ما كتصلاحش لهاد الزريعة.",
+    "voix": "ar-MA-MounaNeural"
+  },
+  "hiba_sol_ok": {
+    "quand": "2026-11-15T17:11:53",
+    "source": "synthese",
+    "texte": "الأرض ديالك كتصلاح لهاد الزريعة.",
+    "voix": "ar-MA-MounaNeural"
+  },
+  "hiba_verdict_non": {
+    "quand": "2026-11-15T17:11:08",
+    "source": "synthese",
+    "texte": "البلان ديالك ما مزيانش هاد العام.",
+    "voix": "ar-MA-MounaNeural"
+  },
+  "hiba_verdict_non_evalue": {
+    "quand": "2026-11-15T17:11:10",
+    "source": "synthese",
+    "texte": "ما قدرناش نشوفو البلان ديالك.",
+    "voix": "ar-MA-MounaNeural"
+  },
+  "hiba_verdict_partiel": {
+    "quand": "2026-11-15T15:40:22",
+    "texte": "شي حاجة فالبلان ديالك مزيانة، وشي حاجة لا."
+  },
+  "hiba_verdict_viable": {
+    "quand": "2026-11-15T17:11:05",
+    "source": "synthese",
+    "texte": "البلان ديالك مزيان.",
+    "voix": "ar-MA-MounaNeural"
+  }
+}

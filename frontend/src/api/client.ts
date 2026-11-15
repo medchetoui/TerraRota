@@ -208,11 +208,25 @@ export interface FellahPhrase {
   darija: string;
   fr: string;
   audio: string | null;
+  voix?: 'synthese' | 'humaine' | null;
+}
+
+export interface FellahParcelle {
+  latitude: number;
+  longitude: number;
+  previous_crop: string;
+  water_access: string;
+  soil_type: string;
+  field_size_ha: number | null;
+  data_status: string;
+  annual_rain_mm: number | null;
+  mean_annual_temp_c: number | null;
 }
 
 export interface FellahAnswer {
   question: string;
   scenario: string;
+  parcelle: Record<string, string | number | boolean> | null;
   intention: string;
   culture: string | null;
   phrases: FellahPhrase[][];
@@ -242,15 +256,64 @@ export async function getFellahSetup(): Promise<FellahSetup> {
   return request<FellahSetup>('/fellah/scenarios/');
 }
 
-export async function askFellah(question: string, scenario: string): Promise<FellahAnswer> {
+export async function askFellah(
+  question: string,
+  scenario: string,
+  parcelle?: FellahParcelle | null,
+): Promise<FellahAnswer> {
   return request<FellahAnswer>('/fellah/question/', {
     method: 'POST',
-    body: JSON.stringify({ question, scenario }),
+    body: JSON.stringify(parcelle ? { question, parcelle } : { question, scenario }),
   });
 }
 
 export async function logFellahVoiceTry(entry: Record<string, unknown>): Promise<void> {
   await request('/fellah/journal/', { method: 'POST', body: JSON.stringify(entry) });
+}
+
+// ─── Préparation de la démo (développement seulement) ───
+
+export interface FellahPhraseEtat {
+  id: string;
+  darija: string;
+  fr: string;
+  statut: string;
+  texte_avant: string;
+  demo: boolean;
+  present: boolean;
+  a_refaire: boolean;
+  voix?: 'synthese' | 'humaine' | null;
+}
+
+export interface FellahValidation {
+  id: string;
+  darija: string;
+  statut: string;
+  modifiee: boolean;
+  a_refaire: boolean;
+  demo: { questions: number; type_correct: number; reponses_avec_chiffres: number };
+}
+
+export async function getFellahPhrases(): Promise<{ phrases: FellahPhraseEtat[]; audio_url: string }> {
+  return request('/fellah/phrases/');
+}
+
+export async function saveFellahClip(id: string, wav: Blob): Promise<{ status: string; audio: string }> {
+  const response = await fetch(`${BASE_URL}/fellah/clips/${encodeURIComponent(id)}/`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'audio/wav' },
+    body: wav,
+  });
+  const data = await response.json();
+  if (!response.ok) throw { status: response.status, data };
+  return data;
+}
+
+export async function validateFellahPhrase(id: string, texte_darija?: string): Promise<FellahValidation> {
+  return request<FellahValidation>(`/fellah/phrases/${encodeURIComponent(id)}/`, {
+    method: 'POST',
+    body: JSON.stringify(texte_darija === undefined ? { action: 'ok' } : { action: 'modifier', texte_darija }),
+  });
 }
 
 // ─── Real-Time AI Agricultural Advisor (Context-Aware) ───────

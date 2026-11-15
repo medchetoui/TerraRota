@@ -1232,7 +1232,21 @@ useEffect(() => {
 
                 {/* ─── ROUTE 4: "/advisor" (المرشد الفلاحي الصوتي الذكي) ─── */}
                 <Route path="/advisor" element={
-                  <AdvisorPage lang={lang} />
+                  <AdvisorPage
+                    lang={lang}
+                    regionName={activeRegionName}
+                    parcelle={apiResponse && apiResponse.status === 'ok' ? {
+                      latitude: activeLat,
+                      longitude: activeLon,
+                      previous_crop: previousCrop,
+                      water_access: waterAccess,
+                      soil_type: soilType,
+                      field_size_ha: parseFloat(fieldSize) || null,
+                      data_status: apiResponse.data_status,
+                      annual_rain_mm: apiResponse.indicators?.annual_rain_mm ?? null,
+                      mean_annual_temp_c: apiResponse.indicators?.mean_annual_temp_c ?? null,
+                    } : null}
+                  />
                 } />
 
                 {/* ─── ROUTE 5: "/nasa" (مرصد ناسا المناخي والتتبع) ─── */}

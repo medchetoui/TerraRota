@@ -1,5 +1,5 @@
 {
- "_source": "source : Membre 2 (moteur/scenarios/scenarios.json et engine.report.analyze, commit 191d956 2026-11-14 docs: update README with full system architecture, NASA integration, and quickstart)",
+ "_source": "source : Membre 2 (moteur/scenarios/scenarios.json et engine.report.analyze, commit 6e22386 2026-11-15 moteur: mapping, fenêtres, what-if, explain et tests)",
  "annee": 2026,
  "cultures": {
   "ble_tendre": {
@@ -184,6 +184,7 @@
           ]
          }
         ],
+        "window": null,
         "alternatives": [
          {
           "crop": "pois_chiche",
@@ -274,6 +275,7 @@
           ]
          }
         ],
+        "window": null,
         "alternatives": [
          {
           "crop": "lentille",
@@ -473,6 +475,7 @@
           ]
          }
         ],
+        "window": null,
         "alternatives": []
        },
        {
@@ -550,6 +553,7 @@
           ]
          }
         ],
+        "window": null,
         "alternatives": []
        },
        {
@@ -627,6 +631,7 @@
           ]
          }
         ],
+        "window": null,
         "alternatives": []
        }
       ],
@@ -802,6 +807,7 @@
           ]
          }
         ],
+        "window": null,
         "alternatives": []
        },
        {
@@ -884,6 +890,7 @@
           ]
          }
         ],
+        "window": null,
         "alternatives": []
        },
        {
@@ -966,6 +973,7 @@
           ]
          }
         ],
+        "window": null,
         "alternatives": []
        }
       ],
@@ -1181,6 +1189,7 @@
           ]
          }
         ],
+        "window": null,
         "alternatives": [
          {
           "crop": "ble_dur",
@@ -1270,6 +1279,7 @@
           ]
          }
         ],
+        "window": null,
         "alternatives": []
        }
       ],
@@ -1448,6 +1458,7 @@
           ]
          }
         ],
+        "window": null,
         "alternatives": []
        },
        {
@@ -1530,6 +1541,7 @@
           ]
          }
         ],
+        "window": null,
         "alternatives": []
        },
        {
@@ -1612,6 +1624,7 @@
           ]
          }
         ],
+        "window": null,
         "alternatives": []
        }
       ],
@@ -1792,6 +1805,7 @@
           ]
          }
         ],
+        "window": null,
         "alternatives": []
        },
        {
@@ -1869,6 +1883,7 @@
           ]
          }
         ],
+        "window": null,
         "alternatives": []
        },
        {
@@ -1946,6 +1961,7 @@
           ]
          }
         ],
+        "window": null,
         "alternatives": []
        }
       ],
@@ -2146,6 +2162,7 @@
           ]
          }
         ],
+        "window": null,
         "alternatives": []
        },
        {
@@ -2223,6 +2240,7 @@
           ]
          }
         ],
+        "window": null,
         "alternatives": []
        }
       ],
@@ -2393,6 +2411,7 @@
           ]
          }
         ],
+        "window": null,
         "alternatives": []
        },
        {
@@ -2470,6 +2489,7 @@
           ]
          }
         ],
+        "window": null,
         "alternatives": []
        },
        {
@@ -2547,6 +2567,7 @@
           ]
          }
         ],
+        "window": null,
         "alternatives": []
        }
       ],
@@ -2722,6 +2743,7 @@
           ]
          }
         ],
+        "window": null,
         "alternatives": []
        },
        {
@@ -2804,6 +2826,7 @@
           ]
          }
         ],
+        "window": null,
         "alternatives": []
        },
        {
@@ -2886,6 +2909,7 @@
           ]
          }
         ],
+        "window": null,
         "alternatives": []
        }
       ],
@@ -3096,6 +3120,7 @@
           ]
          }
         ],
+        "window": null,
         "alternatives": [
          {
           "crop": "orge",
@@ -3186,6 +3211,7 @@
           ]
          }
         ],
+        "window": null,
         "alternatives": []
        }
       ],
@@ -3350,6 +3376,7 @@
           ]
          }
         ],
+        "window": null,
         "alternatives": []
        },
        {
@@ -3432,6 +3459,7 @@
           ]
          }
         ],
+        "window": null,
         "alternatives": []
        },
        {
@@ -3514,6 +3542,7 @@
           ]
          }
         ],
+        "window": null,
         "alternatives": []
        }
       ],
@@ -3717,6 +3746,7 @@
           ]
          }
         ],
+        "window": null,
         "alternatives": [
          {
           "crop": "orge",
@@ -3896,6 +3926,7 @@
           ]
          }
         ],
+        "window": null,
         "alternatives": []
        },
        {
@@ -3973,6 +4004,7 @@
           ]
          }
         ],
+        "window": null,
         "alternatives": []
        },
        {
@@ -4050,6 +4082,7 @@
           ]
          }
         ],
+        "window": null,
         "alternatives": []
        }
       ],
@@ -4310,6 +4343,7 @@
           ]
          }
         ],
+        "window": null,
         "alternatives": []
        },
        {
@@ -4394,6 +4428,7 @@
           ]
          }
         ],
+        "window": null,
         "alternatives": []
        },
        {
@@ -4478,6 +4513,7 @@
           ]
          }
         ],
+        "window": null,
         "alternatives": []
        }
       ],
@@ -4674,6 +4710,7 @@
           ]
          }
         ],
+        "window": null,
         "alternatives": []
        },
        {
@@ -4751,6 +4788,7 @@
           ]
          }
         ],
+        "window": null,
         "alternatives": []
        },
        {
@@ -4828,6 +4866,7 @@
           ]
          }
         ],
+        "window": null,
         "alternatives": []
        }
       ],
@@ -5088,6 +5127,7 @@
           ]
          }
         ],
+        "window": null,
         "alternatives": []
        },
        {
@@ -5172,6 +5212,7 @@
           ]
          }
         ],
+        "window": null,
         "alternatives": []
        },
        {
@@ -5256,6 +5297,7 @@
           ]
          }
         ],
+        "window": null,
         "alternatives": []
        }
       ],
@@ -5452,6 +5494,7 @@
           ]
          }
         ],
+        "window": null,
         "alternatives": []
        },
        {
@@ -5529,6 +5572,7 @@
           ]
          }
         ],
+        "window": null,
         "alternatives": []
        },
        {
@@ -5606,6 +5650,7 @@
           ]
          }
         ],
+        "window": null,
         "alternatives": []
        }
       ],
@@ -5811,6 +5856,7 @@
           ]
          }
         ],
+        "window": null,
         "alternatives": [
          {
           "crop": "orge",
@@ -5963,6 +6009,7 @@
           ]
          }
         ],
+        "window": null,
         "alternatives": []
        }
       ],

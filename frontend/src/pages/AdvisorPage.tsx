@@ -4,6 +4,7 @@ import { FarmerContextPanel } from '../components/FarmerContextPanel';
 import { VoiceCallScreen } from '../components/VoiceCallScreen';
 import { AdvisorChat } from '../components/AdvisorChat';
 import FellahQuestion from '../components/FellahQuestion';
+import type { FellahParcelle } from '../api/client';
 import {
   getAdvisorContext,
   askAdvisor,
@@ -21,9 +22,11 @@ import type {
 
 interface AdvisorPageProps {
   lang: 'ar' | 'fr' | 'en';
+  parcelle?: FellahParcelle | null;
+  regionName?: string;
 }
 
-export const AdvisorPage: React.FC<AdvisorPageProps> = ({ lang }) => {
+export const AdvisorPage: React.FC<AdvisorPageProps> = ({ lang, parcelle = null, regionName = '' }) => {
   const [persona, setPersona] = useState<'ami_ahmed' | 'mi_fatima'>('ami_ahmed');
   const [context, setContext] = useState<AdvisorContextData | null>(null);
   const [isCallActive, setIsCallActive] = useState(false);
@@ -307,7 +310,7 @@ export const AdvisorPage: React.FC<AdvisorPageProps> = ({ lang }) => {
       />
 
       {/* Classic Darija Quick Question Box (Member 3 component & test harness compatibility) */}
-      <FellahQuestion lang={lang} persona={persona} />
+      <FellahQuestion lang={lang} persona={persona} parcelle={parcelle} regionName={regionName} />
 
       {/* Interactive AI Voice Call Screen (if active) */}
       {isCallActive && (

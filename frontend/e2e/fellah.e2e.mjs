@@ -2,16 +2,20 @@
 // DevTools (WebSocket intégré à Node, aucune dépendance).
 //
 // Prérequis : backend (python manage.py runserver 8000) et frontend (npm run dev) lancés.
-// L'appel /api/v1/recommendations/ (qui interroge NASA POWER en ligne) est bloqué pendant le test.
+// L'appel /api/v1/recommendations/ (qui interroge NASA POWER en ligne) n'atteint jamais le backend : il est bloqué,
+// ou remplacé par une réponse fictive (FAUSSE_RECO) pour tester les questions sur la parcelle du formulaire.
 // Utilisation :
 //   npm run test:e2e
 //   npm run test:e2e -- --wav chemin/question.wav   (micro simulé ; expérimental : dans Chrome sans interface,
 //                                                    la reconnaissance vocale n'entend en général rien)
 // Variables : E2E_URL (défaut http://localhost:5173), CHROME_PATH.
 import { spawn } from 'node:child_process';
-import { existsSync, mkdtempSync, rmSync } from 'node:fs';
+import { existsSync, mkdtempSync, readFileSync, rmSync, writeFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
-import { join, resolve } from 'node:path';
+import { dirname, join, resolve } from 'node:path';
+import { fileURLToPath } from 'node:url';
+
+const AUDIO_DIR = join(dirname(fileURLToPath(import.meta.url)), '..', 'public', 'audio', 'darija');
 
 const args = process.argv.slice(2);
 const opt = (nom) => (args.includes(nom) ? args[args.indexOf(nom) + 1] : undefined);
@@ -31,9 +35,10 @@ const profil = mkdtempSync(join(tmpdir(), 'fellah-e2e-'));
 const port = 9300 + Math.floor(Math.random() * 500);
 const flags = [
   '--headless=new', `--remote-debugging-port=${port}`, `--user-data-dir=${profil}`, '--no-first-run',
-  '--use-fake-ui-for-media-stream', '--lang=ar', '--autoplay-policy=no-user-gesture-required',
+  '--use-fake-ui-for-media-stream', '--use-fake-device-for-media-stream', '--lang=ar',
+  '--autoplay-policy=no-user-gesture-required',
 ];
-if (WAV) flags.push('--use-fake-device-for-media-stream', `--use-file-for-fake-audio-capture=${resolve(WAV)}`);
+if (WAV) flags.push(`--use-file-for-fake-audio-capture=${resolve(WAV)}`);
 const proc = spawn(chrome, [...flags, 'about:blank'], { stdio: 'ignore' });
 
 const attendre = (ms) => new Promise((r) => setTimeout(r, ms));
@@ -41,7 +46,7 @@ let ws;
 let id = 0;
 const enAttente = new Map();
 let erreursConsole = [];
-const ATTENDUES = /recommendations|NASA API query error|ERR_BLOCKED_BY_CLIENT/;
+const ATTENDUES = /recommendations|NASA API query error|ERR_BLOCKED_BY_CLIENT|fellah\/phrases\/hiba_et\/|\/api\/v1\/advisor\//;
 
 function cdp(method, params = {}) {
   return new Promise((ok, ko) => {
@@ -107,6 +112,16 @@ async function suggestionsMarchent() {
   }
   return { ok: textes.length > 0, detail: `${textes.length} suggestions` };
 }
+const FAUSSE_REPONSE_RECO = {
+  status: 'ok', data_status: 'live', provenance: null,
+  indicators: { annual_rain_mm: 350, mean_annual_temp_c: 18, gdd_base10: 2100, frost_days_per_year: 6,
+    aridity_index: 0.25, dry_months: 6, missing_data_pct: 0 },
+  recommendations: [{ crop_id: 'barley', crop_name_fr: 'Orge', crop_name_ar: 'الشعير', crop_name_en: 'Barley',
+    crop_category: 'cereal', crop_emoji: '🌾', score: 80, rank: 1, eligible: true, reasons: ['test'],
+    reasons_fr: ['test'], reasons_en: ['test'], cautions: [], cautions_fr: [], cautions_en: [] }],
+  abstained_crops: [], abstention_reason: null, insufficient_data_reason: null,
+};
+let recommandation = 'bloquee';
 const erreursInattendues = () => erreursConsole.filter((e) => !ATTENDUES.test(e));
 const FAUSSE_RECO = (erreur) => `window.SpeechRecognition = undefined;
   window.webkitSpeechRecognition = class { start() { setTimeout(() => { this.onerror && this.onerror({ error: '${erreur}' }); this.onend && this.onend(); }, 50); } stop() {} };`;
@@ -129,6 +144,17 @@ try {
       const { ok, ko } = enAttente.get(d.id);
       enAttente.delete(d.id);
       d.error ? ko(new Error(d.error.message)) : ok(d.result);
+    } else if (d.method === 'Fetch.requestPaused') {
+      const requestId = d.params.requestId;
+      if (d.params.request.url.includes('/api/v1/advisor/')) {
+        cdp('Fetch.failRequest', { requestId, errorReason: 'BlockedByClient' }).catch(() => undefined);
+      } else if (recommandation === 'fictive') {
+        cdp('Fetch.fulfillRequest', { requestId, responseCode: 200,
+          responseHeaders: [{ name: 'Content-Type', value: 'application/json' }],
+          body: Buffer.from(JSON.stringify(FAUSSE_REPONSE_RECO)).toString('base64') }).catch(() => undefined);
+      } else {
+        cdp('Fetch.failRequest', { requestId, errorReason: 'BlockedByClient' }).catch(() => undefined);
+      }
     } else if (d.method === 'Runtime.exceptionThrown') {
       erreursConsole.push('exception : ' + (d.params.exceptionDetails.exception?.description || d.params.exceptionDetails.text));
     } else if (d.method === 'Runtime.consoleAPICalled' && d.params.type === 'error') {
@@ -141,7 +167,7 @@ try {
   await cdp('Runtime.enable');
   await cdp('Log.enable');
   await cdp('Network.enable');
-  await cdp('Network.setBlockedURLs', { urls: ['*/api/v1/recommendations*'] });
+  await cdp('Fetch.enable', { patterns: [{ urlPattern: '*/api/v1/recommendations*' }, { urlPattern: '*/api/v1/advisor/*' }] });
 
   // 1. Page /advisor : chargement, champ texte, micro, réponses
   await ouvrirAdvisor();
@@ -179,6 +205,21 @@ try {
     await attendreQue(`window.__clipsJoues.length >= ${urls.length}`, 20000).catch(() => undefined);
     const joues = await evaluer(`window.__clipsJoues.map((u) => new URL(u).pathname)`);
     verifier('🔊 joue les clips présents, dans l’ordre', JSON.stringify(joues) === JSON.stringify(urls), joues.join(', '));
+    for (const q of ['شنو نزرع هاد العام؟', 'علاش هاد النصيحة؟', 'واش خاصني نسقي؟', 'واش نتيق فهاد النصيحة؟', 'شحال غادي نحصد؟']) {
+      const attendus = await (await fetch(`${BASE}/api/v1/fellah/question/`, { method: 'POST', headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ question: q }) })).json().then((r) => ({ urls: r.phrases.flat().map((p) => p.audio).filter(Boolean),
+          synthese: r.phrases.flat().some((p) => p.audio && p.voix === 'synthese') }));
+      await poserEcrit(q);
+      await evaluer(`window.__clipsJoues = []`);
+      await evaluer(`[...document.querySelectorAll('[data-testid=fellah-reponse] button')].at(-1).click()`);
+      await attendreQue(`window.__clipsJoues.length >= ${attendus.urls.length}`, 30000).catch(() => undefined);
+      const lus = await evaluer(`window.__clipsJoues.map((u) => new URL(u).pathname)`);
+      const etiquette = await evaluer(`document.querySelector('[data-testid=voix-synthese]')?.innerText || ''`);
+      verifier(`🔊 « ${q} » : ${attendus.urls.length} clip(s) joués dans l’ordre${attendus.synthese ? ' + étiquette « voix de synthèse »' : ''}`,
+        attendus.urls.length > 0 && JSON.stringify(lus) === JSON.stringify(attendus.urls) && (!attendus.synthese || etiquette.includes('voix de synthèse')),
+        etiquette);
+      await evaluer(`[...document.querySelectorAll('[data-testid=fellah-reponse] button')].at(-1).innerText.includes('إيقاف') && [...document.querySelectorAll('[data-testid=fellah-reponse] button')].at(-1).click()`);
+    }
     const rep = await fetch(BASE + urls[0]);
     verifier('clip servi en audio/wav', rep.ok && (rep.headers.get('content-type') || '').includes('audio/wav'), rep.headers.get('content-type'));
   } else {
@@ -198,6 +239,77 @@ try {
     verifier(`micro en erreur « ${erreur} » → message clair`, notice.includes(message) && notice.includes('اكتب سؤالك'), notice);
     verifier(`… puis la question écrite marche`, (await poserEcrit('علاش هاد النصيحة؟')).length > 0);
   }
+
+  // 2b. Questions sur la parcelle du formulaire (réponse de /recommendations fictive : 350 mm, 18 °C)
+  recommandation = 'fictive';
+  await ouvrirAdvisor();
+  await attendreQue(`!!document.querySelector('[data-testid=resume-parcelle]')`);
+  verifier('parcelle du formulaire : mode « الأرض ديالي » actif et résumé affiché',
+    (await evaluer(`document.querySelector('[data-testid=resume-parcelle]').innerText`)).includes('350 mm'));
+  const surParcelle = await poserEcrit('شنو نزرع هاد العام؟');
+  verifier('… réponse calculée sur la parcelle, sans chiffre', surParcelle.length > 0 && !/[0-9٠-٩]/.test(surParcelle), surParcelle);
+  const sol = await poserEcrit('واش الأرض ديالي مزيانة؟');
+  verifier('… sol inconnu du formulaire → « aucune information », pas de valeur inventée', sol.includes('ما عندنا حتى معلومة'), sol);
+  verifier('… badge « Votre parcelle », pas « données d’exemple »', (await evaluer(
+    `document.querySelector('[data-testid=badge-source]').innerText`)).startsWith('Votre parcelle'));
+  await evaluer(`document.querySelector('[data-testid=mode-demo]').click()`);
+  await attendreQue(`!document.querySelector('[data-testid=resume-parcelle]')`);
+  const demo = await poserEcrit('شنو نزرع هاد العام؟');
+  verifier('… bascule « أمثلة » → scénario de démo, autre réponse', demo !== surParcelle && demo.length > 0, demo);
+  verifier('… sans erreur dans la console', erreursInattendues().length === 0, erreursInattendues().join(' | '));
+  recommandation = 'bloquee';
+
+  // 2c. Préparation de la démo (développement) : enregistrer un clip, relire les phrases.
+  // Le test n'utilise qu'une phrase SANS clip et l'efface ensuite ; la relecture n'envoie qu'une correction refusée.
+  await ouvrir('/advisor?enregistrer');
+  await attendreQue(`!!document.querySelector('[data-testid=compteur]')`);
+  verifier('?enregistrer : compteur « X / 21 » des clips de la démo',
+    / \/ 21$/.test(await evaluer(`document.querySelector('[data-testid=compteur]').innerText`)));
+  verifier('… phrase en grand, nom de fichier affiché', /^hiba_\w+\.wav$/.test(await evaluer(
+    `document.querySelector('[data-testid=nom-fichier]').innerText`)) && (await evaluer(`document.querySelector('[data-testid=phrase]').innerText`)).length > 0);
+  await evaluer(`document.querySelector('[data-testid=enregistrement] input[type=checkbox]').click()`);
+  // phrase hors démo SANS enregistrement humain (absente ou en voix de synthèse) ; le clip d'origine est remis à l'identique
+  const libre = await evaluer(`fetch('/api/v1/fellah/phrases/').then((r) => r.json()).then((d) => d.phrases.find((p) => !p.demo && (!p.present || p.voix === 'synthese'))?.id || '')`);
+  if (libre) {
+    const manifeste = join(AUDIO_DIR, 'enregistrements.json');
+    const avantManifeste = existsSync(manifeste) ? readFileSync(manifeste) : null;
+    const fichier = join(AUDIO_DIR, `${libre}.wav`);
+    const avantClip = existsSync(fichier) ? readFileSync(fichier) : null;
+    try {
+      await evaluer(`[...document.querySelectorAll('[data-testid=enregistrement] button[title]')].find((b) => b.title === ${JSON.stringify(libre)}).click()`);
+      await attendreQue(`document.querySelector('[data-testid=nom-fichier]').innerText === ${JSON.stringify(libre + '.wav')}`);
+      const bouton = (texte) => `[...document.querySelectorAll('[data-testid=enregistrement] button')].find((b) => b.innerText.includes(${JSON.stringify(texte)}))`;
+      await evaluer(`${bouton('Enregistrer')}.click()`);
+      await attendre(1500);
+      await evaluer(`${bouton('Arrêter')}.click()`);
+      await attendreQue(`!${bouton('Garder')}.disabled`);
+      await evaluer(`${bouton('Garder')}.click()`);
+      await attendreQue(`(document.querySelector('[data-testid=enregistrement] [role=status]')?.innerText || '').length > 0`);
+      const statut = await evaluer(`document.querySelector('[data-testid=enregistrement] [role=status]').innerText`);
+      verifier('… ⏺ ⏹ ✓ : prise convertie en WAV et enregistrée sous le bon nom', statut.includes(`${libre}.wav`) && existsSync(fichier), statut);
+      const entete = existsSync(fichier) ? readFileSync(fichier) : Buffer.alloc(44);
+      verifier('… fichier WAV mono 16 bits 16000 Hz', entete.toString('ascii', 0, 4) === 'RIFF' && entete.readUInt16LE(22) === 1
+        && entete.readUInt32LE(24) === 16000 && entete.readUInt16LE(34) === 16);
+    } finally {
+      if (avantClip) writeFileSync(fichier, avantClip); else rmSync(fichier, { force: true });
+      if (avantManifeste) writeFileSync(manifeste, avantManifeste); else rmSync(manifeste, { force: true });
+    }
+  } else {
+    console.log('—    toutes les phrases ont déjà un clip : enregistrement non testé (aucun fichier modifié)');
+  }
+  await ouvrir('/advisor?relire');
+  await attendreQue(`!!document.querySelector('[data-testid=compteur-valides]')`);
+  const nbPhrases = await evaluer(`document.querySelectorAll('[data-testid^=phrase-]').length`);
+  verifier('?relire : chaque phrase avec son sens et ✓ OK / ✎ Modifier', nbPhrases >= 21
+    && await evaluer(`!!document.querySelector('[data-testid=ok-hiba_et]') && !!document.querySelector('[data-testid=modifier-hiba_et]')`), `${nbPhrases} phrases`);
+  await evaluer(`document.querySelector('[data-testid=modifier-hiba_et]').click()`);
+  await attendreQue(`!!document.querySelector('[data-testid=phrase-hiba_et] input')`);
+  await evaluer(`(() => { const i = document.querySelector('[data-testid=phrase-hiba_et] input');
+    Object.getOwnPropertyDescriptor(HTMLInputElement.prototype, 'value').set.call(i, 'و 3');
+    i.dispatchEvent(new Event('input', { bubbles: true })); i.form.requestSubmit(); })()`);
+  await attendreQue(`[...document.querySelectorAll('[data-testid=relecture] div')].some((d) => d.innerText.startsWith('Refusé'))`);
+  verifier('… correction avec chiffre refusée (rien n’est écrit)', true);
+  verifier('… pages de préparation sans erreur dans la console', erreursInattendues().length === 0, erreursInattendues().join(' | '));
 
   // 3. Le reste de l'application s'affiche comme avant (sans appel NASA : endpoint bloqué)
   for (const chemin of ['/', '/recommendation', '/weather']) {
