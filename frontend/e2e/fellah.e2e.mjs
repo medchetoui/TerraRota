@@ -10,9 +10,12 @@
 //                                                    la reconnaissance vocale n'entend en général rien)
 // Variables : E2E_URL (défaut http://localhost:5173), CHROME_PATH.
 import { spawn } from 'node:child_process';
-import { existsSync, mkdtempSync, rmSync } from 'node:fs';
+import { existsSync, mkdtempSync, readFileSync, rmSync, writeFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
-import { join, resolve } from 'node:path';
+import { dirname, join, resolve } from 'node:path';
+import { fileURLToPath } from 'node:url';
+
+const AUDIO_DIR = join(dirname(fileURLToPath(import.meta.url)), '..', 'public', 'audio', 'darija');
 
 const args = process.argv.slice(2);
 const opt = (nom) => (args.includes(nom) ? args[args.indexOf(nom) + 1] : undefined);
@@ -32,9 +35,10 @@ const profil = mkdtempSync(join(tmpdir(), 'fellah-e2e-'));
 const port = 9300 + Math.floor(Math.random() * 500);
 const flags = [
   '--headless=new', `--remote-debugging-port=${port}`, `--user-data-dir=${profil}`, '--no-first-run',
-  '--use-fake-ui-for-media-stream', '--lang=ar', '--autoplay-policy=no-user-gesture-required',
+  '--use-fake-ui-for-media-stream', '--use-fake-device-for-media-stream', '--lang=ar',
+  '--autoplay-policy=no-user-gesture-required',
 ];
-if (WAV) flags.push('--use-fake-device-for-media-stream', `--use-file-for-fake-audio-capture=${resolve(WAV)}`);
+if (WAV) flags.push(`--use-file-for-fake-audio-capture=${resolve(WAV)}`);
 const proc = spawn(chrome, [...flags, 'about:blank'], { stdio: 'ignore' });
 
 const attendre = (ms) => new Promise((r) => setTimeout(r, ms));
@@ -42,7 +46,7 @@ let ws;
 let id = 0;
 const enAttente = new Map();
 let erreursConsole = [];
-const ATTENDUES = /recommendations|NASA API query error|ERR_BLOCKED_BY_CLIENT/;
+const ATTENDUES = /recommendations|NASA API query error|ERR_BLOCKED_BY_CLIENT|fellah\/phrases\/hiba_et\//;
 
 function cdp(method, params = {}) {
   return new Promise((ok, ko) => {
@@ -235,6 +239,56 @@ try {
   verifier('… bascule « أمثلة » → scénario de démo, autre réponse', demo !== surParcelle && demo.length > 0, demo);
   verifier('… sans erreur dans la console', erreursInattendues().length === 0, erreursInattendues().join(' | '));
   recommandation = 'bloquee';
+
+  // 2c. Préparation de la démo (développement) : enregistrer un clip, relire les phrases.
+  // Le test n'utilise qu'une phrase SANS clip et l'efface ensuite ; la relecture n'envoie qu'une correction refusée.
+  await ouvrir('/advisor?enregistrer');
+  await attendreQue(`!!document.querySelector('[data-testid=compteur]')`);
+  verifier('?enregistrer : compteur « X / 21 » des clips de la démo',
+    / \/ 21$/.test(await evaluer(`document.querySelector('[data-testid=compteur]').innerText`)));
+  verifier('… phrase en grand, nom de fichier affiché', /^hiba_\w+\.wav$/.test(await evaluer(
+    `document.querySelector('[data-testid=nom-fichier]').innerText`)) && (await evaluer(`document.querySelector('[data-testid=phrase]').innerText`)).length > 0);
+  await evaluer(`document.querySelector('[data-testid=enregistrement] input[type=checkbox]').click()`);
+  const libre = await evaluer(`fetch('/api/v1/fellah/phrases/').then((r) => r.json()).then((d) => d.phrases.find((p) => !p.present && !p.demo)?.id || '')`);
+  if (libre) {
+    const manifeste = join(AUDIO_DIR, 'enregistrements.json');
+    const avantManifeste = existsSync(manifeste) ? readFileSync(manifeste) : null;
+    const fichier = join(AUDIO_DIR, `${libre}.wav`);
+    try {
+      await evaluer(`[...document.querySelectorAll('[data-testid=enregistrement] button[title]')].find((b) => b.title === ${JSON.stringify(libre)}).click()`);
+      await attendreQue(`document.querySelector('[data-testid=nom-fichier]').innerText === ${JSON.stringify(libre + '.wav')}`);
+      const bouton = (texte) => `[...document.querySelectorAll('[data-testid=enregistrement] button')].find((b) => b.innerText.includes(${JSON.stringify(texte)}))`;
+      await evaluer(`${bouton('Enregistrer')}.click()`);
+      await attendre(1500);
+      await evaluer(`${bouton('Arrêter')}.click()`);
+      await attendreQue(`!${bouton('Garder')}.disabled`);
+      await evaluer(`${bouton('Garder')}.click()`);
+      await attendreQue(`(document.querySelector('[data-testid=enregistrement] [role=status]')?.innerText || '').length > 0`);
+      const statut = await evaluer(`document.querySelector('[data-testid=enregistrement] [role=status]').innerText`);
+      verifier('… ⏺ ⏹ ✓ : prise convertie en WAV et enregistrée sous le bon nom', statut.includes(`${libre}.wav`) && existsSync(fichier), statut);
+      const entete = existsSync(fichier) ? readFileSync(fichier) : Buffer.alloc(44);
+      verifier('… fichier WAV mono 16 bits 16000 Hz', entete.toString('ascii', 0, 4) === 'RIFF' && entete.readUInt16LE(22) === 1
+        && entete.readUInt32LE(24) === 16000 && entete.readUInt16LE(34) === 16);
+    } finally {
+      rmSync(fichier, { force: true });
+      if (avantManifeste) writeFileSync(manifeste, avantManifeste); else rmSync(manifeste, { force: true });
+    }
+  } else {
+    console.log('—    toutes les phrases ont déjà un clip : enregistrement non testé (aucun fichier modifié)');
+  }
+  await ouvrir('/advisor?relire');
+  await attendreQue(`!!document.querySelector('[data-testid=compteur-valides]')`);
+  const nbPhrases = await evaluer(`document.querySelectorAll('[data-testid^=phrase-]').length`);
+  verifier('?relire : chaque phrase avec son sens et ✓ OK / ✎ Modifier', nbPhrases >= 21
+    && await evaluer(`!!document.querySelector('[data-testid=ok-hiba_et]') && !!document.querySelector('[data-testid=modifier-hiba_et]')`), `${nbPhrases} phrases`);
+  await evaluer(`document.querySelector('[data-testid=modifier-hiba_et]').click()`);
+  await attendreQue(`!!document.querySelector('[data-testid=phrase-hiba_et] input')`);
+  await evaluer(`(() => { const i = document.querySelector('[data-testid=phrase-hiba_et] input');
+    Object.getOwnPropertyDescriptor(HTMLInputElement.prototype, 'value').set.call(i, 'و 3');
+    i.dispatchEvent(new Event('input', { bubbles: true })); i.form.requestSubmit(); })()`);
+  await attendreQue(`[...document.querySelectorAll('[data-testid=relecture] div')].some((d) => d.innerText.startsWith('Refusé'))`);
+  verifier('… correction avec chiffre refusée (rien n’est écrit)', true);
+  verifier('… pages de préparation sans erreur dans la console', erreursInattendues().length === 0, erreursInattendues().join(' | '));
 
   // 3. Le reste de l'application s'affiche comme avant (sans appel NASA : endpoint bloqué)
   for (const chemin of ['/', '/recommendation', '/weather']) {

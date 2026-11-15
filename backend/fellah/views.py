@@ -13,11 +13,13 @@ from datetime import datetime
 from pathlib import Path
 
 from django.conf import settings
-from django.http import Http404
+from django.http import Http404, JsonResponse
+from django.views.decorators.csrf import csrf_exempt
 from rest_framework import status
 from rest_framework.decorators import api_view
 from rest_framework.response import Response
 
+from . import atelier
 from .darija import repondre_darija as RD
 from .parcelle import CHAMPS_PARCELLE, scenario_parcelle
 
@@ -113,3 +115,46 @@ def journal(request):
     with open(SORTIES / f"voix_app_{maintenant:%Y%m%d}.jsonl", "a", encoding="utf-8") as f:
         f.write(json.dumps(ligne, ensure_ascii=False) + "\n")
     return Response(ligne)
+
+
+# ─── Préparation de la démo (développement seulement) : enregistrer les clips, relire les phrases ───
+
+def _dev():
+    if not settings.DEBUG:
+        raise Http404()
+
+
+@api_view(["GET"])
+def phrases(request):
+    _dev()
+    return Response({"phrases": atelier.etat_phrases(AUDIO_DIR), "audio_url": AUDIO_URL})
+
+
+@csrf_exempt
+def clip(request, clip_id):
+    """POST : corps = WAV mono 16 bits (converti par le navigateur) ; écrit frontend/public/audio/darija/<id>.wav."""
+    _dev()
+    if request.method != "POST":
+        return JsonResponse({"status": "error", "message": "POST attendu"}, status=405)
+    info, probleme = atelier.enregistrer_clip(clip_id, request.body, AUDIO_DIR)
+    if probleme:
+        return JsonResponse({"status": "error", "message": probleme}, status=400)
+    return JsonResponse({"status": "ok", "id": clip_id, **info, "audio": f"{AUDIO_URL}{clip_id}.wav"})
+
+
+@api_view(["POST"])
+def phrase(request, phrase_id):
+    """{"action": "ok"} valide la phrase ; {"action": "modifier", "texte_darija": "..."} la remplace.
+    Les 20 questions de test sont ensuite relancées sur les 2 scénarios de démo."""
+    _dev()
+    action = request.data.get("action")
+    if action not in ("ok", "modifier"):
+        return Response({"status": "error", "message": "action ok ou modifier"}, status=status.HTTP_400_BAD_REQUEST)
+    texte = request.data.get("texte_darija") if action == "modifier" else None
+    if action == "modifier" and texte is None:
+        return Response({"status": "error", "message": "texte_darija manquant"}, status=status.HTTP_400_BAD_REQUEST)
+    resultat, probleme = atelier.valider_phrase(phrase_id, texte)
+    if probleme:
+        return Response({"status": "error", "message": probleme}, status=status.HTTP_400_BAD_REQUEST)
+    etat = next(p for p in atelier.etat_phrases(AUDIO_DIR) if p["id"] == phrase_id)
+    return Response({**resultat, "a_refaire": etat["a_refaire"], "demo": atelier.relancer_demo()})

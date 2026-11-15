@@ -195,3 +195,86 @@ def test_plot_must_be_an_object(client):
 def test_standard_arabic_transcripts_get_the_darija_type(client, texte, attendu, culture):
     r = poser(client, texte).json()
     assert r["intention"] == attendu and (culture is None or r["culture"] == culture)
+
+
+# ─── Préparation de la démo : enregistrer les clips, relire les phrases (DEBUG seulement) ───
+
+def _wav(secondes=1.0, frequence=16000, canaux=1):
+    import io
+    tampon = io.BytesIO()
+    with wave.open(tampon, "wb") as w:
+        w.setnchannels(canaux), w.setsampwidth(2), w.setframerate(frequence)
+        w.writeframes(b"\x01\x00" * int(secondes * frequence) * canaux)
+    return tampon.getvalue()
+
+
+@pytest.fixture()
+def atelier_tmp(tmp_path, monkeypatch):
+    """Clips et phrases dans des copies temporaires (jamais les vrais fichiers)."""
+    import functools
+    import shutil
+    from fellah.darija import repondre_darija as RD
+    audio = tmp_path / "audio"
+    audio.mkdir()
+    phrases = tmp_path / "templates_darija.json"
+    shutil.copy(RD.TEMPLATES_FILE, phrases)
+    monkeypatch.setattr(views, "AUDIO_DIR", audio)
+
+    @functools.lru_cache(maxsize=1)
+    def modeles():
+        return {m["id"]: m for m in json.loads(phrases.read_text(encoding="utf-8"))["modeles"]}
+    monkeypatch.setattr(RD, "modeles", modeles)
+    monkeypatch.setattr(RD, "TEMPLATES_FILE", phrases)
+    with override_settings(DEBUG=True):
+        yield audio, phrases
+
+
+def test_demo_clip_list_matches_the_21_clips():
+    from fellah import atelier
+    ids = atelier.clips_demo()
+    assert len(ids) == 21 and ids[0] == "hiba_verdict_partiel" and "hiba_mostachar" in ids
+
+
+def test_record_clip_checks_name_and_format(client, atelier_tmp):
+    audio, _ = atelier_tmp
+    url = "/api/v1/fellah/clips/{}/"
+    assert client.post(url.format("hiba_mostachar"), _wav(), content_type="audio/wav").status_code == 200
+    assert (audio / "hiba_mostachar.wav").exists()
+    assert client.post(url.format("inconnu"), _wav(), content_type="audio/wav").status_code == 400
+    assert client.post(url.format("hiba_et"), _wav(canaux=2), content_type="audio/wav").status_code == 400
+    assert client.post(url.format("hiba_et"), _wav(frequence=44100), content_type="audio/wav").status_code == 400
+    assert client.post(url.format("hiba_et"), _wav(secondes=0.1), content_type="audio/wav").status_code == 400
+    assert client.post(url.format("hiba_et"), b"pas un wav", content_type="audio/wav").status_code == 400
+    assert not (audio / "hiba_et.wav").exists() and not (audio / "inconnu.wav").exists()
+    etat = {p["id"]: p for p in client.get("/api/v1/fellah/phrases/").json()["phrases"]}
+    assert etat["hiba_mostachar"]["present"] and not etat["hiba_et"]["present"]
+    assert sum(p["demo"] for p in etat.values()) == 21
+    r = poser(client, "شحال غادي نحصد؟").json()
+    assert r["phrases"][0][0]["audio"] is None
+    r = poser(client, "واش نبقى نزرع القمح؟").json()
+    assert [p["audio"] for g in r["phrases"] for p in g if p["id"] == "hiba_mostachar"] == ["/audio/darija/hiba_mostachar.wav"]
+
+
+def test_validate_and_modify_phrase_reruns_demo(client, atelier_tmp):
+    audio, phrases = atelier_tmp
+    client.post("/api/v1/fellah/clips/hiba_mostachar/", _wav(), content_type="audio/wav")
+    r = client.post("/api/v1/fellah/phrases/hiba_et/", {"action": "ok"}, format="json").json()
+    assert r["statut"] == "validé par Ranya" and not r["modifiee"]
+    assert r["demo"] == {"questions": 40, "type_correct": 40, "reponses_avec_chiffres": 0}
+    r = client.post("/api/v1/fellah/phrases/hiba_mostachar/", {"action": "modifier", "texte_darija": "سول المستشار الفلاحي قبل ما تزرع."},
+                    format="json").json()
+    assert r["modifiee"] and r["a_refaire"] and r["demo"]["type_correct"] == 40
+    m = {x["id"]: x for x in json.loads(phrases.read_text(encoding="utf-8"))["modeles"]}["hiba_mostachar"]
+    assert m["texte_darija"] == "سول المستشار الفلاحي قبل ما تزرع." and m["texte_avant"] == "سول المستشار قبل ما تزرع."
+    assert "سول المستشار الفلاحي" in poser(client, "واش نبقى نزرع القمح؟").json()["texte"]
+    for mauvais in ("", "Demandez au conseiller", "سول المستشار 3 مرات", "س" * 201):
+        assert client.post("/api/v1/fellah/phrases/hiba_et/", {"action": "modifier", "texte_darija": mauvais},
+                           format="json").status_code == 400
+    assert client.post("/api/v1/fellah/phrases/inconnue/", {"action": "ok"}, format="json").status_code == 400
+
+
+def test_demo_tools_are_off_outside_debug(client):
+    with override_settings(DEBUG=False):
+        assert client.get("/api/v1/fellah/phrases/").status_code == 404
+        assert client.post("/api/v1/fellah/clips/hiba_et/", _wav(), content_type="audio/wav").status_code == 404
+        assert client.post("/api/v1/fellah/phrases/hiba_et/", {"action": "ok"}, format="json").status_code == 404

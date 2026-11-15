@@ -269,3 +269,47 @@ export async function askFellah(
 export async function logFellahVoiceTry(entry: Record<string, unknown>): Promise<void> {
   await request('/fellah/journal/', { method: 'POST', body: JSON.stringify(entry) });
 }
+
+// ─── Préparation de la démo (développement seulement) ───
+
+export interface FellahPhraseEtat {
+  id: string;
+  darija: string;
+  fr: string;
+  statut: string;
+  texte_avant: string;
+  demo: boolean;
+  present: boolean;
+  a_refaire: boolean;
+}
+
+export interface FellahValidation {
+  id: string;
+  darija: string;
+  statut: string;
+  modifiee: boolean;
+  a_refaire: boolean;
+  demo: { questions: number; type_correct: number; reponses_avec_chiffres: number };
+}
+
+export async function getFellahPhrases(): Promise<{ phrases: FellahPhraseEtat[]; audio_url: string }> {
+  return request('/fellah/phrases/');
+}
+
+export async function saveFellahClip(id: string, wav: Blob): Promise<{ status: string; audio: string }> {
+  const response = await fetch(`${BASE_URL}/fellah/clips/${encodeURIComponent(id)}/`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'audio/wav' },
+    body: wav,
+  });
+  const data = await response.json();
+  if (!response.ok) throw { status: response.status, data };
+  return data;
+}
+
+export async function validateFellahPhrase(id: string, texte_darija?: string): Promise<FellahValidation> {
+  return request<FellahValidation>(`/fellah/phrases/${encodeURIComponent(id)}/`, {
+    method: 'POST',
+    body: JSON.stringify(texte_darija === undefined ? { action: 'ok' } : { action: 'modifier', texte_darija }),
+  });
+}

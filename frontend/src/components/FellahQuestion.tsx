@@ -10,6 +10,8 @@ import {
   type FellahParcelle,
   type FellahSetup,
 } from '../api/client';
+import FellahEnregistrement from './FellahEnregistrement';
+import FellahRelecture from './FellahRelecture';
 
 interface RecognitionResult { 0: { transcript: string } }
 interface RecognitionEvent { results: { 0: RecognitionResult } & ArrayLike<RecognitionResult> }
@@ -45,7 +47,14 @@ interface Props {
   regionName?: string;
 }
 
-export default function FellahQuestion({ parcelle = null, regionName = '' }: Props) {
+export default function FellahQuestion(props: Props) {
+  const params = new URLSearchParams(window.location.search);
+  if (params.has('enregistrer')) return <FellahEnregistrement />;
+  if (params.has('relire')) return <FellahRelecture />;
+  return <FellahQuestionPanel {...props} />;
+}
+
+function FellahQuestionPanel({ parcelle = null, regionName = '' }: Props) {
   const [setup, setSetup] = useState<FellahSetup | null>(null);
   const [scenario, setScenario] = useState('');
   const [question, setQuestion] = useState('');
@@ -57,6 +66,7 @@ export default function FellahQuestion({ parcelle = null, regionName = '' }: Pro
   const [surParcelle, setSurParcelle] = useState(true);
   const useParcelle = surParcelle && parcelle !== null;
   const audioRef = useRef<HTMLAudioElement | null>(null);
+  const derniereDemande = useRef(0);
   const supported = recognitionCtor() !== null;
   const testMode = new URLSearchParams(window.location.search).has('test-voix');
 
@@ -89,8 +99,10 @@ export default function FellahQuestion({ parcelle = null, regionName = '' }: Pro
     if (!q || !scenario) return;
     stopAudio();
     setQuestion(q);
+    const demande = ++derniereDemande.current;
     try {
       const r = await askFellah(q, scenario, useParcelle ? parcelle : null);
+      if (demande !== derniereDemande.current) return;
       setAnswer(r);
       setNotice('');
       if (voix) {
@@ -100,7 +112,7 @@ export default function FellahQuestion({ parcelle = null, regionName = '' }: Pro
         });
       }
     } catch {
-      setNotice('ما قدرتش نجاوب دابا. عاود من بعد.');
+      if (demande === derniereDemande.current) setNotice('ما قدرتش نجاوب دابا. عاود من بعد.');
     }
   };
 
