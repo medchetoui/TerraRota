@@ -258,13 +258,15 @@ export const VoiceCallScreen: React.FC<VoiceCallScreenProps> = ({
 
       const rec: SpeechRecognitionInstance = new SpeechRec();
       rec.lang = isAr ? 'ar-MA' : isEn ? 'en-US' : 'fr-FR';
-      rec.continuous = false;
+      rec.continuous = true;
       rec.interimResults = true;
 
       rec.onstart = () => {
         setCallState('listening');
         setErrorNotice(null);
       };
+
+      let debounceTimer: any = null;
 
       rec.onresult = (event: any) => {
         let interim = '';
@@ -276,46 +278,58 @@ export const VoiceCallScreen: React.FC<VoiceCallScreenProps> = ({
             interim += event.results[i][0].transcript;
           }
         }
-        const text = final || interim;
-        setTranscript(text);
+        const text = (final || interim).trim();
+        if (text) {
+          setTranscript(text);
+        }
 
+        // When user speaks final text or pauses after speech
         if (final && final.trim().length > 1) {
+          clearTimeout(debounceTimer);
           handleFarmerSpokenQuestion(final.trim());
+        } else if (text.length > 3) {
+          // If no final event fired yet but user spoke and then paused for 1.8 seconds
+          clearTimeout(debounceTimer);
+          debounceTimer = setTimeout(() => {
+            if (isCallActiveRef.current && !isSpeakingRef.current && text.length > 2) {
+              handleFarmerSpokenQuestion(text);
+            }
+          }, 1800);
         }
       };
 
       rec.onerror = (e: any) => {
-        // Harmless speech timeout or silence -> automatically restart listening loop
+        // Harmless speech timeout or silence -> keep listening active in the background!
         if (e.error === 'no-speech' || e.error === 'network') {
           if (isCallActiveRef.current && !isSpeakingRef.current && !isMuted) {
             setTimeout(() => {
               if (isCallActiveRef.current && !isSpeakingRef.current && !isMuted) {
-                startListening();
+                try { rec.start(); } catch { startListening(); }
               }
-            }, 600);
+            }, 300);
             return;
           }
         } else if (e.error === 'not-allowed') {
           setErrorNotice(isAr ? 'تم رفض إذن الميكروفون' : 'Microphone permission denied');
           setCallState('idle');
         } else if (e.error !== 'aborted') {
-          // Keep listening ready instead of completely locking into paused state
+          // Restart gracefully
           setTimeout(() => {
             if (isCallActiveRef.current && !isSpeakingRef.current && !isMuted) {
               startListening();
             }
-          }, 800);
+          }, 500);
         }
       };
 
       rec.onend = () => {
-        // When speech recognition ends naturally, if the call is still active and AI is not speaking, keep listening active!
+        // Crucial: Keep continuous call listening open whenever the call is active and AI isn't speaking
         if (isCallActiveRef.current && !isSpeakingRef.current && !isMuted && callStateRef.current !== 'processing') {
           setTimeout(() => {
             if (isCallActiveRef.current && !isSpeakingRef.current && !isMuted && callStateRef.current !== 'processing') {
-              startListening();
+              try { rec.start(); } catch { startListening(); }
             }
-          }, 400);
+          }, 300);
         }
       };
 

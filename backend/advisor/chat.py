@@ -302,33 +302,49 @@ def _build_personalized_answer(
                 "crop_name_en" if lang == "en" else "crop_name_fr",
                 top_crop["crop_name_ar"]
             )
-            reason = (top_crop.get("reasons_en" if lang == "en" else "reasons_fr" if lang == "fr" else "reasons") or [""])[0]
+            reasons = top_crop.get("reasons_en" if lang == "en" else "reasons_fr" if lang == "fr" else "reasons") or []
+            reasons_text = ". ".join(reasons[:2]) if reasons else ""
+            cautions = top_crop.get("cautions_en" if lang == "en" else "cautions_fr" if lang == "fr" else "cautions") or []
+            caution_text = cautions[0] if cautions else ""
+
             if lang == "ar":
+                prev_text = f"المحصول السابق كان {prev_crop_name}، وهاد التناوب كيحافظ على خصوبة الأرض ويقلل من الأمراض." if prev_crop_id != 'fallow' else "الأرض كانت مرتاحة، وهاد المحصول غادي يستافد مزيان."
+                soil_text = f"تربة ديالك {soil} كتناسب جذور هاد المحصول." if soil != "unknown" else ""
+                why_text = f"وعلاش بالضبط نصحتك بيه؟ أولاً، {reasons_text}. ثانياً، {soil_text} {prev_text}"
                 return (
-                    f"أهلاً {farmer_name}! "
-                    f"بناءً على معطيات أرضك ف {region} والبيانات المناخية ديال ناسا "
-                    f"({rain_mm} ملم/سنة، {temp_c}°C)، "
-                    f"المحصول الأنسب هو {top_crop['crop_name_ar']} ({top_crop.get('crop_emoji','🌱')}). "
-                    f"{reason} "
-                    f"{'المحصول السابق كان ' + prev_crop_name + ' وهاد الدورة الزراعية منطقية.' if prev_crop_id != 'fallow' else ''}"
+                    f"أهلاً سي {farmer_name}! "
+                    f"بناءً على معطيات أرضك ف {region} ومعطيات أقمار ناسا للمناخ "
+                    f"(تساقطات: {rain_mm} ملم/سنة، والحرارة: {temp_c}°C)، "
+                    f"أحسن محصول مقترح ليك هاد الموسم هو {top_crop['crop_name_ar']} {top_crop.get('crop_emoji','🌱')} (نقطة الملائمة: {top_crop.get('score', 80)}/100). "
+                    f"{why_text} "
+                    f"{'رد بالك: ' + caution_text if caution_text else ''} "
+                    f"واش بغيتي نزيد نشرح ليك أكتر، أو نديرو مقارنة مع محصول آخر؟"
                 )
             elif lang == "fr":
+                prev_text = f"Votre précédent cultural était {prev_crop_name}, ce qui assure une excellente rotation sanitaire et azotée." if prev_crop_id != 'fallow' else ""
+                soil_text = f"Votre sol {soil} présente une rétention idéale pour cette plante." if soil != "unknown" else ""
+                why_text = f"Pourquoi ce choix ? D'abord, {reasons_text}. De plus, {soil_text} {prev_text}"
                 return (
                     f"Bonjour {farmer_name} ! "
-                    f"D'après les données de votre parcelle à {region} et les observations NASA "
+                    f"D'après les données de votre parcelle à {region} et les observations satellites NASA "
                     f"({rain_mm} mm/an, {temp_c}°C), "
-                    f"la culture la plus adaptée est {top_crop.get('crop_name_fr', crop_name)} {top_crop.get('crop_emoji','🌱')}. "
-                    f"{reason} "
-                    f"{'Votre précédent cultural était ' + prev_crop_name + ', ce qui rend cette rotation agronomiquement justifiée.' if prev_crop_id != 'fallow' else ''}"
+                    f"la culture la plus recommandée est {top_crop.get('crop_name_fr', crop_name)} {top_crop.get('crop_emoji','🌱')} (score : {top_crop.get('score', 80)}/100). "
+                    f"{why_text} "
+                    f"{'Attention : ' + caution_text if caution_text else ''} "
+                    f"Souhaitez-vous que je compare avec une autre culture ou simule un scénario de sécheresse ?"
                 )
             else:
+                prev_text = f"Your previous crop was {prev_crop_name}, providing an agronomic rotation benefit." if prev_crop_id != 'fallow' else ""
+                soil_text = f"Your {soil} soil type provides suitable aeration and retention." if soil != "unknown" else ""
+                why_text = f"Why this crop? First, {reasons_text}. Additionally, {soil_text} {prev_text}"
                 return (
                     f"Hello {farmer_name}! "
-                    f"Based on your parcel data in {region} and NASA satellite observations "
+                    f"Based on your parcel in {region} and NASA agroclimate observations "
                     f"({rain_mm} mm/year, {temp_c}°C), "
-                    f"the most suitable crop is {top_crop.get('crop_name_en', crop_name)} {top_crop.get('crop_emoji','🌱')}. "
-                    f"{reason} "
-                    f"{'Your previous crop was ' + prev_crop_name + ', making this rotation agronomically sound.' if prev_crop_id != 'fallow' else ''}"
+                    f"the top recommended crop is {top_crop.get('crop_name_en', crop_name)} {top_crop.get('crop_emoji','🌱')} (score: {top_crop.get('score', 80)}/100). "
+                    f"{why_text} "
+                    f"{'Note: ' + caution_text if caution_text else ''} "
+                    f"Would you like to compare with another crop or explore a what-if scenario?"
                 )
         else:
             if lang == "ar":
