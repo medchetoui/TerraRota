@@ -64,3 +64,6 @@ desktop.ini
 # Misc
 *.bak
 *.tmp
+
+# Journal local du test voix (fellah)
+backend/sorties/

@@ -1,4 +1,4 @@
-from django.urls import path
+from django.urls import include, path
 from rest_framework_simplejwt.views import TokenRefreshView
 from .jwt_views import CustomTokenObtainPairView
 from . import views
@@ -27,4 +27,7 @@ urlpatterns = [
     # Farm plan workflow (draft, proposed, approved, modified, rejected)
     path("plans/", views.plans_list_create, name="plans_list_create"),
     path("plans/<int:pk>/", views.plan_detail_patch, name="plan_detail_patch"),
+
+    # Questions du fellah en darija (Membre 3, sur le moteur du Membre 2)
+    path("fellah/", include("fellah.urls")),
 ]

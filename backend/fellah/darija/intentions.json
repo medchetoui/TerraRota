@@ -1,0 +1,523 @@
+{
+  "_label": "FICTIF - liste d'intentions et questions d'exemple en BROUILLON (ecrites par l'equipe). A remplacer par de vraies questions d'agriculteurs ou de conseillers.",
+  "_version": "2026-10-30",
+  "intentions": [
+    {
+      "id": "QUOI_PLANTER",
+      "description_fr": "Que planter (la prochaine fois) ?",
+      "hors_perimetre": false,
+      "donnees_utilisees": [
+        "recommendation.crop_id",
+        "recommendation.recommended_crop",
+        "inputs.previous_crop_id",
+        "alertes"
+      ],
+      "modeles_reponse": [
+        "demo_fictif",
+        "apres_culture_precedente",
+        "intro_reco",
+        "reco_sans_nom",
+        "avertissement prioritaire",
+        "voir_conseiller"
+      ],
+      "mots_cles": [
+        "نزرع",
+        "نزرعو",
+        "نغرس",
+        "تنصحني",
+        "nzra3",
+        "nzre3",
+        "nzr3",
+        "nghres",
+        "ngherss"
+      ],
+      "exemples_darija": [
+        {
+          "darija": "شنو نزرع هاد العام؟",
+          "fr": "Que planter cette année ?",
+          "statut": "brouillon - à valider par un locuteur natif"
+        },
+        {
+          "darija": "اش نزرع من بعد هاد الزرع؟",
+          "fr": "Que planter après cette culture ?",
+          "statut": "brouillon - à valider par un locuteur natif"
+        },
+        {
+          "darija": "شنو الزريعة اللي مزيانة ليا؟",
+          "fr": "Quelle culture est bonne pour moi ?",
+          "statut": "brouillon - à valider par un locuteur natif"
+        },
+        {
+          "darija": "شنو تنصحني نزرع؟",
+          "fr": "Que me conseilles-tu de planter ?",
+          "statut": "brouillon - à valider par un locuteur natif"
+        },
+        {
+          "darija": "chno nzra3 had l3am?",
+          "fr": "Que planter cette année ? (lettres latines)",
+          "statut": "brouillon - à valider par un locuteur natif"
+        },
+        {
+          "darija": "ach nzre3 mn b3d?",
+          "fr": "Que planter après ? (lettres latines)",
+          "statut": "brouillon - à valider par un locuteur natif"
+        }
+      ]
+    },
+    {
+      "id": "POURQUOI",
+      "description_fr": "Pourquoi cette culture ?",
+      "hors_perimetre": false,
+      "donnees_utilisees": [
+        "recommendation.crop_id",
+        "recommendation.reason_ids",
+        "recommendation.reasons",
+        "alertes"
+      ],
+      "modeles_reponse": [
+        "demo_fictif",
+        "intro_reco",
+        "raison_*",
+        "rep_raisons_conseiller",
+        "avertissement prioritaire",
+        "voir_conseiller"
+      ],
+      "mots_cles": [
+        "علاش",
+        "لاش",
+        "السبب",
+        "سبب",
+        "الاسباب",
+        "3lach",
+        "3lache",
+        "lach",
+        "sbab",
+        "sabab"
+      ],
+      "exemples_darija": [
+        {
+          "darija": "علاش هاد الزريعة؟",
+          "fr": "Pourquoi cette culture ?",
+          "statut": "brouillon - à valider par un locuteur natif"
+        },
+        {
+          "darija": "علاش نصحتيني بهادي؟",
+          "fr": "Pourquoi m'as-tu conseillé celle-ci ?",
+          "statut": "brouillon - à valider par un locuteur natif"
+        },
+        {
+          "darija": "شنو السبب ديال هاد النصيحة؟",
+          "fr": "Quelle est la raison de ce conseil ?",
+          "statut": "brouillon - à valider par un locuteur natif"
+        },
+        {
+          "darija": "لاش هادي ماشي شي حاجة اخرى؟",
+          "fr": "Pourquoi celle-ci et pas autre chose ?",
+          "statut": "brouillon - à valider par un locuteur natif"
+        },
+        {
+          "darija": "3lach had zri3a?",
+          "fr": "Pourquoi cette culture ? (lettres latines)",
+          "statut": "brouillon - à valider par un locuteur natif"
+        },
+        {
+          "darija": "3lach nsa7tini b hadi?",
+          "fr": "Pourquoi m'as-tu conseillé celle-ci ? (lettres latines)",
+          "statut": "brouillon - à valider par un locuteur natif"
+        }
+      ]
+    },
+    {
+      "id": "EAU_IRRIGATION",
+      "description_fr": "Je n'ai pas d'eau / d'irrigation, que faire ? Besoins en eau.",
+      "hors_perimetre": false,
+      "donnees_utilisees": [
+        "inputs.constraints.irrigation",
+        "recommendation.reasons (contradiction)",
+        "alertes"
+      ],
+      "modeles_reponse": [
+        "contradiction_irrigation",
+        "manque_irrigation",
+        "rep_irrigation_aucune",
+        "rep_irrigation_disponible",
+        "precaution_*",
+        "voir_conseiller"
+      ],
+      "mots_cles": [
+        "سقي",
+        "نسقي",
+        "السقي",
+        "الما",
+        "ماء",
+        "بير",
+        "البير",
+        "ساقيه",
+        "سقايه",
+        "sqi",
+        "nsqi",
+        "lma",
+        "bir",
+        "sa9ya",
+        "irrigation"
+      ],
+      "exemples_darija": [
+        {
+          "darija": "ما عنديش السقي، شنو ندير؟",
+          "fr": "Je n'ai pas d'irrigation, que faire ?",
+          "statut": "brouillon - à valider par un locuteur natif"
+        },
+        {
+          "darija": "واش هاد الزريعة كتبغي بزاف ديال الما؟",
+          "fr": "Cette culture demande-t-elle beaucoup d'eau ?",
+          "statut": "brouillon - à valider par un locuteur natif"
+        },
+        {
+          "darija": "عندي غير الما ديال البير، واش يكفي؟",
+          "fr": "J'ai seulement l'eau du puits, est-ce suffisant ?",
+          "statut": "brouillon - à valider par un locuteur natif"
+        },
+        {
+          "darija": "شحال خاصني نسقي؟",
+          "fr": "Combien dois-je irriguer ?",
+          "statut": "brouillon - à valider par un locuteur natif"
+        },
+        {
+          "darija": "ma 3ndich sqi, chno ndir?",
+          "fr": "Je n'ai pas d'irrigation, que faire ? (lettres latines)",
+          "statut": "brouillon - à valider par un locuteur natif"
+        },
+        {
+          "darija": "wach khass lma bzaf?",
+          "fr": "Faut-il beaucoup d'eau ? (lettres latines)",
+          "statut": "brouillon - à valider par un locuteur natif"
+        }
+      ]
+    },
+    {
+      "id": "SOL",
+      "description_fr": "Questions sur le sol.",
+      "hors_perimetre": false,
+      "donnees_utilisees": [
+        "inputs.constraints.soil",
+        "alertes"
+      ],
+      "modeles_reponse": [
+        "manque_sol",
+        "rep_sol_connu",
+        "voir_conseiller"
+      ],
+      "mots_cles": [
+        "ارض",
+        "الارض",
+        "تربه",
+        "التربه",
+        "تراب",
+        "التراب",
+        "الحجر",
+        "l2ard",
+        "lard",
+        "trab",
+        "torba"
+      ],
+      "exemples_darija": [
+        {
+          "darija": "شنو نوع الأرض ديالي؟",
+          "fr": "Quel est le type de mon sol ?",
+          "statut": "brouillon - à valider par un locuteur natif"
+        },
+        {
+          "darija": "واش الأرض ديالي مزيانة لهاد الزريعة؟",
+          "fr": "Mon sol est-il bon pour cette culture ?",
+          "statut": "brouillon - à valider par un locuteur natif"
+        },
+        {
+          "darija": "الأرض ديالي فيها الحجر، واش مشكل؟",
+          "fr": "Mon sol a des pierres, est-ce un problème ?",
+          "statut": "brouillon - à valider par un locuteur natif"
+        },
+        {
+          "darija": "ما عرفتش نوع التربة ديالي.",
+          "fr": "Je ne connais pas mon type de sol.",
+          "statut": "brouillon - à valider par un locuteur natif"
+        },
+        {
+          "darija": "chno no3 l2ard dyali?",
+          "fr": "Quel est le type de mon sol ? (lettres latines)",
+          "statut": "brouillon - à valider par un locuteur natif"
+        },
+        {
+          "darija": "wach l2ard dyali mzyana?",
+          "fr": "Mon sol est-il bon ? (lettres latines)",
+          "statut": "brouillon - à valider par un locuteur natif"
+        }
+      ]
+    },
+    {
+      "id": "PLUIE_METEO",
+      "description_fr": "La pluie ou le temps de la saison : réponse seulement à partir des indicateurs du JSON (date et source), jamais de prévision inventée.",
+      "hors_perimetre": false,
+      "donnees_utilisees": [
+        "indicators[*] dont le nom contient pluie/precip/rain : value, unit, period, source, limitations",
+        "data_status",
+        "alertes"
+      ],
+      "modeles_reponse": [
+        "rep_pluie_pas_de_donnees",
+        "rep_pluie_ancienne",
+        "rep_pluie_disponible_conseiller",
+        "rep_pluie_bas/moyen/haut (seulement si seuils du Membre 1)",
+        "nasa_indisponible",
+        "voir_conseiller"
+      ],
+      "mots_cles": [
+        "شتا",
+        "تشتا",
+        "الشتا",
+        "مطر",
+        "المطر",
+        "الجو",
+        "جفاف",
+        "الجفاف",
+        "حراره",
+        "الحراره",
+        "chta",
+        "tchta",
+        "shta",
+        "jaw",
+        "jfaf",
+        "mtar",
+        "lmtar",
+        "l7rara"
+      ],
+      "exemples_darija": [
+        {
+          "darija": "واش غادي تشتا هاد العام؟",
+          "fr": "Va-t-il pleuvoir cette année ?",
+          "statut": "brouillon - à valider par un locuteur natif"
+        },
+        {
+          "darija": "شحال طاحت الشتا هاد الموسم؟",
+          "fr": "Combien a-t-il plu cette saison ?",
+          "statut": "brouillon - à valider par un locuteur natif"
+        },
+        {
+          "darija": "كيفاش كان الجو هاد العام؟",
+          "fr": "Comment était le temps cette année ?",
+          "statut": "brouillon - à valider par un locuteur natif"
+        },
+        {
+          "darija": "واش كاين الجفاف؟",
+          "fr": "Y a-t-il la sécheresse ?",
+          "statut": "brouillon - à valider par un locuteur natif"
+        },
+        {
+          "darija": "wach ghadi tchta?",
+          "fr": "Va-t-il pleuvoir ? (lettres latines)",
+          "statut": "brouillon - à valider par un locuteur natif"
+        },
+        {
+          "darija": "ch7al tay7at chta had l3am?",
+          "fr": "Combien a-t-il plu cette année ? (lettres latines)",
+          "statut": "brouillon - à valider par un locuteur natif"
+        }
+      ]
+    },
+    {
+      "id": "FIABILITE",
+      "description_fr": "Puis-je faire confiance à ce conseil ?",
+      "hors_perimetre": false,
+      "donnees_utilisees": [
+        "_label (FICTIF)",
+        "data_status",
+        "indicators[*].period / limitations",
+        "alertes"
+      ],
+      "modeles_reponse": [
+        "demo_fictif",
+        "rep_fiabilite_limitee",
+        "rep_fiable_aide",
+        "avertissement prioritaire",
+        "voir_conseiller"
+      ],
+      "mots_cles": [
+        "نتيق",
+        "نثيق",
+        "صحيح",
+        "صحاح",
+        "مضمون",
+        "مضمونه",
+        "متاكد",
+        "نامن",
+        "nti9",
+        "nthi9",
+        "s7i7",
+        "s7a7",
+        "mdmon",
+        "madmon",
+        "mt2aked"
+      ],
+      "exemples_darija": [
+        {
+          "darija": "واش نتيق فهاد النصيحة؟",
+          "fr": "Puis-je faire confiance à ce conseil ?",
+          "statut": "brouillon - à valider par un locuteur natif"
+        },
+        {
+          "darija": "واش هاد الكلام صحيح؟",
+          "fr": "Est-ce que c'est vrai ?",
+          "statut": "brouillon - à valider par un locuteur natif"
+        },
+        {
+          "darija": "واش هاد النصيحة مضمونة؟",
+          "fr": "Ce conseil est-il garanti ?",
+          "statut": "brouillon - à valider par un locuteur natif"
+        },
+        {
+          "darija": "منين جبتو هاد المعلومات؟",
+          "fr": "D'où viennent ces informations ?",
+          "statut": "brouillon - à valider par un locuteur natif"
+        },
+        {
+          "darija": "wach nti9 f had nasi7a?",
+          "fr": "Puis-je faire confiance à ce conseil ? (lettres latines)",
+          "statut": "brouillon - à valider par un locuteur natif"
+        },
+        {
+          "darija": "wach had lkalam s7i7?",
+          "fr": "Est-ce que c'est vrai ? (lettres latines)",
+          "statut": "brouillon - à valider par un locuteur natif"
+        }
+      ]
+    },
+    {
+      "id": "ENGRAIS",
+      "description_fr": "Engrais, fumier, produits à épandre, doses.",
+      "hors_perimetre": true,
+      "donnees_utilisees": [],
+      "modeles_reponse": [
+        "rep_engrais_hors",
+        "voir_conseiller"
+      ],
+      "mots_cles": [
+        "سماد",
+        "السماد",
+        "غبار",
+        "الغبار",
+        "فيمي",
+        "الفيمي",
+        "الدوا",
+        "نرش",
+        "زبل",
+        "الزبل",
+        "smad",
+        "ghbar",
+        "lghbar",
+        "fumier",
+        "zbel",
+        "nrach",
+        "engrais"
+      ],
+      "exemples_darija": [
+        {
+          "darija": "شنو السماد اللي نحط؟",
+          "fr": "Quel engrais dois-je mettre ?",
+          "statut": "brouillon - à valider par un locuteur natif"
+        },
+        {
+          "darija": "شحال ديال الغبار خاصني؟",
+          "fr": "Combien d'engrais me faut-il ?",
+          "statut": "brouillon - à valider par un locuteur natif"
+        },
+        {
+          "darija": "واش نحط الفيمي؟",
+          "fr": "Dois-je mettre du fumier ?",
+          "statut": "brouillon - à valider par un locuteur natif"
+        },
+        {
+          "darija": "اشمن دوا نرش؟",
+          "fr": "Quel produit dois-je pulvériser ?",
+          "statut": "brouillon - à valider par un locuteur natif"
+        },
+        {
+          "darija": "chno smad li n7et?",
+          "fr": "Quel engrais mettre ? (lettres latines)",
+          "statut": "brouillon - à valider par un locuteur natif"
+        },
+        {
+          "darija": "ch7al dyal lghbar?",
+          "fr": "Combien d'engrais ? (lettres latines)",
+          "statut": "brouillon - à valider par un locuteur natif"
+        }
+      ]
+    },
+    {
+      "id": "RENDEMENT",
+      "description_fr": "Rendement, récolte, gains.",
+      "hors_perimetre": true,
+      "donnees_utilisees": [],
+      "modeles_reponse": [
+        "rep_rendement_hors",
+        "voir_conseiller"
+      ],
+      "mots_cles": [
+        "نجمع",
+        "الصابه",
+        "صابه",
+        "قنطار",
+        "القنطار",
+        "نربح",
+        "الغله",
+        "njma3",
+        "saba",
+        "9ntar",
+        "l9ntar",
+        "nrba7",
+        "tonne"
+      ],
+      "exemples_darija": [
+        {
+          "darija": "شحال غادي نجمع؟",
+          "fr": "Combien vais-je récolter ?",
+          "statut": "brouillon - à valider par un locuteur natif"
+        },
+        {
+          "darija": "شحال ديال القنطار غادي تعطيني؟",
+          "fr": "Combien de quintaux va-t-elle me donner ?",
+          "statut": "brouillon - à valider par un locuteur natif"
+        },
+        {
+          "darija": "واش الصابة غادي تكون مزيانة؟",
+          "fr": "La récolte sera-t-elle bonne ?",
+          "statut": "brouillon - à valider par un locuteur natif"
+        },
+        {
+          "darija": "شحال غادي نربح؟",
+          "fr": "Combien vais-je gagner ?",
+          "statut": "brouillon - à valider par un locuteur natif"
+        },
+        {
+          "darija": "ch7al ghadi njma3?",
+          "fr": "Combien vais-je récolter ? (lettres latines)",
+          "statut": "brouillon - à valider par un locuteur natif"
+        },
+        {
+          "darija": "wach saba ghadi tkon mzyana?",
+          "fr": "La récolte sera-t-elle bonne ? (lettres latines)",
+          "statut": "brouillon - à valider par un locuteur natif"
+        }
+      ]
+    },
+    {
+      "id": "INCONNU",
+      "description_fr": "Question non comprise ou hors sujet : « je n'ai pas compris », puis choix avec des icônes.",
+      "hors_perimetre": true,
+      "donnees_utilisees": [],
+      "modeles_reponse": [
+        "rep_inconnu"
+      ],
+      "mots_cles": [],
+      "exemples_darija": []
+    }
+  ]
+}

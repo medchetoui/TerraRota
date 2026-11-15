@@ -1,0 +1,11 @@
+id,a_dire,ecriture_arabe,texte_avant,type_attendu,culture_attendue,traduction_fr,statut
+V01,chno nzra3 had l3am?,شنو نزرع هاد العام؟,شنو نزرع هاد العام؟,QUOI_PLANTER,,Que planter cette année ?,corrigé – à valider par Ranya
+V02,wach nkemel b l9am7?,واش نكمل بالقمح؟,واش نكمل بالقمح؟,AVIS_CULTURE,ble_tendre,Est-ce que je continue avec le blé ?,corrigé – à valider par Ranya
+V03,3lach had nasi7a?,علاش هاد النصيحة؟,علاش هاد النصيحة؟,POURQUOI,,Pourquoi ce conseil ?,corrigé – à valider par Ranya
+V04,wach ghadi tsob chta bzaf?,واش غادي تصب الشتا بزاف؟,واش غادي تشتا بزاف؟,PLUIE_METEO,,Va-t-il beaucoup pleuvoir ?,corrigé – à valider par Ranya
+V05,wach l2ard dyali mzyana?,واش الأرض ديالي مزيانة؟,واش الأرض ديالي مزيانة؟,SOL,,Ma terre est-elle bonne ?,corrigé – à valider par Ranya
+V06,"ma 3ndich sqi, ach ndir?",ما عنديش السقي، آش ندير؟,ما عنديش السقي شنو ندير؟,EAU_IRRIGATION,,Je n'ai pas d'irrigation : que faire ?,corrigé – à valider par Ranya
+V07,wach nzra3 l3des?,واش نزرع العدس؟,واش نزرع العدس؟,AVIS_CULTURE,lentille,Est-ce que je plante des lentilles ?,corrigé – à valider par Ranya
+V08,wach n7et lghbar?,واش نحط الغبار؟,واش نحط الزبل؟,HORS_PERIMETRE,,Est-ce que je mets du fumier ?,corrigé – à valider par Ranya
+V09,wach nti9 b had nasi7a?,واش نتيق بهاد النصيحة؟,واش نتيق فهاد النصيحة؟,FIABILITE,,Puis-je faire confiance à ce conseil ?,corrigé – à valider par Ranya
+V10,ch7al ghadi n7sed?,شحال غادي نحصد؟,شحال غادي نجمع؟,HORS_PERIMETRE,,Combien vais-je récolter ?,corrigé – à valider par Ranya
