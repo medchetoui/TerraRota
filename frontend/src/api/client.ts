@@ -208,6 +208,7 @@ export interface FellahPhrase {
   darija: string;
   fr: string;
   audio: string | null;
+  voix?: 'synthese' | 'humaine' | null;
 }
 
 export interface FellahParcelle {
@@ -281,6 +282,7 @@ export interface FellahPhraseEtat {
   demo: boolean;
   present: boolean;
   a_refaire: boolean;
+  voix?: 'synthese' | 'humaine' | null;
 }
 
 export interface FellahValidation {

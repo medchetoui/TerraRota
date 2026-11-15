@@ -51,6 +51,19 @@ def _manifeste(audio_dir):
     return json.loads(chemin.read_text(encoding="utf-8")) if chemin.exists() else {}
 
 
+def voix_du_clip(manifeste, clip):
+    """« synthese » si le clip a été généré (generer_voix_synthese.py), sinon « humaine »."""
+    return "synthese" if (manifeste.get(clip) or {}).get("source") == "synthese" else "humaine"
+
+
+def noter_clip(audio_dir, clip, texte, source, **infos):
+    manifeste = _manifeste(audio_dir)
+    manifeste[clip] = {"texte": texte, "source": source, "quand": datetime.now().isoformat(timespec="seconds"), **infos}
+    _ecrire_atomique(Path(audio_dir) / "enregistrements.json",
+                     (json.dumps(manifeste, ensure_ascii=False, indent=2, sort_keys=True) + "\n").encode("utf-8"))
+    return manifeste[clip]
+
+
 def _ecrire_atomique(chemin, octets):
     chemin = Path(chemin)
     chemin.parent.mkdir(parents=True, exist_ok=True)
@@ -73,6 +86,7 @@ def etat_phrases(audio_dir):
         lu = (manifeste.get(i) or {}).get("texte")
         out.append({"id": i, "darija": m["texte_darija"], "fr": m["traduction_fr"], "statut": m["statut"],
                     "texte_avant": m.get("texte_avant", ""), "demo": i in demo, "present": present,
+                    "voix": voix_du_clip(manifeste, i) if present else None,
                     "a_refaire": bool(present and lu is not None and lu != m["texte_darija"])})
     return out
 
@@ -105,11 +119,7 @@ def enregistrer_clip(clip, octets, audio_dir):
     if probleme:
         return None, probleme
     _ecrire_atomique(Path(audio_dir) / f"{clip}.wav", octets)
-    manifeste = _manifeste(audio_dir)
-    manifeste[clip] = {"texte": modeles[clip]["texte_darija"], "quand": datetime.now().isoformat(timespec="seconds")}
-    _ecrire_atomique(Path(audio_dir) / "enregistrements.json",
-                     (json.dumps(manifeste, ensure_ascii=False, indent=2, sort_keys=True) + "\n").encode("utf-8"))
-    return manifeste[clip], None
+    return noter_clip(audio_dir, clip, modeles[clip]["texte_darija"], "humaine"), None
 
 
 def verifier_texte(texte):

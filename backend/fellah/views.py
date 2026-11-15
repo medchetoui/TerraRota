@@ -43,15 +43,22 @@ def questions_voix():
 
 
 def _phrases(resultat):
+    """Phrases de la réponse ; pour chaque clip présent, la voix : « synthese » (générée) ou « humaine »."""
     modeles = RD.modeles()
+    manifeste = atelier._manifeste(AUDIO_DIR)
     out = []
     for groupe in resultat["phrases"]:
-        out.append([{
-            "id": i,
-            "darija": modeles[i]["texte_darija"],
-            "fr": modeles[i]["traduction_fr"],
-            "audio": f"{AUDIO_URL}{i}.wav" if (AUDIO_DIR / f"{i}.wav").exists() else None,
-        } for i in groupe])
+        ligne = []
+        for i in groupe:
+            present = (AUDIO_DIR / f"{i}.wav").exists()
+            ligne.append({
+                "id": i,
+                "darija": modeles[i]["texte_darija"],
+                "fr": modeles[i]["traduction_fr"],
+                "audio": f"{AUDIO_URL}{i}.wav" if present else None,
+                "voix": atelier.voix_du_clip(manifeste, i) if present else None,
+            })
+        out.append(ligne)
     return out
 
 

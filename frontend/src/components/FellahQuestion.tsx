@@ -147,6 +147,7 @@ function FellahQuestionPanel({ parcelle = null, regionName = '' }: Props) {
   };
 
   const clips = (answer?.phrases.flat().map((p) => p.audio).filter(Boolean) as string[]) || [];
+  const synthese = !!answer?.phrases.flat().some((p) => p.audio && p.voix === 'synthese');
 
   const play = () => {
     if (playing) {
@@ -300,6 +301,9 @@ function FellahQuestionPanel({ parcelle = null, regionName = '' }: Props) {
             {clips.length === 0 ? <VolumeX className="w-5 h-5" /> : <Volume2 className="w-5 h-5" />}
             <span>{clips.length === 0 ? 'الصوت مازال ما تسجلش' : playing ? 'وقف' : 'سمع الجواب'}</span>
           </button>
+          {synthese && (
+            <div className="text-[10px] text-[#7A6B53] text-center" data-testid="voix-synthese">صوت اصطناعي · voix de synthèse</div>
+          )}
           <div className="text-[10px] text-[#7A6B53]" dir="ltr" data-testid="badge-source">
             {answer.scenario === 'parcelle'
               ? `Votre parcelle — moteur du Membre 2, climat NASA (${parcelle?.data_status ?? 'inconnu'})`

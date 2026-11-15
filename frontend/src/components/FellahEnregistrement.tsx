@@ -23,7 +23,8 @@ export default function FellahEnregistrement() {
 
   const liste = (phrases || []).filter((p) => toutes || p.demo);
   const courante = liste[Math.min(index, liste.length - 1)];
-  const faits = liste.filter((p) => p.present && !p.a_refaire).length;
+  const faits = liste.filter((p) => p.present && !p.a_refaire && p.voix !== 'synthese').length;
+  const synthese = liste.filter((p) => p.present && p.voix === 'synthese').length;
 
   const oublier = () => {
     if (wav) URL.revokeObjectURL(wav.url);
@@ -71,11 +72,11 @@ export default function FellahEnregistrement() {
     setEtat('envoi');
     try {
       await saveFellahClip(courante.id, wav.blob);
-      setPhrases((ps) => (ps || []).map((p) => (p.id === courante.id ? { ...p, present: true, a_refaire: false } : p)));
+      setPhrases((ps) => (ps || []).map((p) => (p.id === courante.id ? { ...p, present: true, a_refaire: false, voix: 'humaine' } : p)));
       setVersion(Date.now());
       setMessage(`✓ ${courante.id}.wav enregistré`);
       oublier();
-      const suivante = liste.findIndex((p, i) => i > index && (!p.present || p.a_refaire));
+      const suivante = liste.findIndex((p, i) => i > index && (!p.present || p.a_refaire || p.voix === 'synthese'));
       if (suivante >= 0) setIndex(suivante);
     } catch (e) {
       const detail = (e as { data?: { message?: string } }).data?.message;
@@ -92,7 +93,10 @@ export default function FellahEnregistrement() {
     <div className="bg-[#FAF7F2] p-6 rounded-3xl border border-[#DECAB3] shadow-sm max-w-2xl mx-auto space-y-5" data-testid="enregistrement">
       <div className="flex items-center justify-between flex-wrap gap-2" dir="ltr">
         <h4 className="text-lg font-bold text-[#1E331A]">Enregistrer les clips darija</h4>
-        <div className="text-2xl font-black text-[#2D4A27]" data-testid="compteur">{faits} / {liste.length}</div>
+        <div className="text-right">
+          <div className="text-2xl font-black text-[#2D4A27]" data-testid="compteur">{faits} / {liste.length}</div>
+          {synthese > 0 && <div className="text-[11px] text-[#7A6B53]">{synthese} en voix de synthèse, remplacées par vos prises</div>}
+        </div>
       </div>
       <label className="flex items-center gap-2 text-sm text-[#61513C]" dir="ltr">
         <input type="checkbox" checked={toutes} onChange={(e) => { setToutes(e.target.checked); aller(0); }} />
@@ -103,7 +107,8 @@ export default function FellahEnregistrement() {
         <div className="rounded-2xl bg-white border border-[#DECAB3] p-6 space-y-3 text-center">
           <div className="text-xs text-[#7A6B53]" dir="ltr">
             {index + 1} / {liste.length} · <code data-testid="nom-fichier">{courante.id}.wav</code>
-            {courante.present && !courante.a_refaire && ' · ✓ déjà enregistré'}
+            {courante.present && !courante.a_refaire && courante.voix !== 'synthese' && ' · ✓ déjà enregistré'}
+            {courante.present && courante.voix === 'synthese' && ' · voix de synthèse (✓ garder votre prise la remplace)'}
             {courante.a_refaire && ' · ⚠ texte modifié depuis : à réenregistrer'}
           </div>
           <div className="text-4xl leading-relaxed font-bold text-[#1E331A]" dir="rtl" data-testid="phrase">{courante.darija}</div>
@@ -137,7 +142,7 @@ export default function FellahEnregistrement() {
         {liste.map((p, i) => (
           <button key={p.id} type="button" title={p.id} onClick={() => aller(i)}
             className={`w-7 h-7 rounded-full text-[10px] cursor-pointer ${i === index ? 'ring-2 ring-[#8C3A27]' : ''} ${
-              p.a_refaire ? 'bg-amber-300' : p.present ? 'bg-[#2D4A27] text-white' : 'bg-[#E5DDCF]'}`}>{i + 1}</button>
+              p.a_refaire ? 'bg-amber-300' : p.present && p.voix === 'synthese' ? 'bg-sky-200' : p.present ? 'bg-[#2D4A27] text-white' : 'bg-[#E5DDCF]'}`}>{i + 1}</button>
         ))}
       </div>
     </div>

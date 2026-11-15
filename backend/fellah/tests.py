@@ -278,3 +278,45 @@ def test_demo_tools_are_off_outside_debug(client):
         assert client.get("/api/v1/fellah/phrases/").status_code == 404
         assert client.post("/api/v1/fellah/clips/hiba_et/", _wav(), content_type="audio/wav").status_code == 404
         assert client.post("/api/v1/fellah/phrases/hiba_et/", {"action": "ok"}, format="json").status_code == 404
+
+
+# ─── Voix de synthèse : générée une fois, jamais à la place d'un enregistrement humain ───
+
+def test_synthetic_voice_never_replaces_a_human_clip_and_is_labelled(client, atelier_tmp):
+    from fellah import generer_voix_synthese as G
+    audio, _ = atelier_tmp
+    lus = []
+
+    def faux_tts(texte, voix, chemin):
+        lus.append(texte)
+        chemin.write_bytes(_wav())
+
+    def fausse_conversion(source, cible):
+        cible.write_bytes(source.read_bytes())
+
+    client.post("/api/v1/fellah/clips/hiba_mostachar/", _wav(), content_type="audio/wav")
+    humain = (audio / "hiba_mostachar.wav").read_bytes()
+    ids = ["hiba_mostachar", "hiba_alternative", "hiba_culture_pois_chiche", "hiba_culture_ble_tendre", "hiba_culture_non"]
+    bilan = G.generer(audio, ids, synthetiser=faux_tts, convertir=fausse_conversion)
+    assert bilan["humains_gardes"] == ["hiba_mostachar"] and len(bilan["generes"]) == 4
+    assert (audio / "hiba_mostachar.wav").read_bytes() == humain
+    from fellah.darija import repondre_darija as RD
+    assert lus == [RD.modeles()[i]["texte_darija"] for i in ids[1:]]
+    r = poser(client, "واش نبقى نزرع القمح؟").json()
+    voix = {p["id"]: p["voix"] for g in r["phrases"] for p in g}
+    assert voix["hiba_mostachar"] == "humaine" and voix["hiba_alternative"] == "synthese"
+    assert G.generer(audio, ids, synthetiser=faux_tts, convertir=fausse_conversion)["deja_faits"] == ids[1:]
+    client.post("/api/v1/fellah/clips/hiba_alternative/", _wav(), content_type="audio/wav")
+    r = poser(client, "واش نبقى نزرع القمح؟").json()
+    assert {p["id"]: p["voix"] for g in r["phrases"] for p in g}["hiba_alternative"] == "humaine"
+
+
+def test_synthetic_voice_failure_leaves_clip_absent(atelier_tmp):
+    from fellah import generer_voix_synthese as G
+    audio, _ = atelier_tmp
+
+    def panne(texte, voix, chemin):
+        raise ConnectionError("pas d'internet")
+
+    bilan = G.generer(audio, ["hiba_et"], synthetiser=panne, convertir=lambda s, c: None)
+    assert bilan["erreurs"] and not (audio / "hiba_et.wav").exists()
