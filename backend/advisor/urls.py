@@ -21,4 +21,7 @@ urlpatterns = [
     # Plan proposal workflow (propose → farmer approves/rejects)
     path("plan-proposal/", views.advisor_plan_proposal, name="advisor_plan_proposal"),
     path("plan-proposal/<int:proposal_id>/approve/", views.advisor_plan_proposal_approve, name="advisor_plan_proposal_approve"),
+
+    # High-Definition Human Neural Voice Streaming (Real Human Tone)
+    path("voice/speak/", views.advisor_speak, name="advisor_speak"),
 ]

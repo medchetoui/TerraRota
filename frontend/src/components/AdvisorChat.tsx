@@ -31,9 +31,39 @@ export const AdvisorChat: React.FC<AdvisorChatProps> = ({
     onSendMessage(msg);
   };
 
-  const speakText = (text: string) => {
+  const currentAudioRef = React.useRef<HTMLAudioElement | null>(null);
+
+  const speakText = async (text: string) => {
+    if (currentAudioRef.current) {
+      currentAudioRef.current.pause();
+      currentAudioRef.current = null;
+    }
+    if ('speechSynthesis' in window) {
+      window.speechSynthesis.cancel();
+    }
+
+    try {
+      // 1. Try human neural voice from backend
+      const resp = await fetch('/api/v1/advisor/voice/speak/', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ text, lang }),
+      });
+      if (resp.ok) {
+        const blob = await resp.blob();
+        const url = URL.createObjectURL(blob);
+        const audio = new Audio(url);
+        currentAudioRef.current = audio;
+        audio.onended = () => URL.revokeObjectURL(url);
+        await audio.play();
+        return;
+      }
+    } catch {
+      // fallback
+    }
+
+    // 2. Fallback
     if (!('speechSynthesis' in window)) return;
-    window.speechSynthesis.cancel();
     const utterance = new SpeechSynthesisUtterance(text);
     const targetLang = isAr ? 'ar' : isEn ? 'en' : 'fr';
     utterance.lang = isAr ? 'ar-XA' : isEn ? 'en-US' : 'fr-FR';

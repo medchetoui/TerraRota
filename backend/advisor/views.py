@@ -35,8 +35,57 @@ from .serializers import (
 )
 from .context import build_context
 from .chat import answer, compare_crops
+from io import BytesIO
+from django.http import HttpResponse
 
 logger = logging.getLogger("terrarota")
+
+
+# ─── Natural Human Voice Audio Synthesizer (Studio Quality) ───────────────────
+
+@api_view(["POST"])
+@permission_classes([AllowAny])
+def advisor_speak(request):
+    """
+    POST /api/v1/advisor/voice/speak/
+    Generates real human-sounding speech MP3 on the fly for any Arabic/Darija,
+    French, or English text using Google's Neural Text-to-Speech engine.
+    """
+    text = str(request.data.get("text") or "").strip()
+    lang = str(request.data.get("lang") or "ar").strip().lower()
+
+    if not text:
+        return Response({"status": "error", "message": "text is required"}, status=status.HTTP_400_BAD_REQUEST)
+
+    try:
+        from gtts import gTTS
+        # Map lang to gTTS language code with regional accent
+        tts_lang = "ar"
+        tld = "com"
+        if lang == "fr":
+            tts_lang = "fr"
+            tld = "fr"
+        elif lang == "en":
+            tts_lang = "en"
+            tld = "com"
+        else:
+            tts_lang = "ar"
+            tld = "com"
+
+        tts = gTTS(text=text, lang=tts_lang, tld=tld, slow=False)
+        fp = BytesIO()
+        tts.write_to_fp(fp)
+        fp.seek(0)
+
+        response = HttpResponse(fp.read(), content_type="audio/mpeg")
+        response["Content-Disposition"] = 'inline; filename="ami_ahmed_voice.mp3"'
+        return response
+    except Exception as exc:
+        logger.warning("gTTS generation error: %s", exc)
+        return Response({
+            "status": "error",
+            "message": f"TTS synthesis unavailable: {exc}",
+        }, status=status.HTTP_503_SERVICE_UNAVAILABLE)
 
 
 # ─── Farmer Context ───────────────────────────────────────────────────────────

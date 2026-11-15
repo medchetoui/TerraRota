@@ -93,32 +93,78 @@ export const VoiceCallScreen: React.FC<VoiceCallScreenProps> = ({
     };
   }, []);
 
-  // Web Speech Synthesis (TTS) - Enhanced with Natural Voices (Arabic/French/English)
-  const speakText = (text: string, onEnd?: () => void) => {
-    if (!('speechSynthesis' in window)) {
-      if (onEnd) onEnd();
-      return;
-    }
-    window.speechSynthesis.cancel();
+  const audioPlayerRef = useRef<HTMLAudioElement | null>(null);
+
+  // Play high-definition human voice from backend neural TTS with fallback to browser
+  const speakText = async (text: string, onEnd?: () => void) => {
     isSpeakingRef.current = true;
     setCallState('speaking');
     setCurrentAiSpeech(text);
 
+    // Stop previous audio if any
+    if (audioPlayerRef.current) {
+      audioPlayerRef.current.pause();
+      audioPlayerRef.current = null;
+    }
+    if ('speechSynthesis' in window) {
+      window.speechSynthesis.cancel();
+    }
+
+    try {
+      // 1. First priority: Server-side Human Neural Voice (/api/v1/advisor/voice/speak/)
+      const response = await fetch('/api/v1/advisor/voice/speak/', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ text, lang }),
+      });
+
+      if (response.ok) {
+        const blob = await response.blob();
+        const audioUrl = URL.createObjectURL(blob);
+        const audio = new Audio(audioUrl);
+        audioPlayerRef.current = audio;
+
+        audio.onended = () => {
+          isSpeakingRef.current = false;
+          URL.revokeObjectURL(audioUrl);
+          if (isCallActiveRef.current) {
+            if (onEnd) onEnd();
+            else startListening();
+          }
+        };
+
+        audio.onerror = () => {
+          fallbackWebSpeech(text, onEnd);
+        };
+
+        await audio.play();
+        return;
+      }
+    } catch (err) {
+      console.warn('Backend human voice unavailable, falling back to Web Speech:', err);
+    }
+
+    // 2. Fallback: Browser Web Speech API
+    fallbackWebSpeech(text, onEnd);
+  };
+
+  const fallbackWebSpeech = (text: string, onEnd?: () => void) => {
+    if (!('speechSynthesis' in window)) {
+      if (onEnd) onEnd();
+      return;
+    }
     const utterance = new SpeechSynthesisUtterance(text);
     const targetLang = isAr ? 'ar' : isEn ? 'en' : 'fr';
     utterance.lang = isAr ? 'ar-XA' : isEn ? 'en-US' : 'fr-FR';
 
-    // Pick the most natural human-like voice available in the user's OS / browser
     const voices = window.speechSynthesis.getVoices();
     if (voices && voices.length > 0) {
-      // Prioritize natural Google / Microsoft Neural / Apple voices
       const matchingVoices = voices.filter((v) =>
         v.lang.toLowerCase().startsWith(targetLang)
       );
-
       const naturalVoice = matchingVoices.find((v) =>
         /natural|neural|google|premium|enhanced/i.test(v.name)
-      ) || matchingVoices.find((v) => !/desktop/i.test(v.name)) || matchingVoices[0];
+      ) || matchingVoices[0];
 
       if (naturalVoice) {
         utterance.voice = naturalVoice;
@@ -126,9 +172,8 @@ export const VoiceCallScreen: React.FC<VoiceCallScreenProps> = ({
       }
     }
 
-    // Warm, respectful advisory pace & pitch
     utterance.rate = isAr ? 0.92 : 0.96;
-    utterance.pitch = 0.95; // Slightly deeper, warm advisor tone
+    utterance.pitch = 0.95;
 
     utterance.onend = () => {
       isSpeakingRef.current = false;
@@ -138,8 +183,7 @@ export const VoiceCallScreen: React.FC<VoiceCallScreenProps> = ({
       }
     };
 
-    utterance.onerror = (e) => {
-      console.warn('SpeechSynthesis error:', e);
+    utterance.onerror = () => {
       isSpeakingRef.current = false;
       if (isCallActiveRef.current) {
         if (onEnd) onEnd();
@@ -147,12 +191,15 @@ export const VoiceCallScreen: React.FC<VoiceCallScreenProps> = ({
       }
     };
 
-    // Chrome bug workaround: ensure resume before speak
     window.speechSynthesis.resume();
     window.speechSynthesis.speak(utterance);
   };
 
   const stopSpeaking = () => {
+    if (audioPlayerRef.current) {
+      audioPlayerRef.current.pause();
+      audioPlayerRef.current = null;
+    }
     if ('speechSynthesis' in window) {
       window.speechSynthesis.cancel();
     }
