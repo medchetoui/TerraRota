@@ -130,9 +130,11 @@ def advisor_speak(request):
     except Exception as exc:
         logger.warning("edge-tts unavailable (%s), falling back to gTTS", exc)
 
-    # ── 2. Fallback: gTTS (robotic, but works offline) ────────────────────────
+    # ── 2. Fallback: gTTS (works offline) ────────────────────────────────────
     try:
-        from gtts import gTTS
+        import importlib
+        gtts_mod = importlib.import_module("gtts")
+        gTTS = getattr(gtts_mod, "gTTS")
         tts_lang, tld = _GTTS_LANG_MAP.get(lang, ("ar", "com"))
         tts = gTTS(text=text, lang=tts_lang, tld=tld, slow=False)
         fp = BytesIO()
