@@ -603,3 +603,122 @@ class TestPotatoAndAlmondRules(TestCase):
         res = rank(indicators, inputs)
         rec_ids = [c["crop_id"] for c in res["recommendations"]]
         self.assertIn("almond", rec_ids)
+
+
+class TestNewFeaturesAndEndpoints(APITestCase):
+    def test_crops_detail_endpoint(self):
+        resp = self.client.get("/api/v1/crops/detail/")
+        self.assertEqual(resp.status_code, 200)
+        data = resp.json()
+        self.assertEqual(data["status"], "ok")
+        self.assertGreaterEqual(data["total"], 12)
+        crop_ids = [c["id"] for c in data["crops"]]
+        self.assertIn("lentil", crop_ids)
+        self.assertIn("faba_bean", crop_ids)
+
+    def test_data_sources_endpoint(self):
+        resp = self.client.get("/api/v1/data-sources/")
+        self.assertEqual(resp.status_code, 200)
+        sources = resp.json()["data_sources"]
+        self.assertTrue(any(s["id"] == "nasa_power_ag" for s in sources))
+        self.assertTrue(any(s["status"] == "fully_integrated" for s in sources))
+
+    def test_scenarios_endpoint(self):
+        with patch("api.views.nasa_power.fetch_climate_data", return_value=_make_climate_result(status="live")):
+            resp = self.client.post("/api/v1/scenarios/", {
+                "latitude": 31.52,
+                "longitude": -8.75,
+                "water_access": "rainfed",
+                "previous_crop": "wheat_hard",
+            }, format="json")
+        self.assertEqual(resp.status_code, 200)
+        data = resp.json()
+        self.assertEqual(data["status"], "ok")
+        self.assertGreaterEqual(len(data["scenarios"]), 3)
+        self.assertIn("crop_sequence", data["scenarios"][0])
+
+    def test_whatif_endpoint(self):
+        with patch("api.views.nasa_power.fetch_climate_data", return_value=_make_climate_result(status="live")):
+            resp = self.client.post("/api/v1/whatif/", {
+                "latitude": 31.52,
+                "longitude": -8.75,
+                "water_access": "rainfed",
+                "previous_crop": "wheat_hard",
+                "simulated_changes": {
+                    "rain_factor": 0.8,
+                    "temp_delta": 2.0,
+                    "water_access": "irrigated",
+                }
+            }, format="json")
+        self.assertEqual(resp.status_code, 200)
+        sim = resp.json()["simulation"]
+        self.assertIn("crop_comparisons", sim)
+        self.assertIn("changes_applied", sim)
+
+    def test_priorities_weighting(self):
+        with patch("api.views.nasa_power.fetch_climate_data", return_value=_make_climate_result(status="live")):
+            resp_no_prio = self.client.post("/api/v1/recommendations/", {
+                "latitude": 31.52, "longitude": -8.75, "water_access": "rainfed"
+            }, format="json")
+            resp_soil = self.client.post("/api/v1/recommendations/", {
+                "latitude": 31.52, "longitude": -8.75, "water_access": "rainfed",
+                "farmer_priorities": {"soil_health": 1.0, "profitability": 0.0}
+            }, format="json")
+        self.assertEqual(resp_soil.status_code, 200)
+        recs_soil = {r["crop_id"]: r["score"] for r in resp_soil.json()["recommendations"]}
+        recs_no = {r["crop_id"]: r["score"] for r in resp_no_prio.json()["recommendations"]}
+        # Legumes like chickpea or faba_bean should score higher or equal with soil health priority
+        self.assertGreaterEqual(recs_soil.get("chickpea", 0), recs_no.get("chickpea", 0))
+
+    def test_farm_plans_workflow(self):
+        # Register user
+        reg = self.client.post("/api/v1/auth/register/", {
+            "username": "plan_tester",
+            "password": "planpassword123",
+        }, format="json")
+        token = reg.json()["access"]
+        self.client.credentials(HTTP_AUTHORIZATION=f"Bearer {token}")
+
+        # Create parcel
+        parcel_resp = self.client.post("/api/v1/parcels/", {
+            "name": "Ferme Chaouia Plan Test",
+            "latitude": 33.0,
+            "longitude": -7.6,
+        }, format="json")
+        parcel_id = parcel_resp.json()["parcel"]["id"]
+
+        # Create plan (proposed)
+        plan_resp = self.client.post("/api/v1/plans/", {
+            "parcel": parcel_id,
+            "title": "Rotation Triennale 2026-2029",
+            "status": "proposed",
+            "selected_crop": "chickpea",
+            "crop_sequence": ["chickpea", "wheat_hard", "barley"],
+        }, format="json")
+        self.assertEqual(plan_resp.status_code, 201)
+        plan_id = plan_resp.json()["plan"]["id"]
+
+        # Approve plan
+        patch_resp = self.client.patch(f"/api/v1/plans/{plan_id}/", {
+            "status": "approved",
+            "farmer_feedback": "Plan validé pour la saison d'automne.",
+        }, format="json")
+        self.assertEqual(patch_resp.status_code, 200)
+        self.assertEqual(patch_resp.json()["plan"]["status"], "approved")
+
+    def test_decision_report_endpoint(self):
+        with patch("api.views.nasa_power.fetch_climate_data", return_value=_make_climate_result(status="live")):
+            resp = self.client.post("/api/v1/reports/decision-report/", {
+                "latitude": 31.52,
+                "longitude": -8.75,
+                "water_access": "rainfed",
+                "previous_crop": "wheat_hard",
+                "farm_name": "Domaine Al Baraka",
+            }, format="json")
+        self.assertEqual(resp.status_code, 200)
+        report = resp.json()["report"]
+        self.assertIn("report_id", report)
+        self.assertIn("farm", report)
+        self.assertIn("nasa_provenance", report)
+        self.assertIn("scientific_citations", report)
+

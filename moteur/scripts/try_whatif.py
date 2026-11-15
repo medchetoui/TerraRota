@@ -48,21 +48,3 @@ else:
     for key in rest or PRESETS:
         run(PRESETS[key]["label"], PRESETS[key]["changes"])
         
-def test_replacing_the_plan_is_compared_with_the_new_lines():
-    res = what_if(BLE, {"P1": AFTER_WHEAT},
-                  {"plan": [{"parcel": "P1", "crop": "pois", "area_ha": 2}]},
-                  crops=CROPS, config=CONFIG, plan_year=2026)
-    line = res["comparison"]["lines"][0]
-    assert line["crop"] == "pois" and line["score_before"] is None and line["score_after"] == 100
-    assert res["comparison"]["changed"]
-
-
-def test_set_changes_a_condition():
-    out = apply_changes({"P1": GOOD}, {"set": {"ph": 8}}, previous_year=2025)
-    assert out["P1"]["conditions"]["ph"] == 8 and "ph" not in GOOD["conditions"]
-
-
-def test_changes_can_target_one_parcel():
-    parcels = {"P1": GOOD, "P2": GOOD}
-    out = apply_changes(parcels, {"rain_factor": 0.5, "parcels": ["P2"]}, previous_year=2025)
-    assert out["P1"]["conditions"]["rain_mm"] == 800 and out["P2"]["conditions"]["rain_mm"] == 400        

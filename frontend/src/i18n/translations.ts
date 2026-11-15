@@ -1,5 +1,5 @@
-// i18n translations — French (primary) and Arabic (complete)
-export type Lang = 'fr' | 'ar';
+// i18n translations — French, Arabic, and English (complete)
+export type Lang = 'fr' | 'ar' | 'en';
 
 export const translations = {
   fr: {
@@ -223,6 +223,122 @@ export const translations = {
     aboutTitle: 'حول مشروع تيرا روتا',
     aboutText: 'تيرا روتا هو نظام رقمي علمي لمساعدة الفلاحين المغاربة على اختيار المحاصيل الأكثر صموداً أمام الجفاف وتغير المناخ بالاعتماد على رصد الأقمار الاصطناعية لناسا.',
     disclaimer: 'تنبيه: التوصيات المقدمة هي للمساعدة في اتخاذ القرار وتستوجب مراجعة خبير فلاحي محلي.',
+  },
+  en: {
+    // App
+    appName: 'TerraRota',
+    tagline: 'Crop recommendations powered by NASA Earth observations',
+    subtitle: 'Real satellite climate data for evidence-based agricultural decisions and drought resilience',
+    startBtn: 'Start Analysis',
+
+    // Steps
+    step1: 'Field Location',
+    step2: 'Farm Details',
+    step3: 'Verification',
+    step4: 'Results',
+
+    // Form
+    latitude: 'Latitude',
+    longitude: 'Longitude',
+    latitudeHelp: 'e.g. 31.52 (Marrakech)',
+    longitudeHelp: 'e.g. -8.75 (Marrakech)',
+    previousCrop: 'Previous Crop',
+    waterAccess: 'Water Access',
+    soilType: 'Soil Type',
+    fieldSize: 'Field Size (ha)',
+    preferredCrops: 'Preferred Crops (optional)',
+    notes: 'Additional Notes',
+    nextBtn: 'Next',
+    backBtn: 'Back',
+    submitBtn: 'Get Crop Recommendations',
+    reviseBtn: 'Modify Input Data',
+
+    // Water access options
+    rainfed: 'Rainfed (No irrigation)',
+    irrigated: 'Irrigated (Drip / Well)',
+    partial: 'Partially Irrigated (Supplemental)',
+
+    // Soil types
+    clay: 'Clay',
+    clay_loam: 'Clay Loam (Tirs)',
+    loam: 'Loam',
+    sandy_loam: 'Sandy Loam (Hamri)',
+    sandy: 'Sandy',
+    unknown: 'Unknown / Not specified',
+
+    // Crop names
+    wheat_hard: 'Durum Wheat',
+    wheat_soft: 'Soft Wheat',
+    barley: 'Barley',
+    olive: 'Olive',
+    argan: 'Argan',
+    tomato: 'Tomato',
+    chickpea: 'Chickpea',
+    cactus_pear: 'Cactus Pear',
+    potato: 'Potato',
+    almond: 'Almond',
+    none: 'None / Fallow land',
+
+    // Results
+    recommendations: 'Crop Recommendations',
+    indicators: 'Satellite Agro-Climatic Indicators',
+    annualRain: 'Cumulative Annual Rainfall',
+    meanTemp: 'Mean Annual Temperature',
+    gdd: 'Growing Degree Days (GDD Base 10°C)',
+    frostDays: 'Frost Days per Year',
+    aridityIndex: 'UNEP Aridity Index (AI)',
+    dryMonths: 'Dry Months per Year (<30mm)',
+    score: 'Suitability Score',
+    reasons: 'Favorable Factors',
+    cautions: 'Vigilance & Risks',
+    rulesApplied: 'Applied Scientific Rules',
+    provisional: 'Agronomic Notice',
+    provisionalNote: 'Provisional decision model based on NASA and INRA agroclimatology. Consult a local advisor.',
+    insufficientData: 'Insufficient Data',
+    noRecommendations: 'No suitable crops found for these environmental conditions.',
+    sampleDataWarning: 'Offline mode: Demonstrative simulated NASA data.',
+    dataSource: 'Satellite Data Source',
+    period: 'Analyzed Time Window',
+    resolution: 'Spatial Resolution',
+    loading: 'Fetching NASA Earth observations...',
+    loadingDetail: 'Direct connection to NASA POWER, computing agro-climatic indicators...',
+    errorTitle: 'Processing Error',
+    errorRetry: 'Retry',
+    missingData: 'Missing Data',
+    rank: 'Rank',
+    ineligible: 'Agronomically Ineligible',
+    ineligibleReason: 'Rejection Reason',
+    reviewTitle: 'Verify Field Parameters',
+    reviewCoords: 'Geographic Coordinates',
+    reviewConstraints: 'Pedoclimatic Constraints',
+    nasaLive: 'NASA Direct Live Data',
+    nasaCached: 'NASA Cached Observations',
+    nasaSample: 'Simulated NASA Data',
+
+    // Auth & Saved Parcels
+    login: 'Log In',
+    register: 'Create Account',
+    logout: 'Log Out',
+    username: 'Username',
+    password: 'Password',
+    email: 'Email Address',
+    saveParcel: 'Save this Field to My Account',
+    myParcels: 'My Saved Fields',
+    parcelName: 'Field Name (e.g. Haouz Farm)',
+    savedSuccess: 'Field successfully saved!',
+    noParcels: 'No saved fields yet.',
+    loadParcel: 'Load Field Data',
+    authRequired: 'Log in to save and track your fields.',
+
+    // Validation
+    requiredField: 'This field is required.',
+    invalidLat: 'Latitude must be between -90 and 90.',
+    invalidLon: 'Longitude must be between -180 and 180.',
+
+    // About
+    aboutTitle: 'About TerraRota',
+    aboutText: 'TerraRota is an agricultural decision-support platform designed for Moroccan farmers and agronomists, combining NASA Earth observations with INRA and FAO crop rotation rules for climate and drought resilience.',
+    disclaimer: 'Disclaimer: Recommendations are provided as technical decision support. Consult an agronomist before investing.',
   },
 } as const;
 
