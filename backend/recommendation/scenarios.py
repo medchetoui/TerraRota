@@ -46,7 +46,9 @@ def generate_scenarios(
         "title_ar": "دورة التجديد الحيوي (قطاني - حبوب)",
         "title_en": "Biological Soil Regeneration (Legume - Cereal)",
         "strategy_type": "soil_restoration",
-        "badge": "Recommandé INRA Maroc",
+        "badge_fr": "Recommandé INRA Maroc",
+        "badge_ar": "موصى به من INRA المغرب",
+        "badge_en": "INRA Morocco Recommended",
         "crop_sequence": [
             {
                 "year": 1, 
@@ -76,21 +78,41 @@ def generate_scenarios(
                 "crop_emoji": CROPS.get(s1_sequence[2], {}).get("emoji", "🫘")
             },
         ],
-        "water_demand_level": "Modérée",
+        "water_demand_level_fr": "Modérée",
+        "water_demand_level_ar": "معتدلة",
+        "water_demand_level_en": "Moderate",
         "water_savings_pct": 25,
         "n_fixation_kg_ha": "50 - 90 kg N/ha",
         "soil_health_score": 92,
         "resilience_score": 85,
         "profitability_score": 78,
-        "advantages": [
+        "advantages_fr": [
             "Fixation biologique symbiotique de l'azote atmosphérique (Rhizobium).",
             "Rupture nette du cycle des maladies racinaires (Fusarium, Piétin-échaudage).",
             "Économie substantielle sur la facture des engrais azotés de synthèse.",
         ],
-        "risks": [
+        "advantages_ar": [
+            "تثبيت بيولوجي تكافلي لنيتروجين الغلاف الجوي (Rhizobium).",
+            "كسر واضح لدورة أمراض الجذور (Fusarium، تعفن القدم).",
+            "توفير كبير في فاتورة الأسمدة النيتروجينية الصناعية.",
+        ],
+        "advantages_en": [
+            "Symbiotic biological fixation of atmospheric nitrogen (Rhizobium).",
+            "Clear break in root disease cycles (Fusarium, take-all).",
+            "Substantial savings on synthetic nitrogen fertilizer bills.",
+        ],
+        "risks_fr": [
             "Sensibilité du pois chiche ou de la lentille aux gelées printanières au stade floraison.",
         ],
-        "scientific_basis": "INRA Settat / ICARDA: Cereal-legume rotations increase subsequent wheat grain yield by 20-30% while restoring soil organic carbon.",
+        "risks_ar": [
+            "حساسية الحمص أو العدس للصقيع الربيعي في مرحلة الإزهار.",
+        ],
+        "risks_en": [
+            "Chickpea or lentil sensitivity to spring frost during the flowering stage.",
+        ],
+        "scientific_basis_fr": "INRA Settat / ICARDA: Cereal-legume rotations increase subsequent wheat grain yield by 20-30% while restoring soil organic carbon.",
+        "scientific_basis_ar": "المعهد الوطني للبحث الزراعي (سطات) / إيكاردا: دورات الحبوب-القطاني تزيد من غلة القمح بنسبة 20-30% مع استعادة الكربون العضوي للتربة.",
+        "scientific_basis_en": "INRA Settat / ICARDA: Cereal-legume rotations increase subsequent wheat grain yield by 20-30% while restoring soil organic carbon.",
     })
 
     # ─────────────────────────────────────────────────────────────
@@ -108,27 +130,49 @@ def generate_scenarios(
         "title_ar": "الاستراتيجية المائية المقاومة للإجهاد والجفاف",
         "title_en": "Water Conservation & Drought Resilience",
         "strategy_type": "water_saving",
-        "badge": "Adapté Déficit Pluviométrique",
+        "badge_fr": "Adapté Déficit Pluviométrique",
+        "badge_ar": "مقاوم للجفاف",
+        "badge_en": "Drought-Resilient",
         "crop_sequence": [
             {"year": 1, "season": "2026/2027", "crop_id": s2_sequence[0], "crop_name_fr": CROPS.get(s2_sequence[0], {}).get("name_fr", s2_sequence[0]), "crop_name_ar": CROPS.get(s2_sequence[0], {}).get("name_ar", s2_sequence[0]), "crop_name_en": CROPS.get(s2_sequence[0], {}).get("name_en", s2_sequence[0]), "crop_emoji": CROPS.get(s2_sequence[0], {}).get("emoji", "🌵")},
             {"year": 2, "season": "2027/2028", "crop_id": s2_sequence[1], "crop_name_fr": CROPS.get(s2_sequence[1], {}).get("name_fr", s2_sequence[1]), "crop_name_ar": CROPS.get(s2_sequence[1], {}).get("name_ar", s2_sequence[1]), "crop_name_en": CROPS.get(s2_sequence[1], {}).get("name_en", s2_sequence[1]), "crop_emoji": CROPS.get(s2_sequence[1], {}).get("emoji", "🌾")},
             {"year": 3, "season": "2028/2029", "crop_id": s2_sequence[2], "crop_name_fr": CROPS.get(s2_sequence[2], {}).get("name_fr", s2_sequence[2]), "crop_name_ar": CROPS.get(s2_sequence[2], {}).get("name_ar", s2_sequence[2]), "crop_name_en": CROPS.get(s2_sequence[2], {}).get("name_en", s2_sequence[2]), "crop_emoji": CROPS.get(s2_sequence[2], {}).get("emoji", "🫒")},
         ],
-        "water_demand_level": "Très faible",
+        "water_demand_level_fr": "Très faible",
+        "water_demand_level_ar": "ضعيف جداً",
+        "water_demand_level_en": "Very Low",
         "water_savings_pct": 55,
         "n_fixation_kg_ha": "15 - 30 kg N/ha",
         "soil_health_score": 75,
         "resilience_score": 96,
         "profitability_score": 70,
-        "advantages": [
+        "advantages_fr": [
             "Résistance maximale aux vagues de chaleur et aux sécheresses prolongées.",
             "Consommation hydrique divisée par deux par rapport aux cultures pluviales intensives.",
             "Faibles charges d'intrants et risque de perte financière minime.",
         ],
-        "risks": [
+        "advantages_ar": [
+            "مقاومة قصوى لموجات الحرارة والجفاف الطويل.",
+            "استهلاك مائي مقسم إلى النصف مقارنة بالزراعات البورية المكثفة.",
+            "تكاليف مدخلات منخفضة وخطر خسارة مالية ضئيل.",
+        ],
+        "advantages_en": [
+            "Maximum resistance to heat waves and prolonged droughts.",
+            "Water consumption halved compared to intensive rainfed crops.",
+            "Low input costs and minimal financial loss risk.",
+        ],
+        "risks_fr": [
             "Valorisation commerciale par hectare inférieure aux cultures maraîchères.",
         ],
-        "scientific_basis": "FAO Dryland Series: Barley and drought-adapted perennial tree crops achieve higher water-use efficiency (WUE) under semi-arid conditions.",
+        "risks_ar": [
+            "القيمة التجارية للهكتار أقل من زراعات الخضروات.",
+        ],
+        "risks_en": [
+            "Commercial value per hectare lower than market garden crops.",
+        ],
+        "scientific_basis_fr": "FAO Dryland Series: Barley and drought-adapted perennial tree crops achieve higher water-use efficiency (WUE) under semi-arid conditions.",
+        "scientific_basis_ar": "سلسلة منظمة الأغذية والزراعة للأراضي الجافة: الشعير والأشجار المعمرة المتكيفة مع الجفاف تحقق كفاءة أعلى في استخدام المياه في الظروف شبه الجافة.",
+        "scientific_basis_en": "FAO Dryland Series: Barley and drought-adapted perennial tree crops achieve higher water-use efficiency (WUE) under semi-arid conditions.",
     })
 
     # ─────────────────────────────────────────────────────────────
@@ -145,27 +189,49 @@ def generate_scenarios(
         "title_ar": "تعظيم المردودية الاقتصادية والقيمة التسويقية",
         "title_en": "High Economic Market Value",
         "strategy_type": "profitability",
-        "badge": "Marge Nette Élevée",
+        "badge_fr": "Marge Nette Élevée",
+        "badge_ar": "هامش ربح مرتفع",
+        "badge_en": "High Net Margin",
         "crop_sequence": [
             {"year": 1, "season": "2026/2027", "crop_id": s3_sequence[0], "crop_name_fr": CROPS.get(s3_sequence[0], {}).get("name_fr", s3_sequence[0]), "crop_name_ar": CROPS.get(s3_sequence[0], {}).get("name_ar", s3_sequence[0]), "crop_name_en": CROPS.get(s3_sequence[0], {}).get("name_en", s3_sequence[0]), "crop_emoji": CROPS.get(s3_sequence[0], {}).get("emoji", "🥔")},
             {"year": 2, "season": "2027/2028", "crop_id": s3_sequence[1], "crop_name_fr": CROPS.get(s3_sequence[1], {}).get("name_fr", s3_sequence[1]), "crop_name_ar": CROPS.get(s3_sequence[1], {}).get("name_ar", s3_sequence[1]), "crop_name_en": CROPS.get(s3_sequence[1], {}).get("name_en", s3_sequence[1]), "crop_emoji": CROPS.get(s3_sequence[1], {}).get("emoji", "🌾")},
             {"year": 3, "season": "2028/2029", "crop_id": s3_sequence[2], "crop_name_fr": CROPS.get(s3_sequence[2], {}).get("name_fr", s3_sequence[2]), "crop_name_ar": CROPS.get(s3_sequence[2], {}).get("name_ar", s3_sequence[2]), "crop_name_en": CROPS.get(s3_sequence[2], {}).get("name_en", s3_sequence[2]), "crop_emoji": CROPS.get(s3_sequence[2], {}).get("emoji", "🍅")},
         ],
-        "water_demand_level": "Élevée" if is_irrigated else "Moyenne",
+        "water_demand_level_fr": "Élevée" if is_irrigated else "Moyenne",
+        "water_demand_level_ar": "مرتفع" if is_irrigated else "متوسط",
+        "water_demand_level_en": "High" if is_irrigated else "Moderate",
         "water_savings_pct": 5 if is_irrigated else 20,
         "n_fixation_kg_ha": "10 - 40 kg N/ha",
         "soil_health_score": 68,
         "resilience_score": 72,
         "profitability_score": 95,
-        "advantages": [
+        "advantages_fr": [
             "Revenu brut et marge nette à l'hectare les plus élevés du marché marocain.",
             "Filières de commercialisation structurées sur les marchés de gros (Casablanca, Fès, Agadir).",
         ],
-        "risks": [
+        "advantages_ar": [
+            "أعلى دخل إجمالي وهامش ربح صافي للهكتار في السوق المغربي.",
+            "سلاسل تسويق منظمة في أسواق الجملة (الدار البيضاء، فاس، أكادير).",
+        ],
+        "advantages_en": [
+            "Highest gross income and net margin per hectare in the Moroccan market.",
+            "Structured marketing channels in wholesale markets (Casablanca, Fes, Agadir).",
+        ],
+        "risks_fr": [
             "Besoin impératif en eau d'irrigation et investissement initial en semences certifiées.",
             "Sensibilité aux fluctuations des prix sur les marchés locaux.",
         ],
-        "scientific_basis": "Ministère de l'Agriculture du Maroc - Plan Génération Green: High-value horticultural and potato crops generate the highest gross margins under monitored irrigation.",
+        "risks_ar": [
+            "حاجة حتمية لمياه الري والاستثمار الأولي في البذور المعتمدة.",
+            "الحساسية لتقلبات الأسعار في الأسواق المحلية.",
+        ],
+        "risks_en": [
+            "Mandatory need for irrigation water and initial investment in certified seeds.",
+            "Sensitivity to price fluctuations in local markets.",
+        ],
+        "scientific_basis_fr": "Ministère de l'Agriculture du Maroc - Plan Génération Green: High-value horticultural and potato crops generate the highest gross margins under monitored irrigation.",
+        "scientific_basis_ar": "وزارة الفلاحة المغربية - جيل أخضر: محاصيل البستنة والبطاطس عالية القيمة تحقق أعلى هوامش إجمالية تحت الري المراقب.",
+        "scientific_basis_en": "Ministry of Agriculture of Morocco - Green Generation Plan: High-value horticultural and potato crops generate the highest gross margins under monitored irrigation.",
     })
 
     # ─────────────────────────────────────────────────────────────
@@ -178,27 +244,49 @@ def generate_scenarios(
         "title_ar": "التنوع الزراعي وتوزيع المخاطر البيئية",
         "title_en": "Agrobiodiversity & Risk Mitigation",
         "strategy_type": "diversification",
-        "badge": "Équilibre et Durabilité",
+        "badge_fr": "Équilibre et Durabilité",
+        "badge_ar": "متوازن ومستدام",
+        "badge_en": "Balanced & Sustainable",
         "crop_sequence": [
             {"year": 1, "season": "2026/2027", "crop_id": s4_sequence[0], "crop_name_fr": CROPS.get(s4_sequence[0], {}).get("name_fr", s4_sequence[0]), "crop_name_ar": CROPS.get(s4_sequence[0], {}).get("name_ar", s4_sequence[0]), "crop_name_en": CROPS.get(s4_sequence[0], {}).get("name_en", s4_sequence[0]), "crop_emoji": CROPS.get(s4_sequence[0], {}).get("emoji", "🫘")},
             {"year": 2, "season": "2027/2028", "crop_id": s4_sequence[1], "crop_name_fr": CROPS.get(s4_sequence[1], {}).get("name_fr", s4_sequence[1]), "crop_name_ar": CROPS.get(s4_sequence[1], {}).get("name_ar", s4_sequence[1]), "crop_name_en": CROPS.get(s4_sequence[1], {}).get("name_en", s4_sequence[1]), "crop_emoji": CROPS.get(s4_sequence[1], {}).get("emoji", "🌾")},
             {"year": 3, "season": "2028/2029", "crop_id": s4_sequence[2], "crop_name_fr": CROPS.get(s4_sequence[2], {}).get("name_fr", s4_sequence[2]), "crop_name_ar": CROPS.get(s4_sequence[2], {}).get("name_ar", s4_sequence[2]), "crop_name_en": CROPS.get(s4_sequence[2], {}).get("name_en", s4_sequence[2]), "crop_emoji": CROPS.get(s4_sequence[2], {}).get("emoji", "🫒")},
         ],
-        "water_demand_level": "Faible à modérée",
+        "water_demand_level_fr": "Faible à modérée",
+        "water_demand_level_ar": "منخفض إلى متوسط",
+        "water_demand_level_en": "Low to moderate",
         "water_savings_pct": 35,
         "n_fixation_kg_ha": "40 - 70 kg N/ha",
         "soil_health_score": 88,
         "resilience_score": 90,
         "profitability_score": 82,
-        "advantages": [
+        "advantages_fr": [
             "Combinaison de trois familles botaniques distinctes (Fabaceae, Poaceae, Oleaceae).",
             "Étalement des pointes de travail agricole et des rentrées de trésorerie sur l'année.",
             "Excellente protection contre les aléas climatiques extrêmes.",
         ],
-        "risks": [
+        "advantages_ar": [
+            "مزيج من ثلاث عائلات نباتية مختلفة (بقوليات، حبوب، زيتون).",
+            "توزيع فترات العمل الزراعي وتدفقات الخزينة على مدار السنة.",
+            "حماية ممتازة ضد التقلبات المناخية القصوى.",
+        ],
+        "advantages_en": [
+            "Combination of three distinct plant families (Fabaceae, Poaceae, Oleaceae).",
+            "Spreading of farm workload and cash flow throughout the year.",
+            "Excellent protection against extreme climate hazards.",
+        ],
+        "risks_fr": [
             "Nécessite la maîtrise technique de filières agricoles multiples.",
         ],
-        "scientific_basis": "FAO Agroecology Principles: Crop diversification stabilizes farm-level yields and dampens the economic impact of single-crop market or climate shocks.",
+        "risks_ar": [
+            "يتطلب التحكم الفني في سلاسل زراعية متعددة.",
+        ],
+        "risks_en": [
+            "Requires technical mastery of multiple agricultural value chains.",
+        ],
+        "scientific_basis_fr": "FAO Agroecology Principles: Crop diversification stabilizes farm-level yields and dampens the economic impact of single-crop market or climate shocks.",
+        "scientific_basis_ar": "مبادئ الزراعة الإيكولوجية لمنظمة الأغذية والزراعة: تنويع المحاصيل يثبت غلة المزرعة ويقلل من التأثير الاقتصادي لتقلبات الأسعار أو المناخ.",
+        "scientific_basis_en": "FAO Agroecology Principles: Crop diversification stabilizes farm-level yields and dampens the economic impact of single-crop market or climate shocks.",
     })
 
     return scenarios
