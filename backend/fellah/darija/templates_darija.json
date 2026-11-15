@@ -1,0 +1,438 @@
+{
+  "_label": "FICTIF - modeles de phrases en darija, BROUILLON a valider par des locuteurs natifs. Cultures, raisons et precautions = espaces reserves (A REMPLACER par les regles du Membre 1).",
+  "_version": "2026-10-30",
+  "modeles": [
+    {
+      "id": "hiba_culture_ble_tendre",
+      "texte_avant": "القمح الطري",
+      "texte_darija": "القمح الطري",
+      "traduction_fr": "Blé tendre",
+      "fichier_audio": "audio/darija/hiba_culture_ble_tendre.wav",
+      "statut": "corrigé – à valider par Ranya",
+      "variables": []
+    },
+    {
+      "id": "hiba_culture_ble_dur",
+      "texte_avant": "القمح الصلب",
+      "texte_darija": "القمح الصلب",
+      "traduction_fr": "Blé dur",
+      "fichier_audio": "audio/darija/hiba_culture_ble_dur.wav",
+      "statut": "corrigé – à valider par Ranya",
+      "variables": []
+    },
+    {
+      "id": "hiba_culture_orge",
+      "texte_avant": "الشعير",
+      "texte_darija": "الشعير",
+      "traduction_fr": "Orge",
+      "fichier_audio": "audio/darija/hiba_culture_orge.wav",
+      "statut": "corrigé – à valider par Ranya",
+      "variables": []
+    },
+    {
+      "id": "hiba_culture_pois_chiche",
+      "texte_avant": "الحمص",
+      "texte_darija": "الحمص",
+      "traduction_fr": "Pois chiche",
+      "fichier_audio": "audio/darija/hiba_culture_pois_chiche.wav",
+      "statut": "corrigé – à valider par Ranya",
+      "variables": []
+    },
+    {
+      "id": "hiba_culture_lentille",
+      "texte_avant": "العدس",
+      "texte_darija": "العدس",
+      "traduction_fr": "Lentille",
+      "fichier_audio": "audio/darija/hiba_culture_lentille.wav",
+      "statut": "corrigé – à valider par Ranya",
+      "variables": []
+    },
+    {
+      "id": "hiba_culture_feve",
+      "texte_avant": "الفول",
+      "texte_darija": "الفول",
+      "traduction_fr": "Fève",
+      "fichier_audio": "audio/darija/hiba_culture_feve.wav",
+      "statut": "corrigé – à valider par Ranya",
+      "variables": []
+    },
+    {
+      "id": "hiba_culture_oignon",
+      "texte_avant": "البصلة",
+      "texte_darija": "البصل",
+      "traduction_fr": "Oignon",
+      "fichier_audio": "audio/darija/hiba_culture_oignon.wav",
+      "statut": "corrigé – à valider par Ranya",
+      "variables": []
+    },
+    {
+      "id": "hiba_culture_pomme_de_terre",
+      "texte_avant": "البطاطا",
+      "texte_darija": "البطاطا",
+      "traduction_fr": "Pomme de terre",
+      "fichier_audio": "audio/darija/hiba_culture_pomme_de_terre.wav",
+      "statut": "corrigé – à valider par Ranya",
+      "variables": []
+    },
+    {
+      "id": "hiba_culture_olivier",
+      "texte_avant": "الزيتون",
+      "texte_darija": "الزيتون",
+      "traduction_fr": "Olivier",
+      "fichier_audio": "audio/darija/hiba_culture_olivier.wav",
+      "statut": "corrigé – à valider par Ranya",
+      "variables": []
+    },
+    {
+      "id": "hiba_culture_oranger",
+      "texte_avant": "الليمون",
+      "texte_darija": "الليمون",
+      "traduction_fr": "Oranger",
+      "fichier_audio": "audio/darija/hiba_culture_oranger.wav",
+      "statut": "corrigé – à valider par Ranya",
+      "variables": []
+    },
+    {
+      "id": "hiba_culture_caprier",
+      "texte_avant": "الكبار",
+      "texte_darija": "الكبار",
+      "traduction_fr": "Câprier",
+      "fichier_audio": "audio/darija/hiba_culture_caprier.wav",
+      "statut": "corrigé – à valider par Ranya",
+      "variables": []
+    },
+    {
+      "id": "hiba_culture_clementinier",
+      "texte_avant": "الكليمونتين",
+      "texte_darija": "الكليمونتين",
+      "traduction_fr": "Clémentinier",
+      "fichier_audio": "audio/darija/hiba_culture_clementinier.wav",
+      "statut": "corrigé – à valider par Ranya",
+      "variables": []
+    },
+    {
+      "id": "hiba_et",
+      "texte_avant": "و",
+      "texte_darija": "و",
+      "traduction_fr": "et",
+      "fichier_audio": "audio/darija/hiba_et.wav",
+      "statut": "corrigé – à valider par Ranya",
+      "variables": []
+    },
+    {
+      "id": "hiba_verdict_viable",
+      "texte_avant": "البلان ديالك صالح.",
+      "texte_darija": "البلان ديالك مزيان.",
+      "traduction_fr": "Votre plan est bon.",
+      "fichier_audio": "audio/darija/hiba_verdict_viable.wav",
+      "statut": "corrigé – à valider par Ranya",
+      "variables": []
+    },
+    {
+      "id": "hiba_verdict_partiel",
+      "texte_avant": "البلان ديالك صالح غير شي شوية.",
+      "texte_darija": "شي حاجة فالبلان ديالك مزيانة، وشي حاجة لا.",
+      "traduction_fr": "Une partie de votre plan est bonne, une partie non.",
+      "fichier_audio": "audio/darija/hiba_verdict_partiel.wav",
+      "statut": "corrigé – à valider par Ranya",
+      "variables": []
+    },
+    {
+      "id": "hiba_verdict_non",
+      "texte_avant": "البلان ديالك ما صالحش هاد الموسم.",
+      "texte_darija": "البلان ديالك ما مزيانش هاد العام.",
+      "traduction_fr": "Votre plan n'est pas bon cette année.",
+      "fichier_audio": "audio/darija/hiba_verdict_non.wav",
+      "statut": "corrigé – à valider par Ranya",
+      "variables": []
+    },
+    {
+      "id": "hiba_verdict_non_evalue",
+      "texte_avant": "ما قدرناش نقيمو البلان ديالك.",
+      "texte_darija": "ما قدرناش نشوفو البلان ديالك.",
+      "traduction_fr": "Nous n'avons pas pu évaluer votre plan.",
+      "fichier_audio": "audio/darija/hiba_verdict_non_evalue.wav",
+      "statut": "corrigé – à valider par Ranya",
+      "variables": []
+    },
+    {
+      "id": "hiba_conseil_garder",
+      "texte_avant": "تقدر تكمل بالبلان ديالك.",
+      "texte_darija": "تقدر تبقى على البلان ديالك.",
+      "traduction_fr": "Vous pouvez garder votre plan.",
+      "fichier_audio": "audio/darija/hiba_conseil_garder.wav",
+      "statut": "corrigé – à valider par Ranya",
+      "variables": []
+    },
+    {
+      "id": "hiba_conseil_changer",
+      "texte_avant": "الأحسن ليك هاد الموسم تزرع:",
+      "texte_darija": "هاد العام، الأحسن ليك تزرع:",
+      "traduction_fr": "Cette année, le mieux pour vous, c'est de planter :",
+      "fichier_audio": "audio/darija/hiba_conseil_changer.wav",
+      "statut": "corrigé – à valider par Ranya",
+      "variables": []
+    },
+    {
+      "id": "hiba_culture_ok",
+      "texte_avant": "اختيار مزيان هاد الموسم.",
+      "texte_darija": "مزيان هاد العام.",
+      "traduction_fr": "Bien, cette année.",
+      "fichier_audio": "audio/darija/hiba_culture_ok.wav",
+      "statut": "corrigé – à valider par Ranya",
+      "variables": []
+    },
+    {
+      "id": "hiba_culture_non",
+      "texte_avant": "ما كيتنصحش هاد الموسم.",
+      "texte_darija": "ماشي هاد العام.",
+      "traduction_fr": "Pas cette année.",
+      "fichier_audio": "audio/darija/hiba_culture_non.wav",
+      "statut": "corrigé – à valider par Ranya",
+      "variables": []
+    },
+    {
+      "id": "hiba_culture_pas_evaluee",
+      "texte_avant": "ما عندناش تقييم لهاد الزريعة فهاد الأرض.",
+      "texte_darija": "ما عندنا ما نقولو ليك فهاد الأرض.",
+      "traduction_fr": "Nous n'avons rien à vous dire pour cette terre.",
+      "fichier_audio": "audio/darija/hiba_culture_pas_evaluee.wav",
+      "statut": "corrigé – à valider par Ranya",
+      "variables": []
+    },
+    {
+      "id": "hiba_alternative",
+      "texte_avant": "الأحسن منها:",
+      "texte_darija": "حسن ليك:",
+      "traduction_fr": "Mieux pour vous :",
+      "fichier_audio": "audio/darija/hiba_alternative.wav",
+      "statut": "corrigé – à valider par Ranya",
+      "variables": []
+    },
+    {
+      "id": "hiba_raison_meme_culture",
+      "texte_avant": "زرعتيها العام اللي فات، خاصك تبدل.",
+      "texte_darija": "زرعتيها العام اللي فات، خاصك تبدل.",
+      "traduction_fr": "Vous l'avez plantée l'an dernier, il faut changer.",
+      "fichier_audio": "audio/darija/hiba_raison_meme_culture.wav",
+      "statut": "corrigé – à valider par Ranya",
+      "variables": []
+    },
+    {
+      "id": "hiba_raison_meme_famille",
+      "texte_avant": "زرعتي نفس النوع العام اللي فات، خاصك تبدل.",
+      "texte_darija": "زرعتي بحالها العام اللي فات، خاصك تبدل.",
+      "traduction_fr": "Vous avez planté une culture semblable l'an dernier, il faut changer.",
+      "fichier_audio": "audio/darija/hiba_raison_meme_famille.wav",
+      "statut": "corrigé – à valider par Ranya",
+      "variables": []
+    },
+    {
+      "id": "hiba_raison_historique_absent",
+      "texte_avant": "ما عرفناش شنو زرعتي قبل، وهادشي كينقص من الدقة.",
+      "texte_darija": "ما عرفناش شنو كنتي زارع قبل، داكشي علاش النصيحة ماشي مضمونة بزاف.",
+      "traduction_fr": "Nous ne savons pas ce que vous plantiez avant, donc le conseil est moins sûr.",
+      "fichier_audio": "audio/darija/hiba_raison_historique_absent.wav",
+      "statut": "corrigé – à valider par Ranya",
+      "variables": []
+    },
+    {
+      "id": "hiba_raison_chaleur",
+      "texte_avant": "الحرارة كثيرة على هاد الزريعة.",
+      "texte_darija": "السخانة بزاف على هاد الزريعة.",
+      "traduction_fr": "Il fait trop chaud pour cette culture.",
+      "fichier_audio": "audio/darija/hiba_raison_chaleur.wav",
+      "statut": "corrigé – à valider par Ranya",
+      "variables": []
+    },
+    {
+      "id": "hiba_raison_froid",
+      "texte_avant": "البرد كثير على هاد الزريعة.",
+      "texte_darija": "البرد بزاف على هاد الزريعة.",
+      "traduction_fr": "Il fait trop froid pour cette culture.",
+      "fichier_audio": "audio/darija/hiba_raison_froid.wav",
+      "statut": "corrigé – à valider par Ranya",
+      "variables": []
+    },
+    {
+      "id": "hiba_raison_pluie_peu",
+      "texte_avant": "الشتا ما كافياش لهاد الزريعة.",
+      "texte_darija": "الشتا قليلة على هاد الزريعة.",
+      "traduction_fr": "La pluie ne suffit pas pour cette culture.",
+      "fichier_audio": "audio/darija/hiba_raison_pluie_peu.wav",
+      "statut": "corrigé – à valider par Ranya",
+      "variables": []
+    },
+    {
+      "id": "hiba_raison_pluie_trop",
+      "texte_avant": "الشتا كثيرة على هاد الزريعة.",
+      "texte_darija": "الشتا بزاف على هاد الزريعة.",
+      "traduction_fr": "Il pleut trop pour cette culture.",
+      "fichier_audio": "audio/darija/hiba_raison_pluie_trop.wav",
+      "statut": "corrigé – à valider par Ranya",
+      "variables": []
+    },
+    {
+      "id": "hiba_raison_sel",
+      "texte_avant": "الأرض فيها الملحة بزاف لهاد الزريعة.",
+      "texte_darija": "الأرض مالحة بزاف على هاد الزريعة.",
+      "traduction_fr": "La terre est trop salée pour cette culture.",
+      "fichier_audio": "audio/darija/hiba_raison_sel.wav",
+      "statut": "corrigé – à valider par Ranya",
+      "variables": []
+    },
+    {
+      "id": "hiba_raison_ph",
+      "texte_avant": "التربة ما مناسباش بزاف لهاد الزريعة.",
+      "texte_darija": "الأرض ديالك ما جاياش مزيان مع هاد الزريعة.",
+      "traduction_fr": "Votre terre ne va pas très bien avec cette culture.",
+      "fichier_audio": "audio/darija/hiba_raison_ph.wav",
+      "statut": "corrigé – à valider par Ranya",
+      "variables": []
+    },
+    {
+      "id": "hiba_raison_bonne",
+      "texte_avant": "هاد الزريعة مناسبة للأرض ديالك وللشتا.",
+      "texte_darija": "هاد الزريعة كتجي مزيانة مع الأرض ديالك ومع الشتا.",
+      "traduction_fr": "Cette culture va bien avec votre terre et avec la pluie.",
+      "fichier_audio": "audio/darija/hiba_raison_bonne.wav",
+      "statut": "corrigé – à valider par Ranya",
+      "variables": []
+    },
+    {
+      "id": "hiba_raison_legumineuse",
+      "texte_avant": "القطاني يقدرو يعاونو الأرض ترتاح.",
+      "texte_darija": "القطاني كتعاون الأرض ترتاح.",
+      "traduction_fr": "Les légumineuses aident la terre à se reposer.",
+      "fichier_audio": "audio/darija/hiba_raison_legumineuse.wav",
+      "statut": "corrigé – à valider par Ranya",
+      "variables": []
+    },
+    {
+      "id": "hiba_pluie_optimal",
+      "texte_avant": "الشتا ديال المنطقة مناسبة لهاد الزريعة.",
+      "texte_darija": "الشتا اللي كتطيح عندكم كافية لهاد الزريعة.",
+      "traduction_fr": "La pluie qui tombe chez vous suffit pour cette culture.",
+      "fichier_audio": "audio/darija/hiba_pluie_optimal.wav",
+      "statut": "corrigé – à valider par Ranya",
+      "variables": []
+    },
+    {
+      "id": "hiba_pluie_tolerable",
+      "texte_avant": "الشتا ما كاملاش لهاد الزريعة، ولكن مقبولة.",
+      "texte_darija": "الشتا ماشي هي هاديك لهاد الزريعة، ولكن كتدوز.",
+      "traduction_fr": "La pluie n'est pas idéale pour cette culture, mais ça passe.",
+      "fichier_audio": "audio/darija/hiba_pluie_tolerable.wav",
+      "statut": "corrigé – à valider par Ranya",
+      "variables": []
+    },
+    {
+      "id": "hiba_pluie_out",
+      "texte_avant": "الشتا ما مناسباش لهاد الزريعة.",
+      "texte_darija": "الشتا ما كتصلاحش لهاد الزريعة.",
+      "traduction_fr": "La pluie ne convient pas à cette culture.",
+      "fichier_audio": "audio/darija/hiba_pluie_out.wav",
+      "statut": "corrigé – à valider par Ranya",
+      "variables": []
+    },
+    {
+      "id": "hiba_sol_ok",
+      "texte_avant": "الأرض ديالك مناسبة لهاد الزريعة.",
+      "texte_darija": "الأرض ديالك كتصلاح لهاد الزريعة.",
+      "traduction_fr": "Votre terre convient à cette culture.",
+      "fichier_audio": "audio/darija/hiba_sol_ok.wav",
+      "statut": "corrigé – à valider par Ranya",
+      "variables": []
+    },
+    {
+      "id": "hiba_sol_limite",
+      "texte_avant": "الأرض ديالك مقبولة لهاد الزريعة، ولكن ماشي مثالية.",
+      "texte_darija": "الأرض ديالك كتدوز مع هاد الزريعة، ولكن ماشي هي هاديك.",
+      "traduction_fr": "Votre terre passe avec cette culture, sans être idéale.",
+      "fichier_audio": "audio/darija/hiba_sol_limite.wav",
+      "statut": "corrigé – à valider par Ranya",
+      "variables": []
+    },
+    {
+      "id": "hiba_sol_non",
+      "texte_avant": "الأرض ديالك ما مناسباش لهاد الزريعة.",
+      "texte_darija": "الأرض ديالك ما كتصلاحش لهاد الزريعة.",
+      "traduction_fr": "Votre terre ne convient pas à cette culture.",
+      "fichier_audio": "audio/darija/hiba_sol_non.wav",
+      "statut": "corrigé – à valider par Ranya",
+      "variables": []
+    },
+    {
+      "id": "hiba_eau_bour",
+      "texte_avant": "هاد النصيحة مبنية على أرض بور، بلا سقي.",
+      "texte_darija": "هاد النصيحة على أرض بور، بلا سقي.",
+      "traduction_fr": "Ce conseil est fait pour une terre sans irrigation.",
+      "fichier_audio": "audio/darija/hiba_eau_bour.wav",
+      "statut": "corrigé – à valider par Ranya",
+      "variables": []
+    },
+    {
+      "id": "hiba_eau_sqi",
+      "texte_avant": "هاد النصيحة كتحسب على السقي.",
+      "texte_darija": "هاد النصيحة على أرض فيها السقي.",
+      "traduction_fr": "Ce conseil est fait pour une terre irriguée.",
+      "fichier_audio": "audio/darija/hiba_eau_sqi.wav",
+      "statut": "corrigé – à valider par Ranya",
+      "variables": []
+    },
+    {
+      "id": "hiba_fiab_haute",
+      "texte_avant": "المعلومات اللي عندنا كاملة تقريبا.",
+      "texte_darija": "عندنا تقريبا كلشي باش ننصحوك.",
+      "traduction_fr": "Nous avons presque tout pour vous conseiller.",
+      "fichier_audio": "audio/darija/hiba_fiab_haute.wav",
+      "statut": "corrigé – à valider par Ranya",
+      "variables": []
+    },
+    {
+      "id": "hiba_fiab_moyenne",
+      "texte_avant": "المعلومات اللي عندنا ناقصة شوية.",
+      "texte_darija": "كتنقصنا شي معلومات.",
+      "traduction_fr": "Il nous manque quelques informations.",
+      "fichier_audio": "audio/darija/hiba_fiab_moyenne.wav",
+      "statut": "corrigé – à valider par Ranya",
+      "variables": []
+    },
+    {
+      "id": "hiba_fiab_basse",
+      "texte_avant": "المعلومات اللي عندنا ناقصة بزاف.",
+      "texte_darija": "كتنقصنا بزاف ديال المعلومات.",
+      "traduction_fr": "Il nous manque beaucoup d'informations.",
+      "fichier_audio": "audio/darija/hiba_fiab_basse.wav",
+      "statut": "corrigé – à valider par Ranya",
+      "variables": []
+    },
+    {
+      "id": "hiba_hors_sujet",
+      "texte_avant": "ما عنديش هاد المعلومة، سول المستشار.",
+      "texte_darija": "هادي ما عنديش عليها جواب، سول المستشار.",
+      "traduction_fr": "Je n'ai pas de réponse à cela, demandez au conseiller.",
+      "fichier_audio": "audio/darija/hiba_hors_sujet.wav",
+      "statut": "corrigé – à valider par Ranya",
+      "variables": []
+    },
+    {
+      "id": "hiba_mostachar",
+      "texte_avant": "سول المستشار قبل ما تزرع.",
+      "texte_darija": "سول المستشار قبل ما تزرع.",
+      "traduction_fr": "Demandez au conseiller avant de planter.",
+      "fichier_audio": "audio/darija/hiba_mostachar.wav",
+      "statut": "corrigé – à valider par Ranya",
+      "variables": []
+    },
+    {
+      "id": "hiba_raison_parcelle_inconnue",
+      "texte_avant": "ما عندناش معطيات على هاد الأرض.",
+      "texte_darija": "ما عندنا حتى معلومة على هاد الأرض.",
+      "traduction_fr": "Nous n'avons aucune information sur cette terre.",
+      "fichier_audio": "audio/darija/hiba_raison_parcelle_inconnue.wav",
+      "statut": "corrigé – à valider par Ranya",
+      "variables": []
+    }
+  ]
+}

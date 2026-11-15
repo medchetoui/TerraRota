@@ -66,6 +66,7 @@ import { SoilPage } from './pages/SoilPage';
 import { ReportsPage } from './pages/ReportsPage';
 import { DataSourcesPage } from './pages/DataSourcesPage';
 import { FarmsPage } from './pages/FarmsPage';
+import FellahQuestion from './components/FellahQuestion';
 import { Sliders, FileText, Menu, X } from 'lucide-react';
 
 export interface FormData {
@@ -1340,6 +1341,8 @@ function MainLayout() {
                         {isAr ? 'سول عمي أحمد بصوتك بالدارجة' : isEn ? 'Ask Ami Ahmed With Your Voice' : 'Posez vos questions à Ami Ahmed'}
                       </h3>
                     </div>
+
+                    <FellahQuestion />
 
                     <div className="bg-[#FAF7F2] p-8 rounded-3xl border border-[#DECAB3] shadow-sm max-w-2xl mx-auto text-center space-y-6">
                       <div className="w-20 h-20 rounded-full bg-[#8C3A27]/10 text-[#8C3A27] flex items-center justify-center font-bold mx-auto">

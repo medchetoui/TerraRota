@@ -1,0 +1,6050 @@
+{
+ "_source": "source : Membre 2 (moteur/scenarios/scenarios.json et engine.report.analyze, commit 191d956 2026-11-14 docs: update README with full system architecture, NASA integration, and quickstart)",
+ "annee": 2026,
+ "cultures": {
+  "ble_tendre": {
+   "name_fr": "Blé tendre",
+   "family": "poaceae"
+  },
+  "orge": {
+   "name_fr": "Orge",
+   "family": "poaceae"
+  },
+  "pois_chiche": {
+   "name_fr": "Pois chiche",
+   "family": "fabaceae"
+  },
+  "feve": {
+   "name_fr": "Fève",
+   "family": "fabaceae"
+  },
+  "lentille": {
+   "name_fr": "Lentille",
+   "family": "fabaceae"
+  },
+  "olivier": {
+   "name_fr": "Olivier",
+   "family": "oleaceae"
+  },
+  "oranger": {
+   "name_fr": "Oranger",
+   "family": "rutaceae"
+  },
+  "oignon": {
+   "name_fr": "Oignon",
+   "family": "amaryllidaceae"
+  },
+  "pomme_de_terre": {
+   "name_fr": "Pomme de terre",
+   "family": "solanaceae"
+  },
+  "ble_dur": {
+   "name_fr": "Blé dur",
+   "family": "poaceae"
+  },
+  "caprier": {
+   "name_fr": "Câprier",
+   "family": "capparaceae"
+  },
+  "clementinier": {
+   "name_fr": "Clémentinier",
+   "family": "rutaceae"
+  }
+ },
+ "scenarios": {
+  "cereales_apres_cereale": {
+   "description": "Blé tendre + orge après du blé tendre : à corriger",
+   "parcels": {
+    "P1": {
+     "conditions": {
+      "temp_c": 18,
+      "rain_mm": 500,
+      "ph": 7,
+      "salinity_dsm": 2
+     },
+     "irrigated": false,
+     "history": [
+      {
+       "crop": "ble_tendre",
+       "year": 2025
+      }
+     ]
+    }
+   },
+   "plan": [
+    {
+     "parcel": "P1",
+     "crop": "ble_tendre",
+     "area_ha": 2
+    },
+    {
+     "parcel": "P1",
+     "crop": "orge",
+     "area_ha": 1
+    }
+   ],
+   "rapport": {
+    "schema_version": 1,
+    "year": 2026,
+    "missing_history": [],
+    "farmer": {
+     "plan": [
+      {
+       "parcel": "P1",
+       "crop": "ble_tendre",
+       "area_ha": 2
+      },
+      {
+       "parcel": "P1",
+       "crop": "orge",
+       "area_ha": 1
+      }
+     ],
+     "evaluation": {
+      "verdict": "partially_viable",
+      "lines": [
+       {
+        "parcel": "P1",
+        "crop": "ble_tendre",
+        "area_ha": 2,
+        "name_fr": "Blé tendre",
+        "status": "not_recommended",
+        "score": 39,
+        "agro_score": 78,
+        "rotation_note": 0.5,
+        "exclusions": [],
+        "rotation_issues": [
+         {
+          "rule": "meme_culture_consecutive",
+          "level": "warning",
+          "detail": "ble_tendre deja cultivee la saison precedente"
+         }
+        ],
+        "rotation_benefits": [],
+        "missing": [],
+        "confidence": {
+         "level": "high",
+         "value": 0.85,
+         "percent": 85,
+         "reasons": [
+          "seuils non valides localement (base ECOCROP mondiale)"
+         ]
+        },
+        "criteria": [
+         {
+          "criterion": "temp_c",
+          "value": 18,
+          "position": "optimal",
+          "optimal": [
+           15,
+           23
+          ],
+          "tolerated": [
+           5,
+           27
+          ]
+         },
+         {
+          "criterion": "rain_mm",
+          "value": 500,
+          "position": "tolerable",
+          "optimal": [
+           750,
+           900
+          ],
+          "tolerated": [
+           300,
+           1600
+          ]
+         },
+         {
+          "criterion": "ph",
+          "value": 7,
+          "position": "optimal",
+          "optimal": [
+           6,
+           7
+          ],
+          "tolerated": [
+           5.5,
+           8.5
+          ]
+         },
+         {
+          "criterion": "salinity_dsm",
+          "value": 2,
+          "position": "optimal",
+          "optimal": [
+           0,
+           4
+          ],
+          "tolerated": [
+           0,
+           10
+          ]
+         }
+        ],
+        "alternatives": [
+         {
+          "crop": "pois_chiche",
+          "name_fr": "Pois chiche",
+          "score": 87,
+          "gain": 48
+         }
+        ]
+       },
+       {
+        "parcel": "P1",
+        "crop": "orge",
+        "area_ha": 1,
+        "name_fr": "Orge",
+        "status": "ok",
+        "score": 70,
+        "agro_score": 100,
+        "rotation_note": 0.7,
+        "exclusions": [],
+        "rotation_issues": [
+         {
+          "rule": "meme_famille_consecutive",
+          "level": "warning",
+          "detail": "meme famille (poaceae) que ble_tendre"
+         }
+        ],
+        "rotation_benefits": [],
+        "missing": [],
+        "confidence": {
+         "level": "high",
+         "value": 0.85,
+         "percent": 85,
+         "reasons": [
+          "seuils non valides localement (base ECOCROP mondiale)"
+         ]
+        },
+        "criteria": [
+         {
+          "criterion": "temp_c",
+          "value": 18,
+          "position": "optimal",
+          "optimal": [
+           15,
+           20
+          ],
+          "tolerated": [
+           2,
+           40
+          ]
+         },
+         {
+          "criterion": "rain_mm",
+          "value": 500,
+          "position": "optimal",
+          "optimal": [
+           500,
+           1000
+          ],
+          "tolerated": [
+           200,
+           2000
+          ]
+         },
+         {
+          "criterion": "ph",
+          "value": 7,
+          "position": "optimal",
+          "optimal": [
+           6.5,
+           7.5
+          ],
+          "tolerated": [
+           6,
+           8
+          ]
+         },
+         {
+          "criterion": "salinity_dsm",
+          "value": 2,
+          "position": "optimal",
+          "optimal": [
+           0,
+           4
+          ],
+          "tolerated": [
+           0,
+           10
+          ]
+         }
+        ],
+        "alternatives": [
+         {
+          "crop": "lentille",
+          "name_fr": "Lentille",
+          "score": 89,
+          "gain": 19
+         },
+         {
+          "crop": "pois_chiche",
+          "name_fr": "Pois chiche",
+          "score": 87,
+          "gain": 17
+         }
+        ]
+       }
+      ],
+      "plan_issues": [
+       {
+        "rule": "concentration_famille",
+        "level": "warning",
+        "detail": "100 % du plan dans la famille poaceae",
+        "family": "poaceae",
+        "percent": 100
+       }
+      ],
+      "composition": [
+       {
+        "family": "poaceae",
+        "percent": 100
+       }
+      ],
+      "tips": [
+       {
+        "rule": "une_seule_famille",
+        "family": "poaceae",
+        "suggestions": {
+         "P1": [
+          {
+           "crop": "lentille",
+           "name_fr": "Lentille",
+           "score": 89
+          },
+          {
+           "crop": "pois_chiche",
+           "name_fr": "Pois chiche",
+           "score": 87
+          }
+         ]
+        }
+       }
+      ],
+      "confidence": {
+       "level": "high",
+       "percent": 85
+      }
+     },
+     "explanation": {
+      "verdict": "partially_viable",
+      "headline": "Plan : en partie viable.",
+      "summary": "Lignes évaluées : 2 (bons choix : 1, à risque : 0, à éviter : 1).",
+      "confidence_text": "Fiabilité du plan : 85 % (élevée), égale à celle de la ligne la plus fragile.",
+      "composition_text": "Composition du plan : céréales 100 %.",
+      "issues": [
+       "100 % du plan est dans la même famille de cultures (céréales), ce qui peut favoriser les maladies du sol."
+      ],
+      "tips": [
+       "Votre plan ne contient que des céréales. Ajouter une légumineuse réduit les maladies du sol et enrichit la terre en azote pour la saison suivante. Légumineuses adaptées à P1 : Lentille (89 sur 100), Pois chiche (87 sur 100)."
+      ],
+      "notes": [
+       "Seuils pas encore validés localement pour : Blé tendre, Orge."
+      ],
+      "lines": [
+       {
+        "headline": "Blé tendre sur P1 : à éviter.",
+        "score_text": "Adéquation au terrain : 78 sur 100 ; après prise en compte de la rotation : 39 sur 100.",
+        "reasons": [
+         "La température (18 °C) est dans la plage idéale de cette culture (de 15 °C à 23 °C).",
+         "La pluie (500 mm) est acceptable pour cette culture, mais pas idéale (idéal : de 750 mm à 900 mm).",
+         "Le pH du sol (7) est dans la plage idéale de cette culture (de 6 à 7).",
+         "La salinité du sol (2 dS/m) est dans la plage idéale de cette culture (de 0 dS/m à 4 dS/m).",
+         "Cette culture a déjà été cultivée sur la parcelle la saison précédente."
+        ],
+        "cautions": [],
+        "suggestion": "À envisager à la place : Pois chiche (score 87 sur 100, +48 points)."
+       },
+       {
+        "headline": "Orge sur P1 : acceptable, avec une réserve.",
+        "score_text": "Adéquation au terrain : 100 sur 100 ; après prise en compte de la rotation : 70 sur 100.",
+        "reasons": [
+         "La température (18 °C) est dans la plage idéale de cette culture (de 15 °C à 20 °C).",
+         "La pluie (500 mm) est dans la plage idéale de cette culture (de 500 mm à 1000 mm).",
+         "Le pH du sol (7) est dans la plage idéale de cette culture (de 6.5 à 7.5).",
+         "La salinité du sol (2 dS/m) est dans la plage idéale de cette culture (de 0 dS/m à 4 dS/m).",
+         "La saison précédente, une culture de la même famille a été cultivée, ce qui peut favoriser les maladies du sol."
+        ],
+        "cautions": [],
+        "suggestion": "Une meilleure option existe : Lentille (score 89 sur 100, +19 points), Pois chiche (score 87 sur 100, +17 points)."
+       }
+      ]
+     }
+    },
+    "better": {
+     "year": 2026,
+     "plan": [
+      {
+       "parcel": "P1",
+       "crop": "oignon",
+       "area_ha": null
+      },
+      {
+       "parcel": "P1",
+       "crop": "lentille",
+       "area_ha": null
+      },
+      {
+       "parcel": "P1",
+       "crop": "pois_chiche",
+       "area_ha": null
+      }
+     ],
+     "unplanned": [],
+     "evaluation": {
+      "verdict": "viable",
+      "lines": [
+       {
+        "parcel": "P1",
+        "crop": "oignon",
+        "area_ha": null,
+        "name_fr": "Oignon",
+        "status": "ok",
+        "score": 100,
+        "agro_score": 100,
+        "rotation_note": 1.0,
+        "exclusions": [],
+        "rotation_issues": [],
+        "rotation_benefits": [],
+        "missing": [],
+        "confidence": {
+         "level": "high",
+         "value": 0.85,
+         "percent": 85,
+         "reasons": [
+          "seuils non valides localement (base ECOCROP mondiale)"
+         ]
+        },
+        "criteria": [
+         {
+          "criterion": "temp_c",
+          "value": 18,
+          "position": "optimal",
+          "optimal": [
+           12,
+           25
+          ],
+          "tolerated": [
+           4,
+           30
+          ]
+         },
+         {
+          "criterion": "rain_mm",
+          "value": 500,
+          "position": "optimal",
+          "optimal": [
+           350,
+           600
+          ],
+          "tolerated": [
+           300,
+           2800
+          ]
+         },
+         {
+          "criterion": "ph",
+          "value": 7,
+          "position": "optimal",
+          "optimal": [
+           6,
+           7
+          ],
+          "tolerated": [
+           4.3,
+           8.3
+          ]
+         },
+         {
+          "criterion": "salinity_dsm",
+          "value": 2,
+          "position": "optimal",
+          "optimal": [
+           0,
+           4
+          ],
+          "tolerated": [
+           0,
+           10
+          ]
+         }
+        ],
+        "alternatives": []
+       },
+       {
+        "parcel": "P1",
+        "crop": "lentille",
+        "area_ha": null,
+        "name_fr": "Lentille",
+        "status": "ok",
+        "score": 89,
+        "agro_score": 89,
+        "rotation_note": 1.0,
+        "exclusions": [],
+        "rotation_issues": [],
+        "rotation_benefits": [],
+        "missing": [],
+        "confidence": {
+         "level": "high",
+         "value": 0.85,
+         "percent": 85,
+         "reasons": [
+          "seuils non valides localement (base ECOCROP mondiale)"
+         ]
+        },
+        "criteria": [
+         {
+          "criterion": "temp_c",
+          "value": 18,
+          "position": "optimal",
+          "optimal": [
+           15,
+           29
+          ],
+          "tolerated": [
+           5,
+           32
+          ]
+         },
+         {
+          "criterion": "rain_mm",
+          "value": 500,
+          "position": "tolerable",
+          "optimal": [
+           600,
+           1000
+          ],
+          "tolerated": [
+           250,
+           2500
+          ]
+         },
+         {
+          "criterion": "ph",
+          "value": 7,
+          "position": "optimal",
+          "optimal": [
+           5.5,
+           7.5
+          ],
+          "tolerated": [
+           4.5,
+           8.2
+          ]
+         },
+         {
+          "criterion": "salinity_dsm",
+          "value": 2,
+          "position": "optimal",
+          "optimal": [
+           0,
+           4
+          ],
+          "tolerated": [
+           0,
+           10
+          ]
+         }
+        ],
+        "alternatives": []
+       },
+       {
+        "parcel": "P1",
+        "crop": "pois_chiche",
+        "area_ha": null,
+        "name_fr": "Pois chiche",
+        "status": "ok",
+        "score": 87,
+        "agro_score": 87,
+        "rotation_note": 1.0,
+        "exclusions": [],
+        "rotation_issues": [],
+        "rotation_benefits": [],
+        "missing": [],
+        "confidence": {
+         "level": "high",
+         "value": 0.85,
+         "percent": 85,
+         "reasons": [
+          "seuils non valides localement (base ECOCROP mondiale)"
+         ]
+        },
+        "criteria": [
+         {
+          "criterion": "temp_c",
+          "value": 18,
+          "position": "optimal",
+          "optimal": [
+           15,
+           29
+          ],
+          "tolerated": [
+           7,
+           35
+          ]
+         },
+         {
+          "criterion": "rain_mm",
+          "value": 500,
+          "position": "tolerable",
+          "optimal": [
+           600,
+           1000
+          ],
+          "tolerated": [
+           300,
+           1800
+          ]
+         },
+         {
+          "criterion": "ph",
+          "value": 7,
+          "position": "optimal",
+          "optimal": [
+           6,
+           8.5
+          ],
+          "tolerated": [
+           4.7,
+           9.5
+          ]
+         },
+         {
+          "criterion": "salinity_dsm",
+          "value": 2,
+          "position": "optimal",
+          "optimal": [
+           0,
+           4
+          ],
+          "tolerated": [
+           0,
+           10
+          ]
+         }
+        ],
+        "alternatives": []
+       }
+      ],
+      "plan_issues": [],
+      "composition": [
+       {
+        "family": "fabaceae",
+        "percent": 67
+       },
+       {
+        "family": "amaryllidaceae",
+        "percent": 33
+       }
+      ],
+      "tips": [],
+      "confidence": {
+       "level": "high",
+       "percent": 85
+      }
+     },
+     "explanation": {
+      "verdict": "viable",
+      "headline": "Plan proposé : viable.",
+      "summary": "Lignes évaluées : 3 (bons choix : 3, à risque : 0, à éviter : 0).",
+      "confidence_text": "Fiabilité du plan : 85 % (élevée), égale à celle de la ligne la plus fragile.",
+      "composition_text": "Composition du plan : légumineuses 67 %, famille de l'oignon 33 %.",
+      "issues": [],
+      "tips": [],
+      "notes": [
+       "Seuils pas encore validés localement pour : Oignon, Lentille, Pois chiche."
+      ],
+      "lines": [
+       {
+        "headline": "Oignon sur P1 : bon choix.",
+        "score_text": "Adéquation au terrain : 100 sur 100.",
+        "reasons": [
+         "La température (18 °C) est dans la plage idéale de cette culture (de 12 °C à 25 °C).",
+         "La pluie (500 mm) est dans la plage idéale de cette culture (de 350 mm à 600 mm).",
+         "Le pH du sol (7) est dans la plage idéale de cette culture (de 6 à 7).",
+         "La salinité du sol (2 dS/m) est dans la plage idéale de cette culture (de 0 dS/m à 4 dS/m)."
+        ],
+        "cautions": [],
+        "suggestion": null
+       },
+       {
+        "headline": "Lentille sur P1 : bon choix.",
+        "score_text": "Adéquation au terrain : 89 sur 100.",
+        "reasons": [
+         "La température (18 °C) est dans la plage idéale de cette culture (de 15 °C à 29 °C).",
+         "La pluie (500 mm) est acceptable pour cette culture, mais pas idéale (idéal : de 600 mm à 1000 mm).",
+         "Le pH du sol (7) est dans la plage idéale de cette culture (de 5.5 à 7.5).",
+         "La salinité du sol (2 dS/m) est dans la plage idéale de cette culture (de 0 dS/m à 4 dS/m)."
+        ],
+        "cautions": [],
+        "suggestion": null
+       },
+       {
+        "headline": "Pois chiche sur P1 : bon choix.",
+        "score_text": "Adéquation au terrain : 87 sur 100.",
+        "reasons": [
+         "La température (18 °C) est dans la plage idéale de cette culture (de 15 °C à 29 °C).",
+         "La pluie (500 mm) est acceptable pour cette culture, mais pas idéale (idéal : de 600 mm à 1000 mm).",
+         "Le pH du sol (7) est dans la plage idéale de cette culture (de 6 à 8.5).",
+         "La salinité du sol (2 dS/m) est dans la plage idéale de cette culture (de 0 dS/m à 4 dS/m)."
+        ],
+        "cautions": [],
+        "suggestion": null
+       }
+      ]
+     }
+    },
+    "retained": "proposed",
+    "next_year": {
+     "year": 2027,
+     "plan": [
+      {
+       "parcel": "P1",
+       "crop": "ble_dur",
+       "area_ha": null
+      },
+      {
+       "parcel": "P1",
+       "crop": "oignon",
+       "area_ha": null
+      },
+      {
+       "parcel": "P1",
+       "crop": "orge",
+       "area_ha": null
+      }
+     ],
+     "unplanned": [],
+     "evaluation": {
+      "verdict": "viable",
+      "lines": [
+       {
+        "parcel": "P1",
+        "crop": "ble_dur",
+        "area_ha": null,
+        "name_fr": "Blé dur",
+        "status": "ok",
+        "score": 100,
+        "agro_score": 100,
+        "rotation_note": 1.0,
+        "exclusions": [],
+        "rotation_issues": [],
+        "rotation_benefits": [
+         {
+          "rule": "suite_a_legumineuse",
+          "detail": "pois_chiche enrichit le sol en azote"
+         }
+        ],
+        "missing": [],
+        "confidence": {
+         "level": "high",
+         "value": 0.85,
+         "percent": 85,
+         "reasons": [
+          "seuils non valides localement (base ECOCROP mondiale)"
+         ]
+        },
+        "criteria": [
+         {
+          "criterion": "temp_c",
+          "value": 18,
+          "position": "optimal",
+          "optimal": [
+           17,
+           25
+          ],
+          "tolerated": [
+           6,
+           30
+          ]
+         },
+         {
+          "criterion": "rain_mm",
+          "value": 500,
+          "position": "optimal",
+          "optimal": [
+           500,
+           700
+          ],
+          "tolerated": [
+           400,
+           800
+          ]
+         },
+         {
+          "criterion": "ph",
+          "value": 7,
+          "position": "optimal",
+          "optimal": [
+           6,
+           7
+          ],
+          "tolerated": [
+           5.5,
+           8.5
+          ]
+         },
+         {
+          "criterion": "salinity_dsm",
+          "value": 2,
+          "position": "optimal",
+          "optimal": [
+           0,
+           4
+          ],
+          "tolerated": [
+           0,
+           4
+          ]
+         }
+        ],
+        "alternatives": []
+       },
+       {
+        "parcel": "P1",
+        "crop": "oignon",
+        "area_ha": null,
+        "name_fr": "Oignon",
+        "status": "ok",
+        "score": 100,
+        "agro_score": 100,
+        "rotation_note": 1.0,
+        "exclusions": [],
+        "rotation_issues": [],
+        "rotation_benefits": [
+         {
+          "rule": "suite_a_legumineuse",
+          "detail": "pois_chiche enrichit le sol en azote"
+         }
+        ],
+        "missing": [],
+        "confidence": {
+         "level": "high",
+         "value": 0.85,
+         "percent": 85,
+         "reasons": [
+          "seuils non valides localement (base ECOCROP mondiale)"
+         ]
+        },
+        "criteria": [
+         {
+          "criterion": "temp_c",
+          "value": 18,
+          "position": "optimal",
+          "optimal": [
+           12,
+           25
+          ],
+          "tolerated": [
+           4,
+           30
+          ]
+         },
+         {
+          "criterion": "rain_mm",
+          "value": 500,
+          "position": "optimal",
+          "optimal": [
+           350,
+           600
+          ],
+          "tolerated": [
+           300,
+           2800
+          ]
+         },
+         {
+          "criterion": "ph",
+          "value": 7,
+          "position": "optimal",
+          "optimal": [
+           6,
+           7
+          ],
+          "tolerated": [
+           4.3,
+           8.3
+          ]
+         },
+         {
+          "criterion": "salinity_dsm",
+          "value": 2,
+          "position": "optimal",
+          "optimal": [
+           0,
+           4
+          ],
+          "tolerated": [
+           0,
+           10
+          ]
+         }
+        ],
+        "alternatives": []
+       },
+       {
+        "parcel": "P1",
+        "crop": "orge",
+        "area_ha": null,
+        "name_fr": "Orge",
+        "status": "ok",
+        "score": 100,
+        "agro_score": 100,
+        "rotation_note": 1.0,
+        "exclusions": [],
+        "rotation_issues": [],
+        "rotation_benefits": [
+         {
+          "rule": "suite_a_legumineuse",
+          "detail": "pois_chiche enrichit le sol en azote"
+         }
+        ],
+        "missing": [],
+        "confidence": {
+         "level": "high",
+         "value": 0.85,
+         "percent": 85,
+         "reasons": [
+          "seuils non valides localement (base ECOCROP mondiale)"
+         ]
+        },
+        "criteria": [
+         {
+          "criterion": "temp_c",
+          "value": 18,
+          "position": "optimal",
+          "optimal": [
+           15,
+           20
+          ],
+          "tolerated": [
+           2,
+           40
+          ]
+         },
+         {
+          "criterion": "rain_mm",
+          "value": 500,
+          "position": "optimal",
+          "optimal": [
+           500,
+           1000
+          ],
+          "tolerated": [
+           200,
+           2000
+          ]
+         },
+         {
+          "criterion": "ph",
+          "value": 7,
+          "position": "optimal",
+          "optimal": [
+           6.5,
+           7.5
+          ],
+          "tolerated": [
+           6,
+           8
+          ]
+         },
+         {
+          "criterion": "salinity_dsm",
+          "value": 2,
+          "position": "optimal",
+          "optimal": [
+           0,
+           4
+          ],
+          "tolerated": [
+           0,
+           10
+          ]
+         }
+        ],
+        "alternatives": []
+       }
+      ],
+      "plan_issues": [],
+      "composition": [
+       {
+        "family": "poaceae",
+        "percent": 67
+       },
+       {
+        "family": "amaryllidaceae",
+        "percent": 33
+       }
+      ],
+      "tips": [
+       {
+        "rule": "sans_legumineuse",
+        "suggestions": {}
+       }
+      ],
+      "confidence": {
+       "level": "high",
+       "percent": 85
+      }
+     },
+     "explanation": {
+      "verdict": "viable",
+      "headline": "Plan proposé : viable.",
+      "summary": "Lignes évaluées : 3 (bons choix : 3, à risque : 0, à éviter : 0).",
+      "confidence_text": "Fiabilité du plan : 85 % (élevée), égale à celle de la ligne la plus fragile.",
+      "composition_text": "Composition du plan : céréales 67 %, famille de l'oignon 33 %.",
+      "issues": [],
+      "tips": [
+       "Aucune légumineuse dans le plan. En ajouter une, cette saison ou la suivante, enrichit le sol en azote."
+      ],
+      "notes": [
+       "Seuils pas encore validés localement pour : Blé dur, Oignon, Orge."
+      ],
+      "lines": [
+       {
+        "headline": "Blé dur sur P1 : bon choix.",
+        "score_text": "Adéquation au terrain : 100 sur 100.",
+        "reasons": [
+         "La température (18 °C) est dans la plage idéale de cette culture (de 17 °C à 25 °C).",
+         "La pluie (500 mm) est dans la plage idéale de cette culture (de 500 mm à 700 mm).",
+         "Le pH du sol (7) est dans la plage idéale de cette culture (de 6 à 7).",
+         "La salinité du sol (2 dS/m) est dans la plage idéale de cette culture (de 0 dS/m à 4 dS/m).",
+         "La culture précédente enrichit le sol en azote, ce qui aide celle-ci."
+        ],
+        "cautions": [],
+        "suggestion": null
+       },
+       {
+        "headline": "Oignon sur P1 : bon choix.",
+        "score_text": "Adéquation au terrain : 100 sur 100.",
+        "reasons": [
+         "La température (18 °C) est dans la plage idéale de cette culture (de 12 °C à 25 °C).",
+         "La pluie (500 mm) est dans la plage idéale de cette culture (de 350 mm à 600 mm).",
+         "Le pH du sol (7) est dans la plage idéale de cette culture (de 6 à 7).",
+         "La salinité du sol (2 dS/m) est dans la plage idéale de cette culture (de 0 dS/m à 4 dS/m).",
+         "La culture précédente enrichit le sol en azote, ce qui aide celle-ci."
+        ],
+        "cautions": [],
+        "suggestion": null
+       },
+       {
+        "headline": "Orge sur P1 : bon choix.",
+        "score_text": "Adéquation au terrain : 100 sur 100.",
+        "reasons": [
+         "La température (18 °C) est dans la plage idéale de cette culture (de 15 °C à 20 °C).",
+         "La pluie (500 mm) est dans la plage idéale de cette culture (de 500 mm à 1000 mm).",
+         "Le pH du sol (7) est dans la plage idéale de cette culture (de 6.5 à 7.5).",
+         "La salinité du sol (2 dS/m) est dans la plage idéale de cette culture (de 0 dS/m à 4 dS/m).",
+         "La culture précédente enrichit le sol en azote, ce qui aide celle-ci."
+        ],
+        "cautions": [],
+        "suggestion": null
+       }
+      ]
+     },
+     "based_on": "proposed"
+    }
+   }
+  },
+  "cereales_apres_legumineuse": {
+   "description": "Que des céréales, après une légumineuse : bien noté, mais pas diversifié",
+   "parcels": {
+    "P1": {
+     "conditions": {
+      "temp_c": 18,
+      "rain_mm": 500,
+      "ph": 7,
+      "salinity_dsm": 2
+     },
+     "irrigated": false,
+     "history": [
+      {
+       "crop": "pois_chiche",
+       "year": 2025
+      }
+     ]
+    }
+   },
+   "plan": [
+    {
+     "parcel": "P1",
+     "crop": "ble_tendre",
+     "area_ha": 2
+    },
+    {
+     "parcel": "P1",
+     "crop": "orge",
+     "area_ha": 1
+    }
+   ],
+   "rapport": {
+    "schema_version": 1,
+    "year": 2026,
+    "missing_history": [],
+    "farmer": {
+     "plan": [
+      {
+       "parcel": "P1",
+       "crop": "ble_tendre",
+       "area_ha": 2
+      },
+      {
+       "parcel": "P1",
+       "crop": "orge",
+       "area_ha": 1
+      }
+     ],
+     "evaluation": {
+      "verdict": "viable",
+      "lines": [
+       {
+        "parcel": "P1",
+        "crop": "ble_tendre",
+        "area_ha": 2,
+        "name_fr": "Blé tendre",
+        "status": "ok",
+        "score": 78,
+        "agro_score": 78,
+        "rotation_note": 1.0,
+        "exclusions": [],
+        "rotation_issues": [],
+        "rotation_benefits": [
+         {
+          "rule": "suite_a_legumineuse",
+          "detail": "pois_chiche enrichit le sol en azote"
+         }
+        ],
+        "missing": [],
+        "confidence": {
+         "level": "high",
+         "value": 0.85,
+         "percent": 85,
+         "reasons": [
+          "seuils non valides localement (base ECOCROP mondiale)"
+         ]
+        },
+        "criteria": [
+         {
+          "criterion": "temp_c",
+          "value": 18,
+          "position": "optimal",
+          "optimal": [
+           15,
+           23
+          ],
+          "tolerated": [
+           5,
+           27
+          ]
+         },
+         {
+          "criterion": "rain_mm",
+          "value": 500,
+          "position": "tolerable",
+          "optimal": [
+           750,
+           900
+          ],
+          "tolerated": [
+           300,
+           1600
+          ]
+         },
+         {
+          "criterion": "ph",
+          "value": 7,
+          "position": "optimal",
+          "optimal": [
+           6,
+           7
+          ],
+          "tolerated": [
+           5.5,
+           8.5
+          ]
+         },
+         {
+          "criterion": "salinity_dsm",
+          "value": 2,
+          "position": "optimal",
+          "optimal": [
+           0,
+           4
+          ],
+          "tolerated": [
+           0,
+           10
+          ]
+         }
+        ],
+        "alternatives": [
+         {
+          "crop": "ble_dur",
+          "name_fr": "Blé dur",
+          "score": 100,
+          "gain": 22
+         }
+        ]
+       },
+       {
+        "parcel": "P1",
+        "crop": "orge",
+        "area_ha": 1,
+        "name_fr": "Orge",
+        "status": "ok",
+        "score": 100,
+        "agro_score": 100,
+        "rotation_note": 1.0,
+        "exclusions": [],
+        "rotation_issues": [],
+        "rotation_benefits": [
+         {
+          "rule": "suite_a_legumineuse",
+          "detail": "pois_chiche enrichit le sol en azote"
+         }
+        ],
+        "missing": [],
+        "confidence": {
+         "level": "high",
+         "value": 0.85,
+         "percent": 85,
+         "reasons": [
+          "seuils non valides localement (base ECOCROP mondiale)"
+         ]
+        },
+        "criteria": [
+         {
+          "criterion": "temp_c",
+          "value": 18,
+          "position": "optimal",
+          "optimal": [
+           15,
+           20
+          ],
+          "tolerated": [
+           2,
+           40
+          ]
+         },
+         {
+          "criterion": "rain_mm",
+          "value": 500,
+          "position": "optimal",
+          "optimal": [
+           500,
+           1000
+          ],
+          "tolerated": [
+           200,
+           2000
+          ]
+         },
+         {
+          "criterion": "ph",
+          "value": 7,
+          "position": "optimal",
+          "optimal": [
+           6.5,
+           7.5
+          ],
+          "tolerated": [
+           6,
+           8
+          ]
+         },
+         {
+          "criterion": "salinity_dsm",
+          "value": 2,
+          "position": "optimal",
+          "optimal": [
+           0,
+           4
+          ],
+          "tolerated": [
+           0,
+           10
+          ]
+         }
+        ],
+        "alternatives": []
+       }
+      ],
+      "plan_issues": [
+       {
+        "rule": "concentration_famille",
+        "level": "warning",
+        "detail": "100 % du plan dans la famille poaceae",
+        "family": "poaceae",
+        "percent": 100
+       }
+      ],
+      "composition": [
+       {
+        "family": "poaceae",
+        "percent": 100
+       }
+      ],
+      "tips": [
+       {
+        "rule": "une_seule_famille",
+        "family": "poaceae",
+        "suggestions": {}
+       }
+      ],
+      "confidence": {
+       "level": "high",
+       "percent": 85
+      }
+     },
+     "explanation": {
+      "verdict": "viable",
+      "headline": "Plan : viable.",
+      "summary": "Lignes évaluées : 2 (bons choix : 2, à risque : 0, à éviter : 0).",
+      "confidence_text": "Fiabilité du plan : 85 % (élevée), égale à celle de la ligne la plus fragile.",
+      "composition_text": "Composition du plan : céréales 100 %.",
+      "issues": [
+       "100 % du plan est dans la même famille de cultures (céréales), ce qui peut favoriser les maladies du sol."
+      ],
+      "tips": [
+       "Votre plan ne contient que des céréales. Ajouter une légumineuse réduit les maladies du sol et enrichit la terre en azote pour la saison suivante."
+      ],
+      "notes": [
+       "Seuils pas encore validés localement pour : Blé tendre, Orge."
+      ],
+      "lines": [
+       {
+        "headline": "Blé tendre sur P1 : bon choix.",
+        "score_text": "Adéquation au terrain : 78 sur 100.",
+        "reasons": [
+         "La température (18 °C) est dans la plage idéale de cette culture (de 15 °C à 23 °C).",
+         "La pluie (500 mm) est acceptable pour cette culture, mais pas idéale (idéal : de 750 mm à 900 mm).",
+         "Le pH du sol (7) est dans la plage idéale de cette culture (de 6 à 7).",
+         "La salinité du sol (2 dS/m) est dans la plage idéale de cette culture (de 0 dS/m à 4 dS/m).",
+         "La culture précédente enrichit le sol en azote, ce qui aide celle-ci."
+        ],
+        "cautions": [],
+        "suggestion": "Une meilleure option existe : Blé dur (score 100 sur 100, +22 points)."
+       },
+       {
+        "headline": "Orge sur P1 : bon choix.",
+        "score_text": "Adéquation au terrain : 100 sur 100.",
+        "reasons": [
+         "La température (18 °C) est dans la plage idéale de cette culture (de 15 °C à 20 °C).",
+         "La pluie (500 mm) est dans la plage idéale de cette culture (de 500 mm à 1000 mm).",
+         "Le pH du sol (7) est dans la plage idéale de cette culture (de 6.5 à 7.5).",
+         "La salinité du sol (2 dS/m) est dans la plage idéale de cette culture (de 0 dS/m à 4 dS/m).",
+         "La culture précédente enrichit le sol en azote, ce qui aide celle-ci."
+        ],
+        "cautions": [],
+        "suggestion": null
+       }
+      ]
+     }
+    },
+    "better": {
+     "year": 2026,
+     "plan": [
+      {
+       "parcel": "P1",
+       "crop": "ble_dur",
+       "area_ha": null
+      },
+      {
+       "parcel": "P1",
+       "crop": "oignon",
+       "area_ha": null
+      },
+      {
+       "parcel": "P1",
+       "crop": "orge",
+       "area_ha": null
+      }
+     ],
+     "unplanned": [],
+     "evaluation": {
+      "verdict": "viable",
+      "lines": [
+       {
+        "parcel": "P1",
+        "crop": "ble_dur",
+        "area_ha": null,
+        "name_fr": "Blé dur",
+        "status": "ok",
+        "score": 100,
+        "agro_score": 100,
+        "rotation_note": 1.0,
+        "exclusions": [],
+        "rotation_issues": [],
+        "rotation_benefits": [
+         {
+          "rule": "suite_a_legumineuse",
+          "detail": "pois_chiche enrichit le sol en azote"
+         }
+        ],
+        "missing": [],
+        "confidence": {
+         "level": "high",
+         "value": 0.85,
+         "percent": 85,
+         "reasons": [
+          "seuils non valides localement (base ECOCROP mondiale)"
+         ]
+        },
+        "criteria": [
+         {
+          "criterion": "temp_c",
+          "value": 18,
+          "position": "optimal",
+          "optimal": [
+           17,
+           25
+          ],
+          "tolerated": [
+           6,
+           30
+          ]
+         },
+         {
+          "criterion": "rain_mm",
+          "value": 500,
+          "position": "optimal",
+          "optimal": [
+           500,
+           700
+          ],
+          "tolerated": [
+           400,
+           800
+          ]
+         },
+         {
+          "criterion": "ph",
+          "value": 7,
+          "position": "optimal",
+          "optimal": [
+           6,
+           7
+          ],
+          "tolerated": [
+           5.5,
+           8.5
+          ]
+         },
+         {
+          "criterion": "salinity_dsm",
+          "value": 2,
+          "position": "optimal",
+          "optimal": [
+           0,
+           4
+          ],
+          "tolerated": [
+           0,
+           4
+          ]
+         }
+        ],
+        "alternatives": []
+       },
+       {
+        "parcel": "P1",
+        "crop": "oignon",
+        "area_ha": null,
+        "name_fr": "Oignon",
+        "status": "ok",
+        "score": 100,
+        "agro_score": 100,
+        "rotation_note": 1.0,
+        "exclusions": [],
+        "rotation_issues": [],
+        "rotation_benefits": [
+         {
+          "rule": "suite_a_legumineuse",
+          "detail": "pois_chiche enrichit le sol en azote"
+         }
+        ],
+        "missing": [],
+        "confidence": {
+         "level": "high",
+         "value": 0.85,
+         "percent": 85,
+         "reasons": [
+          "seuils non valides localement (base ECOCROP mondiale)"
+         ]
+        },
+        "criteria": [
+         {
+          "criterion": "temp_c",
+          "value": 18,
+          "position": "optimal",
+          "optimal": [
+           12,
+           25
+          ],
+          "tolerated": [
+           4,
+           30
+          ]
+         },
+         {
+          "criterion": "rain_mm",
+          "value": 500,
+          "position": "optimal",
+          "optimal": [
+           350,
+           600
+          ],
+          "tolerated": [
+           300,
+           2800
+          ]
+         },
+         {
+          "criterion": "ph",
+          "value": 7,
+          "position": "optimal",
+          "optimal": [
+           6,
+           7
+          ],
+          "tolerated": [
+           4.3,
+           8.3
+          ]
+         },
+         {
+          "criterion": "salinity_dsm",
+          "value": 2,
+          "position": "optimal",
+          "optimal": [
+           0,
+           4
+          ],
+          "tolerated": [
+           0,
+           10
+          ]
+         }
+        ],
+        "alternatives": []
+       },
+       {
+        "parcel": "P1",
+        "crop": "orge",
+        "area_ha": null,
+        "name_fr": "Orge",
+        "status": "ok",
+        "score": 100,
+        "agro_score": 100,
+        "rotation_note": 1.0,
+        "exclusions": [],
+        "rotation_issues": [],
+        "rotation_benefits": [
+         {
+          "rule": "suite_a_legumineuse",
+          "detail": "pois_chiche enrichit le sol en azote"
+         }
+        ],
+        "missing": [],
+        "confidence": {
+         "level": "high",
+         "value": 0.85,
+         "percent": 85,
+         "reasons": [
+          "seuils non valides localement (base ECOCROP mondiale)"
+         ]
+        },
+        "criteria": [
+         {
+          "criterion": "temp_c",
+          "value": 18,
+          "position": "optimal",
+          "optimal": [
+           15,
+           20
+          ],
+          "tolerated": [
+           2,
+           40
+          ]
+         },
+         {
+          "criterion": "rain_mm",
+          "value": 500,
+          "position": "optimal",
+          "optimal": [
+           500,
+           1000
+          ],
+          "tolerated": [
+           200,
+           2000
+          ]
+         },
+         {
+          "criterion": "ph",
+          "value": 7,
+          "position": "optimal",
+          "optimal": [
+           6.5,
+           7.5
+          ],
+          "tolerated": [
+           6,
+           8
+          ]
+         },
+         {
+          "criterion": "salinity_dsm",
+          "value": 2,
+          "position": "optimal",
+          "optimal": [
+           0,
+           4
+          ],
+          "tolerated": [
+           0,
+           10
+          ]
+         }
+        ],
+        "alternatives": []
+       }
+      ],
+      "plan_issues": [],
+      "composition": [
+       {
+        "family": "poaceae",
+        "percent": 67
+       },
+       {
+        "family": "amaryllidaceae",
+        "percent": 33
+       }
+      ],
+      "tips": [
+       {
+        "rule": "sans_legumineuse",
+        "suggestions": {}
+       }
+      ],
+      "confidence": {
+       "level": "high",
+       "percent": 85
+      }
+     },
+     "explanation": {
+      "verdict": "viable",
+      "headline": "Plan proposé : viable.",
+      "summary": "Lignes évaluées : 3 (bons choix : 3, à risque : 0, à éviter : 0).",
+      "confidence_text": "Fiabilité du plan : 85 % (élevée), égale à celle de la ligne la plus fragile.",
+      "composition_text": "Composition du plan : céréales 67 %, famille de l'oignon 33 %.",
+      "issues": [],
+      "tips": [
+       "Aucune légumineuse dans le plan. En ajouter une, cette saison ou la suivante, enrichit le sol en azote."
+      ],
+      "notes": [
+       "Seuils pas encore validés localement pour : Blé dur, Oignon, Orge."
+      ],
+      "lines": [
+       {
+        "headline": "Blé dur sur P1 : bon choix.",
+        "score_text": "Adéquation au terrain : 100 sur 100.",
+        "reasons": [
+         "La température (18 °C) est dans la plage idéale de cette culture (de 17 °C à 25 °C).",
+         "La pluie (500 mm) est dans la plage idéale de cette culture (de 500 mm à 700 mm).",
+         "Le pH du sol (7) est dans la plage idéale de cette culture (de 6 à 7).",
+         "La salinité du sol (2 dS/m) est dans la plage idéale de cette culture (de 0 dS/m à 4 dS/m).",
+         "La culture précédente enrichit le sol en azote, ce qui aide celle-ci."
+        ],
+        "cautions": [],
+        "suggestion": null
+       },
+       {
+        "headline": "Oignon sur P1 : bon choix.",
+        "score_text": "Adéquation au terrain : 100 sur 100.",
+        "reasons": [
+         "La température (18 °C) est dans la plage idéale de cette culture (de 12 °C à 25 °C).",
+         "La pluie (500 mm) est dans la plage idéale de cette culture (de 350 mm à 600 mm).",
+         "Le pH du sol (7) est dans la plage idéale de cette culture (de 6 à 7).",
+         "La salinité du sol (2 dS/m) est dans la plage idéale de cette culture (de 0 dS/m à 4 dS/m).",
+         "La culture précédente enrichit le sol en azote, ce qui aide celle-ci."
+        ],
+        "cautions": [],
+        "suggestion": null
+       },
+       {
+        "headline": "Orge sur P1 : bon choix.",
+        "score_text": "Adéquation au terrain : 100 sur 100.",
+        "reasons": [
+         "La température (18 °C) est dans la plage idéale de cette culture (de 15 °C à 20 °C).",
+         "La pluie (500 mm) est dans la plage idéale de cette culture (de 500 mm à 1000 mm).",
+         "Le pH du sol (7) est dans la plage idéale de cette culture (de 6.5 à 7.5).",
+         "La salinité du sol (2 dS/m) est dans la plage idéale de cette culture (de 0 dS/m à 4 dS/m).",
+         "La culture précédente enrichit le sol en azote, ce qui aide celle-ci."
+        ],
+        "cautions": [],
+        "suggestion": null
+       }
+      ]
+     }
+    },
+    "retained": "proposed",
+    "next_year": {
+     "year": 2027,
+     "plan": [
+      {
+       "parcel": "P1",
+       "crop": "oignon",
+       "area_ha": null
+      },
+      {
+       "parcel": "P1",
+       "crop": "lentille",
+       "area_ha": null
+      },
+      {
+       "parcel": "P1",
+       "crop": "pois_chiche",
+       "area_ha": null
+      }
+     ],
+     "unplanned": [],
+     "evaluation": {
+      "verdict": "viable",
+      "lines": [
+       {
+        "parcel": "P1",
+        "crop": "oignon",
+        "area_ha": null,
+        "name_fr": "Oignon",
+        "status": "ok",
+        "score": 100,
+        "agro_score": 100,
+        "rotation_note": 1.0,
+        "exclusions": [],
+        "rotation_issues": [],
+        "rotation_benefits": [],
+        "missing": [],
+        "confidence": {
+         "level": "high",
+         "value": 0.85,
+         "percent": 85,
+         "reasons": [
+          "seuils non valides localement (base ECOCROP mondiale)"
+         ]
+        },
+        "criteria": [
+         {
+          "criterion": "temp_c",
+          "value": 18,
+          "position": "optimal",
+          "optimal": [
+           12,
+           25
+          ],
+          "tolerated": [
+           4,
+           30
+          ]
+         },
+         {
+          "criterion": "rain_mm",
+          "value": 500,
+          "position": "optimal",
+          "optimal": [
+           350,
+           600
+          ],
+          "tolerated": [
+           300,
+           2800
+          ]
+         },
+         {
+          "criterion": "ph",
+          "value": 7,
+          "position": "optimal",
+          "optimal": [
+           6,
+           7
+          ],
+          "tolerated": [
+           4.3,
+           8.3
+          ]
+         },
+         {
+          "criterion": "salinity_dsm",
+          "value": 2,
+          "position": "optimal",
+          "optimal": [
+           0,
+           4
+          ],
+          "tolerated": [
+           0,
+           10
+          ]
+         }
+        ],
+        "alternatives": []
+       },
+       {
+        "parcel": "P1",
+        "crop": "lentille",
+        "area_ha": null,
+        "name_fr": "Lentille",
+        "status": "ok",
+        "score": 89,
+        "agro_score": 89,
+        "rotation_note": 1.0,
+        "exclusions": [],
+        "rotation_issues": [],
+        "rotation_benefits": [],
+        "missing": [],
+        "confidence": {
+         "level": "high",
+         "value": 0.85,
+         "percent": 85,
+         "reasons": [
+          "seuils non valides localement (base ECOCROP mondiale)"
+         ]
+        },
+        "criteria": [
+         {
+          "criterion": "temp_c",
+          "value": 18,
+          "position": "optimal",
+          "optimal": [
+           15,
+           29
+          ],
+          "tolerated": [
+           5,
+           32
+          ]
+         },
+         {
+          "criterion": "rain_mm",
+          "value": 500,
+          "position": "tolerable",
+          "optimal": [
+           600,
+           1000
+          ],
+          "tolerated": [
+           250,
+           2500
+          ]
+         },
+         {
+          "criterion": "ph",
+          "value": 7,
+          "position": "optimal",
+          "optimal": [
+           5.5,
+           7.5
+          ],
+          "tolerated": [
+           4.5,
+           8.2
+          ]
+         },
+         {
+          "criterion": "salinity_dsm",
+          "value": 2,
+          "position": "optimal",
+          "optimal": [
+           0,
+           4
+          ],
+          "tolerated": [
+           0,
+           10
+          ]
+         }
+        ],
+        "alternatives": []
+       },
+       {
+        "parcel": "P1",
+        "crop": "pois_chiche",
+        "area_ha": null,
+        "name_fr": "Pois chiche",
+        "status": "ok",
+        "score": 87,
+        "agro_score": 87,
+        "rotation_note": 1.0,
+        "exclusions": [],
+        "rotation_issues": [],
+        "rotation_benefits": [],
+        "missing": [],
+        "confidence": {
+         "level": "high",
+         "value": 0.85,
+         "percent": 85,
+         "reasons": [
+          "seuils non valides localement (base ECOCROP mondiale)"
+         ]
+        },
+        "criteria": [
+         {
+          "criterion": "temp_c",
+          "value": 18,
+          "position": "optimal",
+          "optimal": [
+           15,
+           29
+          ],
+          "tolerated": [
+           7,
+           35
+          ]
+         },
+         {
+          "criterion": "rain_mm",
+          "value": 500,
+          "position": "tolerable",
+          "optimal": [
+           600,
+           1000
+          ],
+          "tolerated": [
+           300,
+           1800
+          ]
+         },
+         {
+          "criterion": "ph",
+          "value": 7,
+          "position": "optimal",
+          "optimal": [
+           6,
+           8.5
+          ],
+          "tolerated": [
+           4.7,
+           9.5
+          ]
+         },
+         {
+          "criterion": "salinity_dsm",
+          "value": 2,
+          "position": "optimal",
+          "optimal": [
+           0,
+           4
+          ],
+          "tolerated": [
+           0,
+           10
+          ]
+         }
+        ],
+        "alternatives": []
+       }
+      ],
+      "plan_issues": [],
+      "composition": [
+       {
+        "family": "fabaceae",
+        "percent": 67
+       },
+       {
+        "family": "amaryllidaceae",
+        "percent": 33
+       }
+      ],
+      "tips": [],
+      "confidence": {
+       "level": "high",
+       "percent": 85
+      }
+     },
+     "explanation": {
+      "verdict": "viable",
+      "headline": "Plan proposé : viable.",
+      "summary": "Lignes évaluées : 3 (bons choix : 3, à risque : 0, à éviter : 0).",
+      "confidence_text": "Fiabilité du plan : 85 % (élevée), égale à celle de la ligne la plus fragile.",
+      "composition_text": "Composition du plan : légumineuses 67 %, famille de l'oignon 33 %.",
+      "issues": [],
+      "tips": [],
+      "notes": [
+       "Seuils pas encore validés localement pour : Oignon, Lentille, Pois chiche."
+      ],
+      "lines": [
+       {
+        "headline": "Oignon sur P1 : bon choix.",
+        "score_text": "Adéquation au terrain : 100 sur 100.",
+        "reasons": [
+         "La température (18 °C) est dans la plage idéale de cette culture (de 12 °C à 25 °C).",
+         "La pluie (500 mm) est dans la plage idéale de cette culture (de 350 mm à 600 mm).",
+         "Le pH du sol (7) est dans la plage idéale de cette culture (de 6 à 7).",
+         "La salinité du sol (2 dS/m) est dans la plage idéale de cette culture (de 0 dS/m à 4 dS/m)."
+        ],
+        "cautions": [],
+        "suggestion": null
+       },
+       {
+        "headline": "Lentille sur P1 : bon choix.",
+        "score_text": "Adéquation au terrain : 89 sur 100.",
+        "reasons": [
+         "La température (18 °C) est dans la plage idéale de cette culture (de 15 °C à 29 °C).",
+         "La pluie (500 mm) est acceptable pour cette culture, mais pas idéale (idéal : de 600 mm à 1000 mm).",
+         "Le pH du sol (7) est dans la plage idéale de cette culture (de 5.5 à 7.5).",
+         "La salinité du sol (2 dS/m) est dans la plage idéale de cette culture (de 0 dS/m à 4 dS/m)."
+        ],
+        "cautions": [],
+        "suggestion": null
+       },
+       {
+        "headline": "Pois chiche sur P1 : bon choix.",
+        "score_text": "Adéquation au terrain : 87 sur 100.",
+        "reasons": [
+         "La température (18 °C) est dans la plage idéale de cette culture (de 15 °C à 29 °C).",
+         "La pluie (500 mm) est acceptable pour cette culture, mais pas idéale (idéal : de 600 mm à 1000 mm).",
+         "Le pH du sol (7) est dans la plage idéale de cette culture (de 6 à 8.5).",
+         "La salinité du sol (2 dS/m) est dans la plage idéale de cette culture (de 0 dS/m à 4 dS/m)."
+        ],
+        "cautions": [],
+        "suggestion": null
+       }
+      ]
+     },
+     "based_on": "proposed"
+    }
+   }
+  },
+  "legumineuses_seules": {
+   "description": "Que des légumineuses après du blé",
+   "parcels": {
+    "P1": {
+     "conditions": {
+      "temp_c": 18,
+      "rain_mm": 500,
+      "ph": 7,
+      "salinity_dsm": 2
+     },
+     "irrigated": false,
+     "history": [
+      {
+       "crop": "ble_tendre",
+       "year": 2025
+      }
+     ]
+    }
+   },
+   "plan": [
+    {
+     "parcel": "P1",
+     "crop": "pois_chiche",
+     "area_ha": 1
+    },
+    {
+     "parcel": "P1",
+     "crop": "lentille",
+     "area_ha": 1
+    }
+   ],
+   "rapport": {
+    "schema_version": 1,
+    "year": 2026,
+    "missing_history": [],
+    "farmer": {
+     "plan": [
+      {
+       "parcel": "P1",
+       "crop": "pois_chiche",
+       "area_ha": 1
+      },
+      {
+       "parcel": "P1",
+       "crop": "lentille",
+       "area_ha": 1
+      }
+     ],
+     "evaluation": {
+      "verdict": "viable",
+      "lines": [
+       {
+        "parcel": "P1",
+        "crop": "pois_chiche",
+        "area_ha": 1,
+        "name_fr": "Pois chiche",
+        "status": "ok",
+        "score": 87,
+        "agro_score": 87,
+        "rotation_note": 1.0,
+        "exclusions": [],
+        "rotation_issues": [],
+        "rotation_benefits": [],
+        "missing": [],
+        "confidence": {
+         "level": "high",
+         "value": 0.85,
+         "percent": 85,
+         "reasons": [
+          "seuils non valides localement (base ECOCROP mondiale)"
+         ]
+        },
+        "criteria": [
+         {
+          "criterion": "temp_c",
+          "value": 18,
+          "position": "optimal",
+          "optimal": [
+           15,
+           29
+          ],
+          "tolerated": [
+           7,
+           35
+          ]
+         },
+         {
+          "criterion": "rain_mm",
+          "value": 500,
+          "position": "tolerable",
+          "optimal": [
+           600,
+           1000
+          ],
+          "tolerated": [
+           300,
+           1800
+          ]
+         },
+         {
+          "criterion": "ph",
+          "value": 7,
+          "position": "optimal",
+          "optimal": [
+           6,
+           8.5
+          ],
+          "tolerated": [
+           4.7,
+           9.5
+          ]
+         },
+         {
+          "criterion": "salinity_dsm",
+          "value": 2,
+          "position": "optimal",
+          "optimal": [
+           0,
+           4
+          ],
+          "tolerated": [
+           0,
+           10
+          ]
+         }
+        ],
+        "alternatives": []
+       },
+       {
+        "parcel": "P1",
+        "crop": "lentille",
+        "area_ha": 1,
+        "name_fr": "Lentille",
+        "status": "ok",
+        "score": 89,
+        "agro_score": 89,
+        "rotation_note": 1.0,
+        "exclusions": [],
+        "rotation_issues": [],
+        "rotation_benefits": [],
+        "missing": [],
+        "confidence": {
+         "level": "high",
+         "value": 0.85,
+         "percent": 85,
+         "reasons": [
+          "seuils non valides localement (base ECOCROP mondiale)"
+         ]
+        },
+        "criteria": [
+         {
+          "criterion": "temp_c",
+          "value": 18,
+          "position": "optimal",
+          "optimal": [
+           15,
+           29
+          ],
+          "tolerated": [
+           5,
+           32
+          ]
+         },
+         {
+          "criterion": "rain_mm",
+          "value": 500,
+          "position": "tolerable",
+          "optimal": [
+           600,
+           1000
+          ],
+          "tolerated": [
+           250,
+           2500
+          ]
+         },
+         {
+          "criterion": "ph",
+          "value": 7,
+          "position": "optimal",
+          "optimal": [
+           5.5,
+           7.5
+          ],
+          "tolerated": [
+           4.5,
+           8.2
+          ]
+         },
+         {
+          "criterion": "salinity_dsm",
+          "value": 2,
+          "position": "optimal",
+          "optimal": [
+           0,
+           4
+          ],
+          "tolerated": [
+           0,
+           10
+          ]
+         }
+        ],
+        "alternatives": []
+       }
+      ],
+      "plan_issues": [
+       {
+        "rule": "concentration_famille",
+        "level": "warning",
+        "detail": "100 % du plan dans la famille fabaceae",
+        "family": "fabaceae",
+        "percent": 100
+       }
+      ],
+      "composition": [
+       {
+        "family": "fabaceae",
+        "percent": 100
+       }
+      ],
+      "tips": [
+       {
+        "rule": "une_seule_famille",
+        "family": "fabaceae"
+       }
+      ],
+      "confidence": {
+       "level": "high",
+       "percent": 85
+      }
+     },
+     "explanation": {
+      "verdict": "viable",
+      "headline": "Plan : viable.",
+      "summary": "Lignes évaluées : 2 (bons choix : 2, à risque : 0, à éviter : 0).",
+      "confidence_text": "Fiabilité du plan : 85 % (élevée), égale à celle de la ligne la plus fragile.",
+      "composition_text": "Composition du plan : légumineuses 100 %.",
+      "issues": [
+       "100 % du plan est dans la même famille de cultures (légumineuses), ce qui peut favoriser les maladies du sol."
+      ],
+      "tips": [
+       "Votre plan ne contient que des légumineuses. Alterner avec une céréale ou une culture d'une autre famille limite les maladies du sol."
+      ],
+      "notes": [
+       "Seuils pas encore validés localement pour : Pois chiche, Lentille."
+      ],
+      "lines": [
+       {
+        "headline": "Pois chiche sur P1 : bon choix.",
+        "score_text": "Adéquation au terrain : 87 sur 100.",
+        "reasons": [
+         "La température (18 °C) est dans la plage idéale de cette culture (de 15 °C à 29 °C).",
+         "La pluie (500 mm) est acceptable pour cette culture, mais pas idéale (idéal : de 600 mm à 1000 mm).",
+         "Le pH du sol (7) est dans la plage idéale de cette culture (de 6 à 8.5).",
+         "La salinité du sol (2 dS/m) est dans la plage idéale de cette culture (de 0 dS/m à 4 dS/m)."
+        ],
+        "cautions": [],
+        "suggestion": null
+       },
+       {
+        "headline": "Lentille sur P1 : bon choix.",
+        "score_text": "Adéquation au terrain : 89 sur 100.",
+        "reasons": [
+         "La température (18 °C) est dans la plage idéale de cette culture (de 15 °C à 29 °C).",
+         "La pluie (500 mm) est acceptable pour cette culture, mais pas idéale (idéal : de 600 mm à 1000 mm).",
+         "Le pH du sol (7) est dans la plage idéale de cette culture (de 5.5 à 7.5).",
+         "La salinité du sol (2 dS/m) est dans la plage idéale de cette culture (de 0 dS/m à 4 dS/m)."
+        ],
+        "cautions": [],
+        "suggestion": null
+       }
+      ]
+     }
+    },
+    "better": {
+     "year": 2026,
+     "plan": [
+      {
+       "parcel": "P1",
+       "crop": "oignon",
+       "area_ha": null
+      },
+      {
+       "parcel": "P1",
+       "crop": "lentille",
+       "area_ha": null
+      },
+      {
+       "parcel": "P1",
+       "crop": "pois_chiche",
+       "area_ha": null
+      }
+     ],
+     "unplanned": [],
+     "evaluation": {
+      "verdict": "viable",
+      "lines": [
+       {
+        "parcel": "P1",
+        "crop": "oignon",
+        "area_ha": null,
+        "name_fr": "Oignon",
+        "status": "ok",
+        "score": 100,
+        "agro_score": 100,
+        "rotation_note": 1.0,
+        "exclusions": [],
+        "rotation_issues": [],
+        "rotation_benefits": [],
+        "missing": [],
+        "confidence": {
+         "level": "high",
+         "value": 0.85,
+         "percent": 85,
+         "reasons": [
+          "seuils non valides localement (base ECOCROP mondiale)"
+         ]
+        },
+        "criteria": [
+         {
+          "criterion": "temp_c",
+          "value": 18,
+          "position": "optimal",
+          "optimal": [
+           12,
+           25
+          ],
+          "tolerated": [
+           4,
+           30
+          ]
+         },
+         {
+          "criterion": "rain_mm",
+          "value": 500,
+          "position": "optimal",
+          "optimal": [
+           350,
+           600
+          ],
+          "tolerated": [
+           300,
+           2800
+          ]
+         },
+         {
+          "criterion": "ph",
+          "value": 7,
+          "position": "optimal",
+          "optimal": [
+           6,
+           7
+          ],
+          "tolerated": [
+           4.3,
+           8.3
+          ]
+         },
+         {
+          "criterion": "salinity_dsm",
+          "value": 2,
+          "position": "optimal",
+          "optimal": [
+           0,
+           4
+          ],
+          "tolerated": [
+           0,
+           10
+          ]
+         }
+        ],
+        "alternatives": []
+       },
+       {
+        "parcel": "P1",
+        "crop": "lentille",
+        "area_ha": null,
+        "name_fr": "Lentille",
+        "status": "ok",
+        "score": 89,
+        "agro_score": 89,
+        "rotation_note": 1.0,
+        "exclusions": [],
+        "rotation_issues": [],
+        "rotation_benefits": [],
+        "missing": [],
+        "confidence": {
+         "level": "high",
+         "value": 0.85,
+         "percent": 85,
+         "reasons": [
+          "seuils non valides localement (base ECOCROP mondiale)"
+         ]
+        },
+        "criteria": [
+         {
+          "criterion": "temp_c",
+          "value": 18,
+          "position": "optimal",
+          "optimal": [
+           15,
+           29
+          ],
+          "tolerated": [
+           5,
+           32
+          ]
+         },
+         {
+          "criterion": "rain_mm",
+          "value": 500,
+          "position": "tolerable",
+          "optimal": [
+           600,
+           1000
+          ],
+          "tolerated": [
+           250,
+           2500
+          ]
+         },
+         {
+          "criterion": "ph",
+          "value": 7,
+          "position": "optimal",
+          "optimal": [
+           5.5,
+           7.5
+          ],
+          "tolerated": [
+           4.5,
+           8.2
+          ]
+         },
+         {
+          "criterion": "salinity_dsm",
+          "value": 2,
+          "position": "optimal",
+          "optimal": [
+           0,
+           4
+          ],
+          "tolerated": [
+           0,
+           10
+          ]
+         }
+        ],
+        "alternatives": []
+       },
+       {
+        "parcel": "P1",
+        "crop": "pois_chiche",
+        "area_ha": null,
+        "name_fr": "Pois chiche",
+        "status": "ok",
+        "score": 87,
+        "agro_score": 87,
+        "rotation_note": 1.0,
+        "exclusions": [],
+        "rotation_issues": [],
+        "rotation_benefits": [],
+        "missing": [],
+        "confidence": {
+         "level": "high",
+         "value": 0.85,
+         "percent": 85,
+         "reasons": [
+          "seuils non valides localement (base ECOCROP mondiale)"
+         ]
+        },
+        "criteria": [
+         {
+          "criterion": "temp_c",
+          "value": 18,
+          "position": "optimal",
+          "optimal": [
+           15,
+           29
+          ],
+          "tolerated": [
+           7,
+           35
+          ]
+         },
+         {
+          "criterion": "rain_mm",
+          "value": 500,
+          "position": "tolerable",
+          "optimal": [
+           600,
+           1000
+          ],
+          "tolerated": [
+           300,
+           1800
+          ]
+         },
+         {
+          "criterion": "ph",
+          "value": 7,
+          "position": "optimal",
+          "optimal": [
+           6,
+           8.5
+          ],
+          "tolerated": [
+           4.7,
+           9.5
+          ]
+         },
+         {
+          "criterion": "salinity_dsm",
+          "value": 2,
+          "position": "optimal",
+          "optimal": [
+           0,
+           4
+          ],
+          "tolerated": [
+           0,
+           10
+          ]
+         }
+        ],
+        "alternatives": []
+       }
+      ],
+      "plan_issues": [],
+      "composition": [
+       {
+        "family": "fabaceae",
+        "percent": 67
+       },
+       {
+        "family": "amaryllidaceae",
+        "percent": 33
+       }
+      ],
+      "tips": [],
+      "confidence": {
+       "level": "high",
+       "percent": 85
+      }
+     },
+     "explanation": {
+      "verdict": "viable",
+      "headline": "Plan proposé : viable.",
+      "summary": "Lignes évaluées : 3 (bons choix : 3, à risque : 0, à éviter : 0).",
+      "confidence_text": "Fiabilité du plan : 85 % (élevée), égale à celle de la ligne la plus fragile.",
+      "composition_text": "Composition du plan : légumineuses 67 %, famille de l'oignon 33 %.",
+      "issues": [],
+      "tips": [],
+      "notes": [
+       "Seuils pas encore validés localement pour : Oignon, Lentille, Pois chiche."
+      ],
+      "lines": [
+       {
+        "headline": "Oignon sur P1 : bon choix.",
+        "score_text": "Adéquation au terrain : 100 sur 100.",
+        "reasons": [
+         "La température (18 °C) est dans la plage idéale de cette culture (de 12 °C à 25 °C).",
+         "La pluie (500 mm) est dans la plage idéale de cette culture (de 350 mm à 600 mm).",
+         "Le pH du sol (7) est dans la plage idéale de cette culture (de 6 à 7).",
+         "La salinité du sol (2 dS/m) est dans la plage idéale de cette culture (de 0 dS/m à 4 dS/m)."
+        ],
+        "cautions": [],
+        "suggestion": null
+       },
+       {
+        "headline": "Lentille sur P1 : bon choix.",
+        "score_text": "Adéquation au terrain : 89 sur 100.",
+        "reasons": [
+         "La température (18 °C) est dans la plage idéale de cette culture (de 15 °C à 29 °C).",
+         "La pluie (500 mm) est acceptable pour cette culture, mais pas idéale (idéal : de 600 mm à 1000 mm).",
+         "Le pH du sol (7) est dans la plage idéale de cette culture (de 5.5 à 7.5).",
+         "La salinité du sol (2 dS/m) est dans la plage idéale de cette culture (de 0 dS/m à 4 dS/m)."
+        ],
+        "cautions": [],
+        "suggestion": null
+       },
+       {
+        "headline": "Pois chiche sur P1 : bon choix.",
+        "score_text": "Adéquation au terrain : 87 sur 100.",
+        "reasons": [
+         "La température (18 °C) est dans la plage idéale de cette culture (de 15 °C à 29 °C).",
+         "La pluie (500 mm) est acceptable pour cette culture, mais pas idéale (idéal : de 600 mm à 1000 mm).",
+         "Le pH du sol (7) est dans la plage idéale de cette culture (de 6 à 8.5).",
+         "La salinité du sol (2 dS/m) est dans la plage idéale de cette culture (de 0 dS/m à 4 dS/m)."
+        ],
+        "cautions": [],
+        "suggestion": null
+       }
+      ]
+     }
+    },
+    "retained": "proposed",
+    "next_year": {
+     "year": 2027,
+     "plan": [
+      {
+       "parcel": "P1",
+       "crop": "ble_dur",
+       "area_ha": null
+      },
+      {
+       "parcel": "P1",
+       "crop": "oignon",
+       "area_ha": null
+      },
+      {
+       "parcel": "P1",
+       "crop": "orge",
+       "area_ha": null
+      }
+     ],
+     "unplanned": [],
+     "evaluation": {
+      "verdict": "viable",
+      "lines": [
+       {
+        "parcel": "P1",
+        "crop": "ble_dur",
+        "area_ha": null,
+        "name_fr": "Blé dur",
+        "status": "ok",
+        "score": 100,
+        "agro_score": 100,
+        "rotation_note": 1.0,
+        "exclusions": [],
+        "rotation_issues": [],
+        "rotation_benefits": [
+         {
+          "rule": "suite_a_legumineuse",
+          "detail": "pois_chiche enrichit le sol en azote"
+         }
+        ],
+        "missing": [],
+        "confidence": {
+         "level": "high",
+         "value": 0.85,
+         "percent": 85,
+         "reasons": [
+          "seuils non valides localement (base ECOCROP mondiale)"
+         ]
+        },
+        "criteria": [
+         {
+          "criterion": "temp_c",
+          "value": 18,
+          "position": "optimal",
+          "optimal": [
+           17,
+           25
+          ],
+          "tolerated": [
+           6,
+           30
+          ]
+         },
+         {
+          "criterion": "rain_mm",
+          "value": 500,
+          "position": "optimal",
+          "optimal": [
+           500,
+           700
+          ],
+          "tolerated": [
+           400,
+           800
+          ]
+         },
+         {
+          "criterion": "ph",
+          "value": 7,
+          "position": "optimal",
+          "optimal": [
+           6,
+           7
+          ],
+          "tolerated": [
+           5.5,
+           8.5
+          ]
+         },
+         {
+          "criterion": "salinity_dsm",
+          "value": 2,
+          "position": "optimal",
+          "optimal": [
+           0,
+           4
+          ],
+          "tolerated": [
+           0,
+           4
+          ]
+         }
+        ],
+        "alternatives": []
+       },
+       {
+        "parcel": "P1",
+        "crop": "oignon",
+        "area_ha": null,
+        "name_fr": "Oignon",
+        "status": "ok",
+        "score": 100,
+        "agro_score": 100,
+        "rotation_note": 1.0,
+        "exclusions": [],
+        "rotation_issues": [],
+        "rotation_benefits": [
+         {
+          "rule": "suite_a_legumineuse",
+          "detail": "pois_chiche enrichit le sol en azote"
+         }
+        ],
+        "missing": [],
+        "confidence": {
+         "level": "high",
+         "value": 0.85,
+         "percent": 85,
+         "reasons": [
+          "seuils non valides localement (base ECOCROP mondiale)"
+         ]
+        },
+        "criteria": [
+         {
+          "criterion": "temp_c",
+          "value": 18,
+          "position": "optimal",
+          "optimal": [
+           12,
+           25
+          ],
+          "tolerated": [
+           4,
+           30
+          ]
+         },
+         {
+          "criterion": "rain_mm",
+          "value": 500,
+          "position": "optimal",
+          "optimal": [
+           350,
+           600
+          ],
+          "tolerated": [
+           300,
+           2800
+          ]
+         },
+         {
+          "criterion": "ph",
+          "value": 7,
+          "position": "optimal",
+          "optimal": [
+           6,
+           7
+          ],
+          "tolerated": [
+           4.3,
+           8.3
+          ]
+         },
+         {
+          "criterion": "salinity_dsm",
+          "value": 2,
+          "position": "optimal",
+          "optimal": [
+           0,
+           4
+          ],
+          "tolerated": [
+           0,
+           10
+          ]
+         }
+        ],
+        "alternatives": []
+       },
+       {
+        "parcel": "P1",
+        "crop": "orge",
+        "area_ha": null,
+        "name_fr": "Orge",
+        "status": "ok",
+        "score": 100,
+        "agro_score": 100,
+        "rotation_note": 1.0,
+        "exclusions": [],
+        "rotation_issues": [],
+        "rotation_benefits": [
+         {
+          "rule": "suite_a_legumineuse",
+          "detail": "pois_chiche enrichit le sol en azote"
+         }
+        ],
+        "missing": [],
+        "confidence": {
+         "level": "high",
+         "value": 0.85,
+         "percent": 85,
+         "reasons": [
+          "seuils non valides localement (base ECOCROP mondiale)"
+         ]
+        },
+        "criteria": [
+         {
+          "criterion": "temp_c",
+          "value": 18,
+          "position": "optimal",
+          "optimal": [
+           15,
+           20
+          ],
+          "tolerated": [
+           2,
+           40
+          ]
+         },
+         {
+          "criterion": "rain_mm",
+          "value": 500,
+          "position": "optimal",
+          "optimal": [
+           500,
+           1000
+          ],
+          "tolerated": [
+           200,
+           2000
+          ]
+         },
+         {
+          "criterion": "ph",
+          "value": 7,
+          "position": "optimal",
+          "optimal": [
+           6.5,
+           7.5
+          ],
+          "tolerated": [
+           6,
+           8
+          ]
+         },
+         {
+          "criterion": "salinity_dsm",
+          "value": 2,
+          "position": "optimal",
+          "optimal": [
+           0,
+           4
+          ],
+          "tolerated": [
+           0,
+           10
+          ]
+         }
+        ],
+        "alternatives": []
+       }
+      ],
+      "plan_issues": [],
+      "composition": [
+       {
+        "family": "poaceae",
+        "percent": 67
+       },
+       {
+        "family": "amaryllidaceae",
+        "percent": 33
+       }
+      ],
+      "tips": [
+       {
+        "rule": "sans_legumineuse",
+        "suggestions": {}
+       }
+      ],
+      "confidence": {
+       "level": "high",
+       "percent": 85
+      }
+     },
+     "explanation": {
+      "verdict": "viable",
+      "headline": "Plan proposé : viable.",
+      "summary": "Lignes évaluées : 3 (bons choix : 3, à risque : 0, à éviter : 0).",
+      "confidence_text": "Fiabilité du plan : 85 % (élevée), égale à celle de la ligne la plus fragile.",
+      "composition_text": "Composition du plan : céréales 67 %, famille de l'oignon 33 %.",
+      "issues": [],
+      "tips": [
+       "Aucune légumineuse dans le plan. En ajouter une, cette saison ou la suivante, enrichit le sol en azote."
+      ],
+      "notes": [
+       "Seuils pas encore validés localement pour : Blé dur, Oignon, Orge."
+      ],
+      "lines": [
+       {
+        "headline": "Blé dur sur P1 : bon choix.",
+        "score_text": "Adéquation au terrain : 100 sur 100.",
+        "reasons": [
+         "La température (18 °C) est dans la plage idéale de cette culture (de 17 °C à 25 °C).",
+         "La pluie (500 mm) est dans la plage idéale de cette culture (de 500 mm à 700 mm).",
+         "Le pH du sol (7) est dans la plage idéale de cette culture (de 6 à 7).",
+         "La salinité du sol (2 dS/m) est dans la plage idéale de cette culture (de 0 dS/m à 4 dS/m).",
+         "La culture précédente enrichit le sol en azote, ce qui aide celle-ci."
+        ],
+        "cautions": [],
+        "suggestion": null
+       },
+       {
+        "headline": "Oignon sur P1 : bon choix.",
+        "score_text": "Adéquation au terrain : 100 sur 100.",
+        "reasons": [
+         "La température (18 °C) est dans la plage idéale de cette culture (de 12 °C à 25 °C).",
+         "La pluie (500 mm) est dans la plage idéale de cette culture (de 350 mm à 600 mm).",
+         "Le pH du sol (7) est dans la plage idéale de cette culture (de 6 à 7).",
+         "La salinité du sol (2 dS/m) est dans la plage idéale de cette culture (de 0 dS/m à 4 dS/m).",
+         "La culture précédente enrichit le sol en azote, ce qui aide celle-ci."
+        ],
+        "cautions": [],
+        "suggestion": null
+       },
+       {
+        "headline": "Orge sur P1 : bon choix.",
+        "score_text": "Adéquation au terrain : 100 sur 100.",
+        "reasons": [
+         "La température (18 °C) est dans la plage idéale de cette culture (de 15 °C à 20 °C).",
+         "La pluie (500 mm) est dans la plage idéale de cette culture (de 500 mm à 1000 mm).",
+         "Le pH du sol (7) est dans la plage idéale de cette culture (de 6.5 à 7.5).",
+         "La salinité du sol (2 dS/m) est dans la plage idéale de cette culture (de 0 dS/m à 4 dS/m).",
+         "La culture précédente enrichit le sol en azote, ce qui aide celle-ci."
+        ],
+        "cautions": [],
+        "suggestion": null
+       }
+      ]
+     },
+     "based_on": "proposed"
+    }
+   }
+  },
+  "plan_equilibre": {
+   "description": "Céréale + légumineuse après un oignon : rien à corriger",
+   "parcels": {
+    "P1": {
+     "conditions": {
+      "temp_c": 18,
+      "rain_mm": 500,
+      "ph": 7,
+      "salinity_dsm": 2
+     },
+     "irrigated": false,
+     "history": [
+      {
+       "crop": "oignon",
+       "year": 2025
+      }
+     ]
+    }
+   },
+   "plan": [
+    {
+     "parcel": "P1",
+     "crop": "ble_tendre",
+     "area_ha": 1
+    },
+    {
+     "parcel": "P1",
+     "crop": "pois_chiche",
+     "area_ha": 1
+    }
+   ],
+   "rapport": {
+    "schema_version": 1,
+    "year": 2026,
+    "missing_history": [],
+    "farmer": {
+     "plan": [
+      {
+       "parcel": "P1",
+       "crop": "ble_tendre",
+       "area_ha": 1
+      },
+      {
+       "parcel": "P1",
+       "crop": "pois_chiche",
+       "area_ha": 1
+      }
+     ],
+     "evaluation": {
+      "verdict": "viable",
+      "lines": [
+       {
+        "parcel": "P1",
+        "crop": "ble_tendre",
+        "area_ha": 1,
+        "name_fr": "Blé tendre",
+        "status": "ok",
+        "score": 78,
+        "agro_score": 78,
+        "rotation_note": 1.0,
+        "exclusions": [],
+        "rotation_issues": [],
+        "rotation_benefits": [],
+        "missing": [],
+        "confidence": {
+         "level": "high",
+         "value": 0.85,
+         "percent": 85,
+         "reasons": [
+          "seuils non valides localement (base ECOCROP mondiale)"
+         ]
+        },
+        "criteria": [
+         {
+          "criterion": "temp_c",
+          "value": 18,
+          "position": "optimal",
+          "optimal": [
+           15,
+           23
+          ],
+          "tolerated": [
+           5,
+           27
+          ]
+         },
+         {
+          "criterion": "rain_mm",
+          "value": 500,
+          "position": "tolerable",
+          "optimal": [
+           750,
+           900
+          ],
+          "tolerated": [
+           300,
+           1600
+          ]
+         },
+         {
+          "criterion": "ph",
+          "value": 7,
+          "position": "optimal",
+          "optimal": [
+           6,
+           7
+          ],
+          "tolerated": [
+           5.5,
+           8.5
+          ]
+         },
+         {
+          "criterion": "salinity_dsm",
+          "value": 2,
+          "position": "optimal",
+          "optimal": [
+           0,
+           4
+          ],
+          "tolerated": [
+           0,
+           10
+          ]
+         }
+        ],
+        "alternatives": [
+         {
+          "crop": "orge",
+          "name_fr": "Orge",
+          "score": 100,
+          "gain": 22
+         },
+         {
+          "crop": "ble_dur",
+          "name_fr": "Blé dur",
+          "score": 100,
+          "gain": 22
+         }
+        ]
+       },
+       {
+        "parcel": "P1",
+        "crop": "pois_chiche",
+        "area_ha": 1,
+        "name_fr": "Pois chiche",
+        "status": "ok",
+        "score": 87,
+        "agro_score": 87,
+        "rotation_note": 1.0,
+        "exclusions": [],
+        "rotation_issues": [],
+        "rotation_benefits": [],
+        "missing": [],
+        "confidence": {
+         "level": "high",
+         "value": 0.85,
+         "percent": 85,
+         "reasons": [
+          "seuils non valides localement (base ECOCROP mondiale)"
+         ]
+        },
+        "criteria": [
+         {
+          "criterion": "temp_c",
+          "value": 18,
+          "position": "optimal",
+          "optimal": [
+           15,
+           29
+          ],
+          "tolerated": [
+           7,
+           35
+          ]
+         },
+         {
+          "criterion": "rain_mm",
+          "value": 500,
+          "position": "tolerable",
+          "optimal": [
+           600,
+           1000
+          ],
+          "tolerated": [
+           300,
+           1800
+          ]
+         },
+         {
+          "criterion": "ph",
+          "value": 7,
+          "position": "optimal",
+          "optimal": [
+           6,
+           8.5
+          ],
+          "tolerated": [
+           4.7,
+           9.5
+          ]
+         },
+         {
+          "criterion": "salinity_dsm",
+          "value": 2,
+          "position": "optimal",
+          "optimal": [
+           0,
+           4
+          ],
+          "tolerated": [
+           0,
+           10
+          ]
+         }
+        ],
+        "alternatives": []
+       }
+      ],
+      "plan_issues": [],
+      "composition": [
+       {
+        "family": "poaceae",
+        "percent": 50
+       },
+       {
+        "family": "fabaceae",
+        "percent": 50
+       }
+      ],
+      "tips": [],
+      "confidence": {
+       "level": "high",
+       "percent": 85
+      }
+     },
+     "explanation": {
+      "verdict": "viable",
+      "headline": "Plan : viable.",
+      "summary": "Lignes évaluées : 2 (bons choix : 2, à risque : 0, à éviter : 0).",
+      "confidence_text": "Fiabilité du plan : 85 % (élevée), égale à celle de la ligne la plus fragile.",
+      "composition_text": "Composition du plan : céréales 50 %, légumineuses 50 %.",
+      "issues": [],
+      "tips": [],
+      "notes": [
+       "Seuils pas encore validés localement pour : Blé tendre, Pois chiche."
+      ],
+      "lines": [
+       {
+        "headline": "Blé tendre sur P1 : bon choix.",
+        "score_text": "Adéquation au terrain : 78 sur 100.",
+        "reasons": [
+         "La température (18 °C) est dans la plage idéale de cette culture (de 15 °C à 23 °C).",
+         "La pluie (500 mm) est acceptable pour cette culture, mais pas idéale (idéal : de 750 mm à 900 mm).",
+         "Le pH du sol (7) est dans la plage idéale de cette culture (de 6 à 7).",
+         "La salinité du sol (2 dS/m) est dans la plage idéale de cette culture (de 0 dS/m à 4 dS/m)."
+        ],
+        "cautions": [],
+        "suggestion": "Une meilleure option existe : Orge (score 100 sur 100, +22 points), Blé dur (score 100 sur 100, +22 points)."
+       },
+       {
+        "headline": "Pois chiche sur P1 : bon choix.",
+        "score_text": "Adéquation au terrain : 87 sur 100.",
+        "reasons": [
+         "La température (18 °C) est dans la plage idéale de cette culture (de 15 °C à 29 °C).",
+         "La pluie (500 mm) est acceptable pour cette culture, mais pas idéale (idéal : de 600 mm à 1000 mm).",
+         "Le pH du sol (7) est dans la plage idéale de cette culture (de 6 à 8.5).",
+         "La salinité du sol (2 dS/m) est dans la plage idéale de cette culture (de 0 dS/m à 4 dS/m)."
+        ],
+        "cautions": [],
+        "suggestion": null
+       }
+      ]
+     }
+    },
+    "better": null,
+    "retained": "farmer",
+    "next_year": {
+     "year": 2027,
+     "plan": [
+      {
+       "parcel": "P1",
+       "crop": "ble_dur",
+       "area_ha": 0.67
+      },
+      {
+       "parcel": "P1",
+       "crop": "oignon",
+       "area_ha": 0.67
+      },
+      {
+       "parcel": "P1",
+       "crop": "orge",
+       "area_ha": 0.67
+      }
+     ],
+     "unplanned": [],
+     "evaluation": {
+      "verdict": "viable",
+      "lines": [
+       {
+        "parcel": "P1",
+        "crop": "ble_dur",
+        "area_ha": 0.67,
+        "name_fr": "Blé dur",
+        "status": "ok",
+        "score": 100,
+        "agro_score": 100,
+        "rotation_note": 1.0,
+        "exclusions": [],
+        "rotation_issues": [],
+        "rotation_benefits": [
+         {
+          "rule": "suite_a_legumineuse",
+          "detail": "pois_chiche enrichit le sol en azote"
+         }
+        ],
+        "missing": [],
+        "confidence": {
+         "level": "high",
+         "value": 0.85,
+         "percent": 85,
+         "reasons": [
+          "seuils non valides localement (base ECOCROP mondiale)"
+         ]
+        },
+        "criteria": [
+         {
+          "criterion": "temp_c",
+          "value": 18,
+          "position": "optimal",
+          "optimal": [
+           17,
+           25
+          ],
+          "tolerated": [
+           6,
+           30
+          ]
+         },
+         {
+          "criterion": "rain_mm",
+          "value": 500,
+          "position": "optimal",
+          "optimal": [
+           500,
+           700
+          ],
+          "tolerated": [
+           400,
+           800
+          ]
+         },
+         {
+          "criterion": "ph",
+          "value": 7,
+          "position": "optimal",
+          "optimal": [
+           6,
+           7
+          ],
+          "tolerated": [
+           5.5,
+           8.5
+          ]
+         },
+         {
+          "criterion": "salinity_dsm",
+          "value": 2,
+          "position": "optimal",
+          "optimal": [
+           0,
+           4
+          ],
+          "tolerated": [
+           0,
+           4
+          ]
+         }
+        ],
+        "alternatives": []
+       },
+       {
+        "parcel": "P1",
+        "crop": "oignon",
+        "area_ha": 0.67,
+        "name_fr": "Oignon",
+        "status": "ok",
+        "score": 100,
+        "agro_score": 100,
+        "rotation_note": 1.0,
+        "exclusions": [],
+        "rotation_issues": [],
+        "rotation_benefits": [
+         {
+          "rule": "suite_a_legumineuse",
+          "detail": "pois_chiche enrichit le sol en azote"
+         }
+        ],
+        "missing": [],
+        "confidence": {
+         "level": "high",
+         "value": 0.85,
+         "percent": 85,
+         "reasons": [
+          "seuils non valides localement (base ECOCROP mondiale)"
+         ]
+        },
+        "criteria": [
+         {
+          "criterion": "temp_c",
+          "value": 18,
+          "position": "optimal",
+          "optimal": [
+           12,
+           25
+          ],
+          "tolerated": [
+           4,
+           30
+          ]
+         },
+         {
+          "criterion": "rain_mm",
+          "value": 500,
+          "position": "optimal",
+          "optimal": [
+           350,
+           600
+          ],
+          "tolerated": [
+           300,
+           2800
+          ]
+         },
+         {
+          "criterion": "ph",
+          "value": 7,
+          "position": "optimal",
+          "optimal": [
+           6,
+           7
+          ],
+          "tolerated": [
+           4.3,
+           8.3
+          ]
+         },
+         {
+          "criterion": "salinity_dsm",
+          "value": 2,
+          "position": "optimal",
+          "optimal": [
+           0,
+           4
+          ],
+          "tolerated": [
+           0,
+           10
+          ]
+         }
+        ],
+        "alternatives": []
+       },
+       {
+        "parcel": "P1",
+        "crop": "orge",
+        "area_ha": 0.67,
+        "name_fr": "Orge",
+        "status": "ok",
+        "score": 100,
+        "agro_score": 100,
+        "rotation_note": 1.0,
+        "exclusions": [],
+        "rotation_issues": [],
+        "rotation_benefits": [
+         {
+          "rule": "suite_a_legumineuse",
+          "detail": "pois_chiche enrichit le sol en azote"
+         }
+        ],
+        "missing": [],
+        "confidence": {
+         "level": "high",
+         "value": 0.85,
+         "percent": 85,
+         "reasons": [
+          "seuils non valides localement (base ECOCROP mondiale)"
+         ]
+        },
+        "criteria": [
+         {
+          "criterion": "temp_c",
+          "value": 18,
+          "position": "optimal",
+          "optimal": [
+           15,
+           20
+          ],
+          "tolerated": [
+           2,
+           40
+          ]
+         },
+         {
+          "criterion": "rain_mm",
+          "value": 500,
+          "position": "optimal",
+          "optimal": [
+           500,
+           1000
+          ],
+          "tolerated": [
+           200,
+           2000
+          ]
+         },
+         {
+          "criterion": "ph",
+          "value": 7,
+          "position": "optimal",
+          "optimal": [
+           6.5,
+           7.5
+          ],
+          "tolerated": [
+           6,
+           8
+          ]
+         },
+         {
+          "criterion": "salinity_dsm",
+          "value": 2,
+          "position": "optimal",
+          "optimal": [
+           0,
+           4
+          ],
+          "tolerated": [
+           0,
+           10
+          ]
+         }
+        ],
+        "alternatives": []
+       }
+      ],
+      "plan_issues": [],
+      "composition": [
+       {
+        "family": "poaceae",
+        "percent": 67
+       },
+       {
+        "family": "amaryllidaceae",
+        "percent": 33
+       }
+      ],
+      "tips": [
+       {
+        "rule": "sans_legumineuse",
+        "suggestions": {}
+       }
+      ],
+      "confidence": {
+       "level": "high",
+       "percent": 85
+      }
+     },
+     "explanation": {
+      "verdict": "viable",
+      "headline": "Plan proposé : viable.",
+      "summary": "Lignes évaluées : 3 (bons choix : 3, à risque : 0, à éviter : 0).",
+      "confidence_text": "Fiabilité du plan : 85 % (élevée), égale à celle de la ligne la plus fragile.",
+      "composition_text": "Composition du plan : céréales 67 %, famille de l'oignon 33 %.",
+      "issues": [],
+      "tips": [
+       "Aucune légumineuse dans le plan. En ajouter une, cette saison ou la suivante, enrichit le sol en azote."
+      ],
+      "notes": [
+       "Seuils pas encore validés localement pour : Blé dur, Oignon, Orge."
+      ],
+      "lines": [
+       {
+        "headline": "Blé dur sur P1 : bon choix.",
+        "score_text": "Adéquation au terrain : 100 sur 100.",
+        "reasons": [
+         "La température (18 °C) est dans la plage idéale de cette culture (de 17 °C à 25 °C).",
+         "La pluie (500 mm) est dans la plage idéale de cette culture (de 500 mm à 700 mm).",
+         "Le pH du sol (7) est dans la plage idéale de cette culture (de 6 à 7).",
+         "La salinité du sol (2 dS/m) est dans la plage idéale de cette culture (de 0 dS/m à 4 dS/m).",
+         "La culture précédente enrichit le sol en azote, ce qui aide celle-ci."
+        ],
+        "cautions": [],
+        "suggestion": null
+       },
+       {
+        "headline": "Oignon sur P1 : bon choix.",
+        "score_text": "Adéquation au terrain : 100 sur 100.",
+        "reasons": [
+         "La température (18 °C) est dans la plage idéale de cette culture (de 12 °C à 25 °C).",
+         "La pluie (500 mm) est dans la plage idéale de cette culture (de 350 mm à 600 mm).",
+         "Le pH du sol (7) est dans la plage idéale de cette culture (de 6 à 7).",
+         "La salinité du sol (2 dS/m) est dans la plage idéale de cette culture (de 0 dS/m à 4 dS/m).",
+         "La culture précédente enrichit le sol en azote, ce qui aide celle-ci."
+        ],
+        "cautions": [],
+        "suggestion": null
+       },
+       {
+        "headline": "Orge sur P1 : bon choix.",
+        "score_text": "Adéquation au terrain : 100 sur 100.",
+        "reasons": [
+         "La température (18 °C) est dans la plage idéale de cette culture (de 15 °C à 20 °C).",
+         "La pluie (500 mm) est dans la plage idéale de cette culture (de 500 mm à 1000 mm).",
+         "Le pH du sol (7) est dans la plage idéale de cette culture (de 6.5 à 7.5).",
+         "La salinité du sol (2 dS/m) est dans la plage idéale de cette culture (de 0 dS/m à 4 dS/m).",
+         "La culture précédente enrichit le sol en azote, ce qui aide celle-ci."
+        ],
+        "cautions": [],
+        "suggestion": null
+       }
+      ]
+     },
+     "based_on": "farmer"
+    }
+   }
+  },
+  "sans_historique": {
+   "description": "Aucun historique : pas d'erreur, l'app doit poser la question",
+   "parcels": {
+    "P1": {
+     "conditions": {
+      "temp_c": 18,
+      "rain_mm": 500,
+      "ph": 7,
+      "salinity_dsm": 2
+     },
+     "irrigated": false
+    }
+   },
+   "plan": [
+    {
+     "parcel": "P1",
+     "crop": "ble_tendre",
+     "area_ha": 2
+    }
+   ],
+   "rapport": {
+    "schema_version": 1,
+    "year": 2026,
+    "missing_history": [
+     "P1"
+    ],
+    "farmer": {
+     "plan": [
+      {
+       "parcel": "P1",
+       "crop": "ble_tendre",
+       "area_ha": 2
+      }
+     ],
+     "evaluation": {
+      "verdict": "viable",
+      "lines": [
+       {
+        "parcel": "P1",
+        "crop": "ble_tendre",
+        "area_ha": 2,
+        "name_fr": "Blé tendre",
+        "status": "ok",
+        "score": 78,
+        "agro_score": 78,
+        "rotation_note": null,
+        "exclusions": [],
+        "rotation_issues": [
+         {
+          "rule": "historique_absent",
+          "level": "info",
+          "detail": "pas d'historique exploitable, rotation non evaluee"
+         }
+        ],
+        "rotation_benefits": [],
+        "missing": [],
+        "confidence": {
+         "level": "high",
+         "value": 0.75,
+         "percent": 75,
+         "reasons": [
+          "seuils non valides localement (base ECOCROP mondiale)",
+          "historique absent : rotation non evaluee"
+         ]
+        },
+        "criteria": [
+         {
+          "criterion": "temp_c",
+          "value": 18,
+          "position": "optimal",
+          "optimal": [
+           15,
+           23
+          ],
+          "tolerated": [
+           5,
+           27
+          ]
+         },
+         {
+          "criterion": "rain_mm",
+          "value": 500,
+          "position": "tolerable",
+          "optimal": [
+           750,
+           900
+          ],
+          "tolerated": [
+           300,
+           1600
+          ]
+         },
+         {
+          "criterion": "ph",
+          "value": 7,
+          "position": "optimal",
+          "optimal": [
+           6,
+           7
+          ],
+          "tolerated": [
+           5.5,
+           8.5
+          ]
+         },
+         {
+          "criterion": "salinity_dsm",
+          "value": 2,
+          "position": "optimal",
+          "optimal": [
+           0,
+           4
+          ],
+          "tolerated": [
+           0,
+           10
+          ]
+         }
+        ],
+        "alternatives": [
+         {
+          "crop": "orge",
+          "name_fr": "Orge",
+          "score": 100,
+          "gain": 22
+         },
+         {
+          "crop": "ble_dur",
+          "name_fr": "Blé dur",
+          "score": 100,
+          "gain": 22
+         }
+        ]
+       }
+      ],
+      "plan_issues": [],
+      "composition": [
+       {
+        "family": "poaceae",
+        "percent": 100
+       }
+      ],
+      "tips": [
+       {
+        "rule": "une_seule_famille",
+        "family": "poaceae",
+        "suggestions": {
+         "P1": [
+          {
+           "crop": "lentille",
+           "name_fr": "Lentille",
+           "score": 89
+          },
+          {
+           "crop": "pois_chiche",
+           "name_fr": "Pois chiche",
+           "score": 87
+          }
+         ]
+        }
+       }
+      ],
+      "confidence": {
+       "level": "high",
+       "percent": 75
+      }
+     },
+     "explanation": {
+      "verdict": "viable",
+      "headline": "Plan : viable.",
+      "summary": "Lignes évaluées : 1 (bons choix : 1, à risque : 0, à éviter : 0).",
+      "confidence_text": "Fiabilité du plan : 75 % (élevée), égale à celle de la ligne la plus fragile.",
+      "composition_text": "Composition du plan : céréales 100 %.",
+      "issues": [],
+      "tips": [
+       "Votre plan ne contient que des céréales. Ajouter une légumineuse réduit les maladies du sol et enrichit la terre en azote pour la saison suivante. Légumineuses adaptées à P1 : Lentille (89 sur 100), Pois chiche (87 sur 100)."
+      ],
+      "notes": [
+       "Seuils pas encore validés localement pour : Blé tendre."
+      ],
+      "lines": [
+       {
+        "headline": "Blé tendre sur P1 : bon choix.",
+        "score_text": "Adéquation au terrain : 78 sur 100.",
+        "reasons": [
+         "La température (18 °C) est dans la plage idéale de cette culture (de 15 °C à 23 °C).",
+         "La pluie (500 mm) est acceptable pour cette culture, mais pas idéale (idéal : de 750 mm à 900 mm).",
+         "Le pH du sol (7) est dans la plage idéale de cette culture (de 6 à 7).",
+         "La salinité du sol (2 dS/m) est dans la plage idéale de cette culture (de 0 dS/m à 4 dS/m)."
+        ],
+        "cautions": [
+         "Aucun historique exploitable : la rotation n'a pas pu être évaluée."
+        ],
+        "suggestion": "Une meilleure option existe : Orge (score 100 sur 100, +22 points), Blé dur (score 100 sur 100, +22 points)."
+       }
+      ]
+     }
+    },
+    "better": null,
+    "retained": "farmer",
+    "next_year": {
+     "year": 2027,
+     "plan": [
+      {
+       "parcel": "P1",
+       "crop": "oignon",
+       "area_ha": 0.67
+      },
+      {
+       "parcel": "P1",
+       "crop": "lentille",
+       "area_ha": 0.67
+      },
+      {
+       "parcel": "P1",
+       "crop": "pois_chiche",
+       "area_ha": 0.67
+      }
+     ],
+     "unplanned": [],
+     "evaluation": {
+      "verdict": "viable",
+      "lines": [
+       {
+        "parcel": "P1",
+        "crop": "oignon",
+        "area_ha": 0.67,
+        "name_fr": "Oignon",
+        "status": "ok",
+        "score": 100,
+        "agro_score": 100,
+        "rotation_note": 1.0,
+        "exclusions": [],
+        "rotation_issues": [],
+        "rotation_benefits": [],
+        "missing": [],
+        "confidence": {
+         "level": "high",
+         "value": 0.85,
+         "percent": 85,
+         "reasons": [
+          "seuils non valides localement (base ECOCROP mondiale)"
+         ]
+        },
+        "criteria": [
+         {
+          "criterion": "temp_c",
+          "value": 18,
+          "position": "optimal",
+          "optimal": [
+           12,
+           25
+          ],
+          "tolerated": [
+           4,
+           30
+          ]
+         },
+         {
+          "criterion": "rain_mm",
+          "value": 500,
+          "position": "optimal",
+          "optimal": [
+           350,
+           600
+          ],
+          "tolerated": [
+           300,
+           2800
+          ]
+         },
+         {
+          "criterion": "ph",
+          "value": 7,
+          "position": "optimal",
+          "optimal": [
+           6,
+           7
+          ],
+          "tolerated": [
+           4.3,
+           8.3
+          ]
+         },
+         {
+          "criterion": "salinity_dsm",
+          "value": 2,
+          "position": "optimal",
+          "optimal": [
+           0,
+           4
+          ],
+          "tolerated": [
+           0,
+           10
+          ]
+         }
+        ],
+        "alternatives": []
+       },
+       {
+        "parcel": "P1",
+        "crop": "lentille",
+        "area_ha": 0.67,
+        "name_fr": "Lentille",
+        "status": "ok",
+        "score": 89,
+        "agro_score": 89,
+        "rotation_note": 1.0,
+        "exclusions": [],
+        "rotation_issues": [],
+        "rotation_benefits": [],
+        "missing": [],
+        "confidence": {
+         "level": "high",
+         "value": 0.85,
+         "percent": 85,
+         "reasons": [
+          "seuils non valides localement (base ECOCROP mondiale)"
+         ]
+        },
+        "criteria": [
+         {
+          "criterion": "temp_c",
+          "value": 18,
+          "position": "optimal",
+          "optimal": [
+           15,
+           29
+          ],
+          "tolerated": [
+           5,
+           32
+          ]
+         },
+         {
+          "criterion": "rain_mm",
+          "value": 500,
+          "position": "tolerable",
+          "optimal": [
+           600,
+           1000
+          ],
+          "tolerated": [
+           250,
+           2500
+          ]
+         },
+         {
+          "criterion": "ph",
+          "value": 7,
+          "position": "optimal",
+          "optimal": [
+           5.5,
+           7.5
+          ],
+          "tolerated": [
+           4.5,
+           8.2
+          ]
+         },
+         {
+          "criterion": "salinity_dsm",
+          "value": 2,
+          "position": "optimal",
+          "optimal": [
+           0,
+           4
+          ],
+          "tolerated": [
+           0,
+           10
+          ]
+         }
+        ],
+        "alternatives": []
+       },
+       {
+        "parcel": "P1",
+        "crop": "pois_chiche",
+        "area_ha": 0.67,
+        "name_fr": "Pois chiche",
+        "status": "ok",
+        "score": 87,
+        "agro_score": 87,
+        "rotation_note": 1.0,
+        "exclusions": [],
+        "rotation_issues": [],
+        "rotation_benefits": [],
+        "missing": [],
+        "confidence": {
+         "level": "high",
+         "value": 0.85,
+         "percent": 85,
+         "reasons": [
+          "seuils non valides localement (base ECOCROP mondiale)"
+         ]
+        },
+        "criteria": [
+         {
+          "criterion": "temp_c",
+          "value": 18,
+          "position": "optimal",
+          "optimal": [
+           15,
+           29
+          ],
+          "tolerated": [
+           7,
+           35
+          ]
+         },
+         {
+          "criterion": "rain_mm",
+          "value": 500,
+          "position": "tolerable",
+          "optimal": [
+           600,
+           1000
+          ],
+          "tolerated": [
+           300,
+           1800
+          ]
+         },
+         {
+          "criterion": "ph",
+          "value": 7,
+          "position": "optimal",
+          "optimal": [
+           6,
+           8.5
+          ],
+          "tolerated": [
+           4.7,
+           9.5
+          ]
+         },
+         {
+          "criterion": "salinity_dsm",
+          "value": 2,
+          "position": "optimal",
+          "optimal": [
+           0,
+           4
+          ],
+          "tolerated": [
+           0,
+           10
+          ]
+         }
+        ],
+        "alternatives": []
+       }
+      ],
+      "plan_issues": [],
+      "composition": [
+       {
+        "family": "fabaceae",
+        "percent": 67
+       },
+       {
+        "family": "amaryllidaceae",
+        "percent": 33
+       }
+      ],
+      "tips": [],
+      "confidence": {
+       "level": "high",
+       "percent": 85
+      }
+     },
+     "explanation": {
+      "verdict": "viable",
+      "headline": "Plan proposé : viable.",
+      "summary": "Lignes évaluées : 3 (bons choix : 3, à risque : 0, à éviter : 0).",
+      "confidence_text": "Fiabilité du plan : 85 % (élevée), égale à celle de la ligne la plus fragile.",
+      "composition_text": "Composition du plan : légumineuses 67 %, famille de l'oignon 33 %.",
+      "issues": [],
+      "tips": [],
+      "notes": [
+       "Seuils pas encore validés localement pour : Oignon, Lentille, Pois chiche."
+      ],
+      "lines": [
+       {
+        "headline": "Oignon sur P1 : bon choix.",
+        "score_text": "Adéquation au terrain : 100 sur 100.",
+        "reasons": [
+         "La température (18 °C) est dans la plage idéale de cette culture (de 12 °C à 25 °C).",
+         "La pluie (500 mm) est dans la plage idéale de cette culture (de 350 mm à 600 mm).",
+         "Le pH du sol (7) est dans la plage idéale de cette culture (de 6 à 7).",
+         "La salinité du sol (2 dS/m) est dans la plage idéale de cette culture (de 0 dS/m à 4 dS/m)."
+        ],
+        "cautions": [],
+        "suggestion": null
+       },
+       {
+        "headline": "Lentille sur P1 : bon choix.",
+        "score_text": "Adéquation au terrain : 89 sur 100.",
+        "reasons": [
+         "La température (18 °C) est dans la plage idéale de cette culture (de 15 °C à 29 °C).",
+         "La pluie (500 mm) est acceptable pour cette culture, mais pas idéale (idéal : de 600 mm à 1000 mm).",
+         "Le pH du sol (7) est dans la plage idéale de cette culture (de 5.5 à 7.5).",
+         "La salinité du sol (2 dS/m) est dans la plage idéale de cette culture (de 0 dS/m à 4 dS/m)."
+        ],
+        "cautions": [],
+        "suggestion": null
+       },
+       {
+        "headline": "Pois chiche sur P1 : bon choix.",
+        "score_text": "Adéquation au terrain : 87 sur 100.",
+        "reasons": [
+         "La température (18 °C) est dans la plage idéale de cette culture (de 15 °C à 29 °C).",
+         "La pluie (500 mm) est acceptable pour cette culture, mais pas idéale (idéal : de 600 mm à 1000 mm).",
+         "Le pH du sol (7) est dans la plage idéale de cette culture (de 6 à 8.5).",
+         "La salinité du sol (2 dS/m) est dans la plage idéale de cette culture (de 0 dS/m à 4 dS/m)."
+        ],
+        "cautions": [],
+        "suggestion": null
+       }
+      ]
+     },
+     "based_on": "farmer"
+    }
+   }
+  },
+  "culture_inconnue": {
+   "description": "Culture hors catalogue : ligne ignorée, pas de crash",
+   "parcels": {
+    "P1": {
+     "conditions": {
+      "temp_c": 18,
+      "rain_mm": 500,
+      "ph": 7,
+      "salinity_dsm": 2
+     },
+     "irrigated": false,
+     "history": []
+    }
+   },
+   "plan": [
+    {
+     "parcel": "P1",
+     "crop": "quinoa",
+     "area_ha": 1
+    }
+   ],
+   "rapport": {
+    "schema_version": 1,
+    "year": 2026,
+    "missing_history": [
+     "P1"
+    ],
+    "farmer": {
+     "plan": [
+      {
+       "parcel": "P1",
+       "crop": "quinoa",
+       "area_ha": 1
+      }
+     ],
+     "evaluation": {
+      "verdict": "not_evaluated",
+      "lines": [
+       {
+        "parcel": "P1",
+        "crop": "quinoa",
+        "area_ha": 1,
+        "status": "unknown_crop"
+       }
+      ],
+      "plan_issues": [
+       {
+        "rule": "ligne_non_evaluee",
+        "level": "warning",
+        "detail": "P1 / quinoa : unknown_crop",
+        "parcel": "P1",
+        "crop": "quinoa",
+        "status": "unknown_crop"
+       }
+      ],
+      "composition": [],
+      "tips": [],
+      "confidence": null
+     },
+     "explanation": {
+      "verdict": "not_evaluated",
+      "headline": "Plan : non évaluable.",
+      "summary": "Aucune ligne du plan n'a pu être évaluée.",
+      "confidence_text": null,
+      "composition_text": null,
+      "issues": [
+       "La ligne « quinoa » sur P1 n'a pas pu être évaluée."
+      ],
+      "tips": [],
+      "notes": [],
+      "lines": [
+       {
+        "score_text": null,
+        "reasons": [],
+        "cautions": [],
+        "suggestion": null,
+        "headline": "Ligne ignorée : la culture « quinoa » n'est pas connue du moteur."
+       }
+      ]
+     }
+    },
+    "better": {
+     "year": 2026,
+     "plan": [
+      {
+       "parcel": "P1",
+       "crop": "ble_dur",
+       "area_ha": null
+      },
+      {
+       "parcel": "P1",
+       "crop": "oignon",
+       "area_ha": null
+      },
+      {
+       "parcel": "P1",
+       "crop": "orge",
+       "area_ha": null
+      }
+     ],
+     "unplanned": [],
+     "evaluation": {
+      "verdict": "viable",
+      "lines": [
+       {
+        "parcel": "P1",
+        "crop": "ble_dur",
+        "area_ha": null,
+        "name_fr": "Blé dur",
+        "status": "ok",
+        "score": 100,
+        "agro_score": 100,
+        "rotation_note": null,
+        "exclusions": [],
+        "rotation_issues": [
+         {
+          "rule": "historique_absent",
+          "level": "info",
+          "detail": "pas d'historique exploitable, rotation non evaluee"
+         }
+        ],
+        "rotation_benefits": [],
+        "missing": [],
+        "confidence": {
+         "level": "high",
+         "value": 0.75,
+         "percent": 75,
+         "reasons": [
+          "seuils non valides localement (base ECOCROP mondiale)",
+          "historique absent : rotation non evaluee"
+         ]
+        },
+        "criteria": [
+         {
+          "criterion": "temp_c",
+          "value": 18,
+          "position": "optimal",
+          "optimal": [
+           17,
+           25
+          ],
+          "tolerated": [
+           6,
+           30
+          ]
+         },
+         {
+          "criterion": "rain_mm",
+          "value": 500,
+          "position": "optimal",
+          "optimal": [
+           500,
+           700
+          ],
+          "tolerated": [
+           400,
+           800
+          ]
+         },
+         {
+          "criterion": "ph",
+          "value": 7,
+          "position": "optimal",
+          "optimal": [
+           6,
+           7
+          ],
+          "tolerated": [
+           5.5,
+           8.5
+          ]
+         },
+         {
+          "criterion": "salinity_dsm",
+          "value": 2,
+          "position": "optimal",
+          "optimal": [
+           0,
+           4
+          ],
+          "tolerated": [
+           0,
+           4
+          ]
+         }
+        ],
+        "alternatives": []
+       },
+       {
+        "parcel": "P1",
+        "crop": "oignon",
+        "area_ha": null,
+        "name_fr": "Oignon",
+        "status": "ok",
+        "score": 100,
+        "agro_score": 100,
+        "rotation_note": null,
+        "exclusions": [],
+        "rotation_issues": [
+         {
+          "rule": "historique_absent",
+          "level": "info",
+          "detail": "pas d'historique exploitable, rotation non evaluee"
+         }
+        ],
+        "rotation_benefits": [],
+        "missing": [],
+        "confidence": {
+         "level": "high",
+         "value": 0.75,
+         "percent": 75,
+         "reasons": [
+          "seuils non valides localement (base ECOCROP mondiale)",
+          "historique absent : rotation non evaluee"
+         ]
+        },
+        "criteria": [
+         {
+          "criterion": "temp_c",
+          "value": 18,
+          "position": "optimal",
+          "optimal": [
+           12,
+           25
+          ],
+          "tolerated": [
+           4,
+           30
+          ]
+         },
+         {
+          "criterion": "rain_mm",
+          "value": 500,
+          "position": "optimal",
+          "optimal": [
+           350,
+           600
+          ],
+          "tolerated": [
+           300,
+           2800
+          ]
+         },
+         {
+          "criterion": "ph",
+          "value": 7,
+          "position": "optimal",
+          "optimal": [
+           6,
+           7
+          ],
+          "tolerated": [
+           4.3,
+           8.3
+          ]
+         },
+         {
+          "criterion": "salinity_dsm",
+          "value": 2,
+          "position": "optimal",
+          "optimal": [
+           0,
+           4
+          ],
+          "tolerated": [
+           0,
+           10
+          ]
+         }
+        ],
+        "alternatives": []
+       },
+       {
+        "parcel": "P1",
+        "crop": "orge",
+        "area_ha": null,
+        "name_fr": "Orge",
+        "status": "ok",
+        "score": 100,
+        "agro_score": 100,
+        "rotation_note": null,
+        "exclusions": [],
+        "rotation_issues": [
+         {
+          "rule": "historique_absent",
+          "level": "info",
+          "detail": "pas d'historique exploitable, rotation non evaluee"
+         }
+        ],
+        "rotation_benefits": [],
+        "missing": [],
+        "confidence": {
+         "level": "high",
+         "value": 0.75,
+         "percent": 75,
+         "reasons": [
+          "seuils non valides localement (base ECOCROP mondiale)",
+          "historique absent : rotation non evaluee"
+         ]
+        },
+        "criteria": [
+         {
+          "criterion": "temp_c",
+          "value": 18,
+          "position": "optimal",
+          "optimal": [
+           15,
+           20
+          ],
+          "tolerated": [
+           2,
+           40
+          ]
+         },
+         {
+          "criterion": "rain_mm",
+          "value": 500,
+          "position": "optimal",
+          "optimal": [
+           500,
+           1000
+          ],
+          "tolerated": [
+           200,
+           2000
+          ]
+         },
+         {
+          "criterion": "ph",
+          "value": 7,
+          "position": "optimal",
+          "optimal": [
+           6.5,
+           7.5
+          ],
+          "tolerated": [
+           6,
+           8
+          ]
+         },
+         {
+          "criterion": "salinity_dsm",
+          "value": 2,
+          "position": "optimal",
+          "optimal": [
+           0,
+           4
+          ],
+          "tolerated": [
+           0,
+           10
+          ]
+         }
+        ],
+        "alternatives": []
+       }
+      ],
+      "plan_issues": [],
+      "composition": [
+       {
+        "family": "poaceae",
+        "percent": 67
+       },
+       {
+        "family": "amaryllidaceae",
+        "percent": 33
+       }
+      ],
+      "tips": [
+       {
+        "rule": "sans_legumineuse",
+        "suggestions": {
+         "P1": [
+          {
+           "crop": "lentille",
+           "name_fr": "Lentille",
+           "score": 89
+          },
+          {
+           "crop": "pois_chiche",
+           "name_fr": "Pois chiche",
+           "score": 87
+          }
+         ]
+        }
+       }
+      ],
+      "confidence": {
+       "level": "high",
+       "percent": 75
+      }
+     },
+     "explanation": {
+      "verdict": "viable",
+      "headline": "Plan proposé : viable.",
+      "summary": "Lignes évaluées : 3 (bons choix : 3, à risque : 0, à éviter : 0).",
+      "confidence_text": "Fiabilité du plan : 75 % (élevée), égale à celle de la ligne la plus fragile.",
+      "composition_text": "Composition du plan : céréales 67 %, famille de l'oignon 33 %.",
+      "issues": [],
+      "tips": [
+       "Aucune légumineuse dans le plan. En ajouter une, cette saison ou la suivante, enrichit le sol en azote. Légumineuses adaptées à P1 : Lentille (89 sur 100), Pois chiche (87 sur 100)."
+      ],
+      "notes": [
+       "Seuils pas encore validés localement pour : Blé dur, Oignon, Orge."
+      ],
+      "lines": [
+       {
+        "headline": "Blé dur sur P1 : bon choix.",
+        "score_text": "Adéquation au terrain : 100 sur 100.",
+        "reasons": [
+         "La température (18 °C) est dans la plage idéale de cette culture (de 17 °C à 25 °C).",
+         "La pluie (500 mm) est dans la plage idéale de cette culture (de 500 mm à 700 mm).",
+         "Le pH du sol (7) est dans la plage idéale de cette culture (de 6 à 7).",
+         "La salinité du sol (2 dS/m) est dans la plage idéale de cette culture (de 0 dS/m à 4 dS/m)."
+        ],
+        "cautions": [
+         "Aucun historique exploitable : la rotation n'a pas pu être évaluée."
+        ],
+        "suggestion": null
+       },
+       {
+        "headline": "Oignon sur P1 : bon choix.",
+        "score_text": "Adéquation au terrain : 100 sur 100.",
+        "reasons": [
+         "La température (18 °C) est dans la plage idéale de cette culture (de 12 °C à 25 °C).",
+         "La pluie (500 mm) est dans la plage idéale de cette culture (de 350 mm à 600 mm).",
+         "Le pH du sol (7) est dans la plage idéale de cette culture (de 6 à 7).",
+         "La salinité du sol (2 dS/m) est dans la plage idéale de cette culture (de 0 dS/m à 4 dS/m)."
+        ],
+        "cautions": [
+         "Aucun historique exploitable : la rotation n'a pas pu être évaluée."
+        ],
+        "suggestion": null
+       },
+       {
+        "headline": "Orge sur P1 : bon choix.",
+        "score_text": "Adéquation au terrain : 100 sur 100.",
+        "reasons": [
+         "La température (18 °C) est dans la plage idéale de cette culture (de 15 °C à 20 °C).",
+         "La pluie (500 mm) est dans la plage idéale de cette culture (de 500 mm à 1000 mm).",
+         "Le pH du sol (7) est dans la plage idéale de cette culture (de 6.5 à 7.5).",
+         "La salinité du sol (2 dS/m) est dans la plage idéale de cette culture (de 0 dS/m à 4 dS/m)."
+        ],
+        "cautions": [
+         "Aucun historique exploitable : la rotation n'a pas pu être évaluée."
+        ],
+        "suggestion": null
+       }
+      ]
+     }
+    },
+    "retained": "proposed",
+    "next_year": {
+     "year": 2027,
+     "plan": [
+      {
+       "parcel": "P1",
+       "crop": "oignon",
+       "area_ha": null
+      },
+      {
+       "parcel": "P1",
+       "crop": "lentille",
+       "area_ha": null
+      },
+      {
+       "parcel": "P1",
+       "crop": "pois_chiche",
+       "area_ha": null
+      }
+     ],
+     "unplanned": [],
+     "evaluation": {
+      "verdict": "viable",
+      "lines": [
+       {
+        "parcel": "P1",
+        "crop": "oignon",
+        "area_ha": null,
+        "name_fr": "Oignon",
+        "status": "ok",
+        "score": 100,
+        "agro_score": 100,
+        "rotation_note": 1.0,
+        "exclusions": [],
+        "rotation_issues": [],
+        "rotation_benefits": [],
+        "missing": [],
+        "confidence": {
+         "level": "high",
+         "value": 0.85,
+         "percent": 85,
+         "reasons": [
+          "seuils non valides localement (base ECOCROP mondiale)"
+         ]
+        },
+        "criteria": [
+         {
+          "criterion": "temp_c",
+          "value": 18,
+          "position": "optimal",
+          "optimal": [
+           12,
+           25
+          ],
+          "tolerated": [
+           4,
+           30
+          ]
+         },
+         {
+          "criterion": "rain_mm",
+          "value": 500,
+          "position": "optimal",
+          "optimal": [
+           350,
+           600
+          ],
+          "tolerated": [
+           300,
+           2800
+          ]
+         },
+         {
+          "criterion": "ph",
+          "value": 7,
+          "position": "optimal",
+          "optimal": [
+           6,
+           7
+          ],
+          "tolerated": [
+           4.3,
+           8.3
+          ]
+         },
+         {
+          "criterion": "salinity_dsm",
+          "value": 2,
+          "position": "optimal",
+          "optimal": [
+           0,
+           4
+          ],
+          "tolerated": [
+           0,
+           10
+          ]
+         }
+        ],
+        "alternatives": []
+       },
+       {
+        "parcel": "P1",
+        "crop": "lentille",
+        "area_ha": null,
+        "name_fr": "Lentille",
+        "status": "ok",
+        "score": 89,
+        "agro_score": 89,
+        "rotation_note": 1.0,
+        "exclusions": [],
+        "rotation_issues": [],
+        "rotation_benefits": [],
+        "missing": [],
+        "confidence": {
+         "level": "high",
+         "value": 0.85,
+         "percent": 85,
+         "reasons": [
+          "seuils non valides localement (base ECOCROP mondiale)"
+         ]
+        },
+        "criteria": [
+         {
+          "criterion": "temp_c",
+          "value": 18,
+          "position": "optimal",
+          "optimal": [
+           15,
+           29
+          ],
+          "tolerated": [
+           5,
+           32
+          ]
+         },
+         {
+          "criterion": "rain_mm",
+          "value": 500,
+          "position": "tolerable",
+          "optimal": [
+           600,
+           1000
+          ],
+          "tolerated": [
+           250,
+           2500
+          ]
+         },
+         {
+          "criterion": "ph",
+          "value": 7,
+          "position": "optimal",
+          "optimal": [
+           5.5,
+           7.5
+          ],
+          "tolerated": [
+           4.5,
+           8.2
+          ]
+         },
+         {
+          "criterion": "salinity_dsm",
+          "value": 2,
+          "position": "optimal",
+          "optimal": [
+           0,
+           4
+          ],
+          "tolerated": [
+           0,
+           10
+          ]
+         }
+        ],
+        "alternatives": []
+       },
+       {
+        "parcel": "P1",
+        "crop": "pois_chiche",
+        "area_ha": null,
+        "name_fr": "Pois chiche",
+        "status": "ok",
+        "score": 87,
+        "agro_score": 87,
+        "rotation_note": 1.0,
+        "exclusions": [],
+        "rotation_issues": [],
+        "rotation_benefits": [],
+        "missing": [],
+        "confidence": {
+         "level": "high",
+         "value": 0.85,
+         "percent": 85,
+         "reasons": [
+          "seuils non valides localement (base ECOCROP mondiale)"
+         ]
+        },
+        "criteria": [
+         {
+          "criterion": "temp_c",
+          "value": 18,
+          "position": "optimal",
+          "optimal": [
+           15,
+           29
+          ],
+          "tolerated": [
+           7,
+           35
+          ]
+         },
+         {
+          "criterion": "rain_mm",
+          "value": 500,
+          "position": "tolerable",
+          "optimal": [
+           600,
+           1000
+          ],
+          "tolerated": [
+           300,
+           1800
+          ]
+         },
+         {
+          "criterion": "ph",
+          "value": 7,
+          "position": "optimal",
+          "optimal": [
+           6,
+           8.5
+          ],
+          "tolerated": [
+           4.7,
+           9.5
+          ]
+         },
+         {
+          "criterion": "salinity_dsm",
+          "value": 2,
+          "position": "optimal",
+          "optimal": [
+           0,
+           4
+          ],
+          "tolerated": [
+           0,
+           10
+          ]
+         }
+        ],
+        "alternatives": []
+       }
+      ],
+      "plan_issues": [],
+      "composition": [
+       {
+        "family": "fabaceae",
+        "percent": 67
+       },
+       {
+        "family": "amaryllidaceae",
+        "percent": 33
+       }
+      ],
+      "tips": [],
+      "confidence": {
+       "level": "high",
+       "percent": 85
+      }
+     },
+     "explanation": {
+      "verdict": "viable",
+      "headline": "Plan proposé : viable.",
+      "summary": "Lignes évaluées : 3 (bons choix : 3, à risque : 0, à éviter : 0).",
+      "confidence_text": "Fiabilité du plan : 85 % (élevée), égale à celle de la ligne la plus fragile.",
+      "composition_text": "Composition du plan : légumineuses 67 %, famille de l'oignon 33 %.",
+      "issues": [],
+      "tips": [],
+      "notes": [
+       "Seuils pas encore validés localement pour : Oignon, Lentille, Pois chiche."
+      ],
+      "lines": [
+       {
+        "headline": "Oignon sur P1 : bon choix.",
+        "score_text": "Adéquation au terrain : 100 sur 100.",
+        "reasons": [
+         "La température (18 °C) est dans la plage idéale de cette culture (de 12 °C à 25 °C).",
+         "La pluie (500 mm) est dans la plage idéale de cette culture (de 350 mm à 600 mm).",
+         "Le pH du sol (7) est dans la plage idéale de cette culture (de 6 à 7).",
+         "La salinité du sol (2 dS/m) est dans la plage idéale de cette culture (de 0 dS/m à 4 dS/m)."
+        ],
+        "cautions": [],
+        "suggestion": null
+       },
+       {
+        "headline": "Lentille sur P1 : bon choix.",
+        "score_text": "Adéquation au terrain : 89 sur 100.",
+        "reasons": [
+         "La température (18 °C) est dans la plage idéale de cette culture (de 15 °C à 29 °C).",
+         "La pluie (500 mm) est acceptable pour cette culture, mais pas idéale (idéal : de 600 mm à 1000 mm).",
+         "Le pH du sol (7) est dans la plage idéale de cette culture (de 5.5 à 7.5).",
+         "La salinité du sol (2 dS/m) est dans la plage idéale de cette culture (de 0 dS/m à 4 dS/m)."
+        ],
+        "cautions": [],
+        "suggestion": null
+       },
+       {
+        "headline": "Pois chiche sur P1 : bon choix.",
+        "score_text": "Adéquation au terrain : 87 sur 100.",
+        "reasons": [
+         "La température (18 °C) est dans la plage idéale de cette culture (de 15 °C à 29 °C).",
+         "La pluie (500 mm) est acceptable pour cette culture, mais pas idéale (idéal : de 600 mm à 1000 mm).",
+         "Le pH du sol (7) est dans la plage idéale de cette culture (de 6 à 8.5).",
+         "La salinité du sol (2 dS/m) est dans la plage idéale de cette culture (de 0 dS/m à 4 dS/m)."
+        ],
+        "cautions": [],
+        "suggestion": null
+       }
+      ]
+     },
+     "based_on": "proposed"
+    }
+   }
+  },
+  "parcelle_inconnue": {
+   "description": "Plan sur une parcelle sans données : ligne ignorée, pas de crash",
+   "parcels": {
+    "P1": {
+     "conditions": {
+      "temp_c": 18,
+      "rain_mm": 500,
+      "ph": 7,
+      "salinity_dsm": 2
+     },
+     "irrigated": false,
+     "history": []
+    }
+   },
+   "plan": [
+    {
+     "parcel": "PX",
+     "crop": "ble_tendre",
+     "area_ha": 1
+    }
+   ],
+   "rapport": {
+    "schema_version": 1,
+    "year": 2026,
+    "missing_history": [
+     "P1"
+    ],
+    "farmer": {
+     "plan": [
+      {
+       "parcel": "PX",
+       "crop": "ble_tendre",
+       "area_ha": 1
+      }
+     ],
+     "evaluation": {
+      "verdict": "not_evaluated",
+      "lines": [
+       {
+        "parcel": "PX",
+        "crop": "ble_tendre",
+        "area_ha": 1,
+        "status": "unknown_parcel"
+       }
+      ],
+      "plan_issues": [
+       {
+        "rule": "ligne_non_evaluee",
+        "level": "warning",
+        "detail": "PX / ble_tendre : unknown_parcel",
+        "parcel": "PX",
+        "crop": "ble_tendre",
+        "status": "unknown_parcel"
+       }
+      ],
+      "composition": [],
+      "tips": [],
+      "confidence": null
+     },
+     "explanation": {
+      "verdict": "not_evaluated",
+      "headline": "Plan : non évaluable.",
+      "summary": "Aucune ligne du plan n'a pu être évaluée.",
+      "confidence_text": null,
+      "composition_text": null,
+      "issues": [
+       "La ligne « ble_tendre » sur PX n'a pas pu être évaluée."
+      ],
+      "tips": [],
+      "notes": [],
+      "lines": [
+       {
+        "score_text": null,
+        "reasons": [],
+        "cautions": [],
+        "suggestion": null,
+        "headline": "Ligne ignorée : la parcelle « PX » n'a pas de données."
+       }
+      ]
+     }
+    },
+    "better": {
+     "year": 2026,
+     "plan": [
+      {
+       "parcel": "P1",
+       "crop": "ble_dur",
+       "area_ha": null
+      },
+      {
+       "parcel": "P1",
+       "crop": "oignon",
+       "area_ha": null
+      },
+      {
+       "parcel": "P1",
+       "crop": "orge",
+       "area_ha": null
+      }
+     ],
+     "unplanned": [],
+     "evaluation": {
+      "verdict": "viable",
+      "lines": [
+       {
+        "parcel": "P1",
+        "crop": "ble_dur",
+        "area_ha": null,
+        "name_fr": "Blé dur",
+        "status": "ok",
+        "score": 100,
+        "agro_score": 100,
+        "rotation_note": null,
+        "exclusions": [],
+        "rotation_issues": [
+         {
+          "rule": "historique_absent",
+          "level": "info",
+          "detail": "pas d'historique exploitable, rotation non evaluee"
+         }
+        ],
+        "rotation_benefits": [],
+        "missing": [],
+        "confidence": {
+         "level": "high",
+         "value": 0.75,
+         "percent": 75,
+         "reasons": [
+          "seuils non valides localement (base ECOCROP mondiale)",
+          "historique absent : rotation non evaluee"
+         ]
+        },
+        "criteria": [
+         {
+          "criterion": "temp_c",
+          "value": 18,
+          "position": "optimal",
+          "optimal": [
+           17,
+           25
+          ],
+          "tolerated": [
+           6,
+           30
+          ]
+         },
+         {
+          "criterion": "rain_mm",
+          "value": 500,
+          "position": "optimal",
+          "optimal": [
+           500,
+           700
+          ],
+          "tolerated": [
+           400,
+           800
+          ]
+         },
+         {
+          "criterion": "ph",
+          "value": 7,
+          "position": "optimal",
+          "optimal": [
+           6,
+           7
+          ],
+          "tolerated": [
+           5.5,
+           8.5
+          ]
+         },
+         {
+          "criterion": "salinity_dsm",
+          "value": 2,
+          "position": "optimal",
+          "optimal": [
+           0,
+           4
+          ],
+          "tolerated": [
+           0,
+           4
+          ]
+         }
+        ],
+        "alternatives": []
+       },
+       {
+        "parcel": "P1",
+        "crop": "oignon",
+        "area_ha": null,
+        "name_fr": "Oignon",
+        "status": "ok",
+        "score": 100,
+        "agro_score": 100,
+        "rotation_note": null,
+        "exclusions": [],
+        "rotation_issues": [
+         {
+          "rule": "historique_absent",
+          "level": "info",
+          "detail": "pas d'historique exploitable, rotation non evaluee"
+         }
+        ],
+        "rotation_benefits": [],
+        "missing": [],
+        "confidence": {
+         "level": "high",
+         "value": 0.75,
+         "percent": 75,
+         "reasons": [
+          "seuils non valides localement (base ECOCROP mondiale)",
+          "historique absent : rotation non evaluee"
+         ]
+        },
+        "criteria": [
+         {
+          "criterion": "temp_c",
+          "value": 18,
+          "position": "optimal",
+          "optimal": [
+           12,
+           25
+          ],
+          "tolerated": [
+           4,
+           30
+          ]
+         },
+         {
+          "criterion": "rain_mm",
+          "value": 500,
+          "position": "optimal",
+          "optimal": [
+           350,
+           600
+          ],
+          "tolerated": [
+           300,
+           2800
+          ]
+         },
+         {
+          "criterion": "ph",
+          "value": 7,
+          "position": "optimal",
+          "optimal": [
+           6,
+           7
+          ],
+          "tolerated": [
+           4.3,
+           8.3
+          ]
+         },
+         {
+          "criterion": "salinity_dsm",
+          "value": 2,
+          "position": "optimal",
+          "optimal": [
+           0,
+           4
+          ],
+          "tolerated": [
+           0,
+           10
+          ]
+         }
+        ],
+        "alternatives": []
+       },
+       {
+        "parcel": "P1",
+        "crop": "orge",
+        "area_ha": null,
+        "name_fr": "Orge",
+        "status": "ok",
+        "score": 100,
+        "agro_score": 100,
+        "rotation_note": null,
+        "exclusions": [],
+        "rotation_issues": [
+         {
+          "rule": "historique_absent",
+          "level": "info",
+          "detail": "pas d'historique exploitable, rotation non evaluee"
+         }
+        ],
+        "rotation_benefits": [],
+        "missing": [],
+        "confidence": {
+         "level": "high",
+         "value": 0.75,
+         "percent": 75,
+         "reasons": [
+          "seuils non valides localement (base ECOCROP mondiale)",
+          "historique absent : rotation non evaluee"
+         ]
+        },
+        "criteria": [
+         {
+          "criterion": "temp_c",
+          "value": 18,
+          "position": "optimal",
+          "optimal": [
+           15,
+           20
+          ],
+          "tolerated": [
+           2,
+           40
+          ]
+         },
+         {
+          "criterion": "rain_mm",
+          "value": 500,
+          "position": "optimal",
+          "optimal": [
+           500,
+           1000
+          ],
+          "tolerated": [
+           200,
+           2000
+          ]
+         },
+         {
+          "criterion": "ph",
+          "value": 7,
+          "position": "optimal",
+          "optimal": [
+           6.5,
+           7.5
+          ],
+          "tolerated": [
+           6,
+           8
+          ]
+         },
+         {
+          "criterion": "salinity_dsm",
+          "value": 2,
+          "position": "optimal",
+          "optimal": [
+           0,
+           4
+          ],
+          "tolerated": [
+           0,
+           10
+          ]
+         }
+        ],
+        "alternatives": []
+       }
+      ],
+      "plan_issues": [],
+      "composition": [
+       {
+        "family": "poaceae",
+        "percent": 67
+       },
+       {
+        "family": "amaryllidaceae",
+        "percent": 33
+       }
+      ],
+      "tips": [
+       {
+        "rule": "sans_legumineuse",
+        "suggestions": {
+         "P1": [
+          {
+           "crop": "lentille",
+           "name_fr": "Lentille",
+           "score": 89
+          },
+          {
+           "crop": "pois_chiche",
+           "name_fr": "Pois chiche",
+           "score": 87
+          }
+         ]
+        }
+       }
+      ],
+      "confidence": {
+       "level": "high",
+       "percent": 75
+      }
+     },
+     "explanation": {
+      "verdict": "viable",
+      "headline": "Plan proposé : viable.",
+      "summary": "Lignes évaluées : 3 (bons choix : 3, à risque : 0, à éviter : 0).",
+      "confidence_text": "Fiabilité du plan : 75 % (élevée), égale à celle de la ligne la plus fragile.",
+      "composition_text": "Composition du plan : céréales 67 %, famille de l'oignon 33 %.",
+      "issues": [],
+      "tips": [
+       "Aucune légumineuse dans le plan. En ajouter une, cette saison ou la suivante, enrichit le sol en azote. Légumineuses adaptées à P1 : Lentille (89 sur 100), Pois chiche (87 sur 100)."
+      ],
+      "notes": [
+       "Seuils pas encore validés localement pour : Blé dur, Oignon, Orge."
+      ],
+      "lines": [
+       {
+        "headline": "Blé dur sur P1 : bon choix.",
+        "score_text": "Adéquation au terrain : 100 sur 100.",
+        "reasons": [
+         "La température (18 °C) est dans la plage idéale de cette culture (de 17 °C à 25 °C).",
+         "La pluie (500 mm) est dans la plage idéale de cette culture (de 500 mm à 700 mm).",
+         "Le pH du sol (7) est dans la plage idéale de cette culture (de 6 à 7).",
+         "La salinité du sol (2 dS/m) est dans la plage idéale de cette culture (de 0 dS/m à 4 dS/m)."
+        ],
+        "cautions": [
+         "Aucun historique exploitable : la rotation n'a pas pu être évaluée."
+        ],
+        "suggestion": null
+       },
+       {
+        "headline": "Oignon sur P1 : bon choix.",
+        "score_text": "Adéquation au terrain : 100 sur 100.",
+        "reasons": [
+         "La température (18 °C) est dans la plage idéale de cette culture (de 12 °C à 25 °C).",
+         "La pluie (500 mm) est dans la plage idéale de cette culture (de 350 mm à 600 mm).",
+         "Le pH du sol (7) est dans la plage idéale de cette culture (de 6 à 7).",
+         "La salinité du sol (2 dS/m) est dans la plage idéale de cette culture (de 0 dS/m à 4 dS/m)."
+        ],
+        "cautions": [
+         "Aucun historique exploitable : la rotation n'a pas pu être évaluée."
+        ],
+        "suggestion": null
+       },
+       {
+        "headline": "Orge sur P1 : bon choix.",
+        "score_text": "Adéquation au terrain : 100 sur 100.",
+        "reasons": [
+         "La température (18 °C) est dans la plage idéale de cette culture (de 15 °C à 20 °C).",
+         "La pluie (500 mm) est dans la plage idéale de cette culture (de 500 mm à 1000 mm).",
+         "Le pH du sol (7) est dans la plage idéale de cette culture (de 6.5 à 7.5).",
+         "La salinité du sol (2 dS/m) est dans la plage idéale de cette culture (de 0 dS/m à 4 dS/m)."
+        ],
+        "cautions": [
+         "Aucun historique exploitable : la rotation n'a pas pu être évaluée."
+        ],
+        "suggestion": null
+       }
+      ]
+     }
+    },
+    "retained": "proposed",
+    "next_year": {
+     "year": 2027,
+     "plan": [
+      {
+       "parcel": "P1",
+       "crop": "oignon",
+       "area_ha": null
+      },
+      {
+       "parcel": "P1",
+       "crop": "lentille",
+       "area_ha": null
+      },
+      {
+       "parcel": "P1",
+       "crop": "pois_chiche",
+       "area_ha": null
+      }
+     ],
+     "unplanned": [],
+     "evaluation": {
+      "verdict": "viable",
+      "lines": [
+       {
+        "parcel": "P1",
+        "crop": "oignon",
+        "area_ha": null,
+        "name_fr": "Oignon",
+        "status": "ok",
+        "score": 100,
+        "agro_score": 100,
+        "rotation_note": 1.0,
+        "exclusions": [],
+        "rotation_issues": [],
+        "rotation_benefits": [],
+        "missing": [],
+        "confidence": {
+         "level": "high",
+         "value": 0.85,
+         "percent": 85,
+         "reasons": [
+          "seuils non valides localement (base ECOCROP mondiale)"
+         ]
+        },
+        "criteria": [
+         {
+          "criterion": "temp_c",
+          "value": 18,
+          "position": "optimal",
+          "optimal": [
+           12,
+           25
+          ],
+          "tolerated": [
+           4,
+           30
+          ]
+         },
+         {
+          "criterion": "rain_mm",
+          "value": 500,
+          "position": "optimal",
+          "optimal": [
+           350,
+           600
+          ],
+          "tolerated": [
+           300,
+           2800
+          ]
+         },
+         {
+          "criterion": "ph",
+          "value": 7,
+          "position": "optimal",
+          "optimal": [
+           6,
+           7
+          ],
+          "tolerated": [
+           4.3,
+           8.3
+          ]
+         },
+         {
+          "criterion": "salinity_dsm",
+          "value": 2,
+          "position": "optimal",
+          "optimal": [
+           0,
+           4
+          ],
+          "tolerated": [
+           0,
+           10
+          ]
+         }
+        ],
+        "alternatives": []
+       },
+       {
+        "parcel": "P1",
+        "crop": "lentille",
+        "area_ha": null,
+        "name_fr": "Lentille",
+        "status": "ok",
+        "score": 89,
+        "agro_score": 89,
+        "rotation_note": 1.0,
+        "exclusions": [],
+        "rotation_issues": [],
+        "rotation_benefits": [],
+        "missing": [],
+        "confidence": {
+         "level": "high",
+         "value": 0.85,
+         "percent": 85,
+         "reasons": [
+          "seuils non valides localement (base ECOCROP mondiale)"
+         ]
+        },
+        "criteria": [
+         {
+          "criterion": "temp_c",
+          "value": 18,
+          "position": "optimal",
+          "optimal": [
+           15,
+           29
+          ],
+          "tolerated": [
+           5,
+           32
+          ]
+         },
+         {
+          "criterion": "rain_mm",
+          "value": 500,
+          "position": "tolerable",
+          "optimal": [
+           600,
+           1000
+          ],
+          "tolerated": [
+           250,
+           2500
+          ]
+         },
+         {
+          "criterion": "ph",
+          "value": 7,
+          "position": "optimal",
+          "optimal": [
+           5.5,
+           7.5
+          ],
+          "tolerated": [
+           4.5,
+           8.2
+          ]
+         },
+         {
+          "criterion": "salinity_dsm",
+          "value": 2,
+          "position": "optimal",
+          "optimal": [
+           0,
+           4
+          ],
+          "tolerated": [
+           0,
+           10
+          ]
+         }
+        ],
+        "alternatives": []
+       },
+       {
+        "parcel": "P1",
+        "crop": "pois_chiche",
+        "area_ha": null,
+        "name_fr": "Pois chiche",
+        "status": "ok",
+        "score": 87,
+        "agro_score": 87,
+        "rotation_note": 1.0,
+        "exclusions": [],
+        "rotation_issues": [],
+        "rotation_benefits": [],
+        "missing": [],
+        "confidence": {
+         "level": "high",
+         "value": 0.85,
+         "percent": 85,
+         "reasons": [
+          "seuils non valides localement (base ECOCROP mondiale)"
+         ]
+        },
+        "criteria": [
+         {
+          "criterion": "temp_c",
+          "value": 18,
+          "position": "optimal",
+          "optimal": [
+           15,
+           29
+          ],
+          "tolerated": [
+           7,
+           35
+          ]
+         },
+         {
+          "criterion": "rain_mm",
+          "value": 500,
+          "position": "tolerable",
+          "optimal": [
+           600,
+           1000
+          ],
+          "tolerated": [
+           300,
+           1800
+          ]
+         },
+         {
+          "criterion": "ph",
+          "value": 7,
+          "position": "optimal",
+          "optimal": [
+           6,
+           8.5
+          ],
+          "tolerated": [
+           4.7,
+           9.5
+          ]
+         },
+         {
+          "criterion": "salinity_dsm",
+          "value": 2,
+          "position": "optimal",
+          "optimal": [
+           0,
+           4
+          ],
+          "tolerated": [
+           0,
+           10
+          ]
+         }
+        ],
+        "alternatives": []
+       }
+      ],
+      "plan_issues": [],
+      "composition": [
+       {
+        "family": "fabaceae",
+        "percent": 67
+       },
+       {
+        "family": "amaryllidaceae",
+        "percent": 33
+       }
+      ],
+      "tips": [],
+      "confidence": {
+       "level": "high",
+       "percent": 85
+      }
+     },
+     "explanation": {
+      "verdict": "viable",
+      "headline": "Plan proposé : viable.",
+      "summary": "Lignes évaluées : 3 (bons choix : 3, à risque : 0, à éviter : 0).",
+      "confidence_text": "Fiabilité du plan : 85 % (élevée), égale à celle de la ligne la plus fragile.",
+      "composition_text": "Composition du plan : légumineuses 67 %, famille de l'oignon 33 %.",
+      "issues": [],
+      "tips": [],
+      "notes": [
+       "Seuils pas encore validés localement pour : Oignon, Lentille, Pois chiche."
+      ],
+      "lines": [
+       {
+        "headline": "Oignon sur P1 : bon choix.",
+        "score_text": "Adéquation au terrain : 100 sur 100.",
+        "reasons": [
+         "La température (18 °C) est dans la plage idéale de cette culture (de 12 °C à 25 °C).",
+         "La pluie (500 mm) est dans la plage idéale de cette culture (de 350 mm à 600 mm).",
+         "Le pH du sol (7) est dans la plage idéale de cette culture (de 6 à 7).",
+         "La salinité du sol (2 dS/m) est dans la plage idéale de cette culture (de 0 dS/m à 4 dS/m)."
+        ],
+        "cautions": [],
+        "suggestion": null
+       },
+       {
+        "headline": "Lentille sur P1 : bon choix.",
+        "score_text": "Adéquation au terrain : 89 sur 100.",
+        "reasons": [
+         "La température (18 °C) est dans la plage idéale de cette culture (de 15 °C à 29 °C).",
+         "La pluie (500 mm) est acceptable pour cette culture, mais pas idéale (idéal : de 600 mm à 1000 mm).",
+         "Le pH du sol (7) est dans la plage idéale de cette culture (de 5.5 à 7.5).",
+         "La salinité du sol (2 dS/m) est dans la plage idéale de cette culture (de 0 dS/m à 4 dS/m)."
+        ],
+        "cautions": [],
+        "suggestion": null
+       },
+       {
+        "headline": "Pois chiche sur P1 : bon choix.",
+        "score_text": "Adéquation au terrain : 87 sur 100.",
+        "reasons": [
+         "La température (18 °C) est dans la plage idéale de cette culture (de 15 °C à 29 °C).",
+         "La pluie (500 mm) est acceptable pour cette culture, mais pas idéale (idéal : de 600 mm à 1000 mm).",
+         "Le pH du sol (7) est dans la plage idéale de cette culture (de 6 à 8.5).",
+         "La salinité du sol (2 dS/m) est dans la plage idéale de cette culture (de 0 dS/m à 4 dS/m)."
+        ],
+        "cautions": [],
+        "suggestion": null
+       }
+      ]
+     },
+     "based_on": "proposed"
+    }
+   }
+  },
+  "forte_chaleur": {
+   "description": "35 °C : blé tendre éliminé",
+   "parcels": {
+    "P1": {
+     "conditions": {
+      "temp_c": 35,
+      "rain_mm": 500,
+      "ph": 7,
+      "salinity_dsm": 2
+     },
+     "irrigated": false,
+     "history": []
+    }
+   },
+   "plan": [
+    {
+     "parcel": "P1",
+     "crop": "ble_tendre",
+     "area_ha": 1
+    }
+   ],
+   "rapport": {
+    "schema_version": 1,
+    "year": 2026,
+    "missing_history": [
+     "P1"
+    ],
+    "farmer": {
+     "plan": [
+      {
+       "parcel": "P1",
+       "crop": "ble_tendre",
+       "area_ha": 1
+      }
+     ],
+     "evaluation": {
+      "verdict": "not_viable",
+      "lines": [
+       {
+        "parcel": "P1",
+        "crop": "ble_tendre",
+        "area_ha": 1,
+        "name_fr": "Blé tendre",
+        "status": "not_recommended",
+        "score": 43,
+        "agro_score": 43,
+        "rotation_note": null,
+        "exclusions": [
+         {
+          "rule": "temperature_hors_plage",
+          "criterion": "temp_c",
+          "value": 35,
+          "allowed_range": [
+           5,
+           27
+          ],
+          "detail": "temp_c = 35, la culture supporte de 5 a 27"
+         }
+        ],
+        "rotation_issues": [
+         {
+          "rule": "historique_absent",
+          "level": "info",
+          "detail": "pas d'historique exploitable, rotation non evaluee"
+         }
+        ],
+        "rotation_benefits": [],
+        "missing": [],
+        "confidence": {
+         "level": "high",
+         "value": 0.75,
+         "percent": 75,
+         "reasons": [
+          "seuils non valides localement (base ECOCROP mondiale)",
+          "historique absent : rotation non evaluee"
+         ]
+        },
+        "criteria": [
+         {
+          "criterion": "temp_c",
+          "value": 35,
+          "position": "out",
+          "optimal": [
+           15,
+           23
+          ],
+          "tolerated": [
+           5,
+           27
+          ]
+         },
+         {
+          "criterion": "rain_mm",
+          "value": 500,
+          "position": "tolerable",
+          "optimal": [
+           750,
+           900
+          ],
+          "tolerated": [
+           300,
+           1600
+          ]
+         },
+         {
+          "criterion": "ph",
+          "value": 7,
+          "position": "optimal",
+          "optimal": [
+           6,
+           7
+          ],
+          "tolerated": [
+           5.5,
+           8.5
+          ]
+         },
+         {
+          "criterion": "salinity_dsm",
+          "value": 2,
+          "position": "optimal",
+          "optimal": [
+           0,
+           4
+          ],
+          "tolerated": [
+           0,
+           10
+          ]
+         }
+        ],
+        "alternatives": [
+         {
+          "crop": "orge",
+          "name_fr": "Orge",
+          "score": 74,
+          "gain": null
+         }
+        ]
+       }
+      ],
+      "plan_issues": [],
+      "composition": [
+       {
+        "family": "poaceae",
+        "percent": 100
+       }
+      ],
+      "tips": [
+       {
+        "rule": "une_seule_famille",
+        "family": "poaceae",
+        "suggestions": {}
+       }
+      ],
+      "confidence": {
+       "level": "high",
+       "percent": 75
+      }
+     },
+     "explanation": {
+      "verdict": "not_viable",
+      "headline": "Plan : non viable.",
+      "summary": "Lignes évaluées : 1 (bons choix : 0, à risque : 0, à éviter : 1).",
+      "confidence_text": "Fiabilité du plan : 75 % (élevée), égale à celle de la ligne la plus fragile.",
+      "composition_text": "Composition du plan : céréales 100 %.",
+      "issues": [],
+      "tips": [
+       "Votre plan ne contient que des céréales. Ajouter une légumineuse réduit les maladies du sol et enrichit la terre en azote pour la saison suivante."
+      ],
+      "notes": [
+       "Seuils pas encore validés localement pour : Blé tendre."
+      ],
+      "lines": [
+       {
+        "headline": "Blé tendre sur P1 : à éviter.",
+        "score_text": null,
+        "reasons": [
+         "La température (35 °C) est hors de ce que cette culture supporte (de 5 °C à 27 °C)."
+        ],
+        "cautions": [
+         "Aucun historique exploitable : la rotation n'a pas pu être évaluée."
+        ],
+        "suggestion": "À envisager à la place : Orge (score 74 sur 100)."
+       }
+      ]
+     }
+    },
+    "better": {
+     "year": 2026,
+     "plan": [
+      {
+       "parcel": "P1",
+       "crop": "orge",
+       "area_ha": null
+      }
+     ],
+     "unplanned": [],
+     "evaluation": {
+      "verdict": "viable",
+      "lines": [
+       {
+        "parcel": "P1",
+        "crop": "orge",
+        "area_ha": null,
+        "name_fr": "Orge",
+        "status": "ok",
+        "score": 74,
+        "agro_score": 74,
+        "rotation_note": null,
+        "exclusions": [],
+        "rotation_issues": [
+         {
+          "rule": "historique_absent",
+          "level": "info",
+          "detail": "pas d'historique exploitable, rotation non evaluee"
+         }
+        ],
+        "rotation_benefits": [],
+        "missing": [],
+        "confidence": {
+         "level": "high",
+         "value": 0.75,
+         "percent": 75,
+         "reasons": [
+          "seuils non valides localement (base ECOCROP mondiale)",
+          "historique absent : rotation non evaluee"
+         ]
+        },
+        "criteria": [
+         {
+          "criterion": "temp_c",
+          "value": 35,
+          "position": "tolerable",
+          "optimal": [
+           15,
+           20
+          ],
+          "tolerated": [
+           2,
+           40
+          ]
+         },
+         {
+          "criterion": "rain_mm",
+          "value": 500,
+          "position": "optimal",
+          "optimal": [
+           500,
+           1000
+          ],
+          "tolerated": [
+           200,
+           2000
+          ]
+         },
+         {
+          "criterion": "ph",
+          "value": 7,
+          "position": "optimal",
+          "optimal": [
+           6.5,
+           7.5
+          ],
+          "tolerated": [
+           6,
+           8
+          ]
+         },
+         {
+          "criterion": "salinity_dsm",
+          "value": 2,
+          "position": "optimal",
+          "optimal": [
+           0,
+           4
+          ],
+          "tolerated": [
+           0,
+           10
+          ]
+         }
+        ],
+        "alternatives": []
+       }
+      ],
+      "plan_issues": [],
+      "composition": [
+       {
+        "family": "poaceae",
+        "percent": 100
+       }
+      ],
+      "tips": [
+       {
+        "rule": "une_seule_famille",
+        "family": "poaceae",
+        "suggestions": {}
+       }
+      ],
+      "confidence": {
+       "level": "high",
+       "percent": 75
+      }
+     },
+     "explanation": {
+      "verdict": "viable",
+      "headline": "Plan proposé : viable.",
+      "summary": "Lignes évaluées : 1 (bons choix : 1, à risque : 0, à éviter : 0).",
+      "confidence_text": "Fiabilité du plan : 75 % (élevée), égale à celle de la ligne la plus fragile.",
+      "composition_text": "Composition du plan : céréales 100 %.",
+      "issues": [],
+      "tips": [
+       "Votre plan ne contient que des céréales. Ajouter une légumineuse réduit les maladies du sol et enrichit la terre en azote pour la saison suivante."
+      ],
+      "notes": [
+       "Seuils pas encore validés localement pour : Orge."
+      ],
+      "lines": [
+       {
+        "headline": "Orge sur P1 : bon choix.",
+        "score_text": "Adéquation au terrain : 74 sur 100.",
+        "reasons": [
+         "La température (35 °C) est acceptable pour cette culture, mais pas idéale (idéal : de 15 °C à 20 °C).",
+         "La pluie (500 mm) est dans la plage idéale de cette culture (de 500 mm à 1000 mm).",
+         "Le pH du sol (7) est dans la plage idéale de cette culture (de 6.5 à 7.5).",
+         "La salinité du sol (2 dS/m) est dans la plage idéale de cette culture (de 0 dS/m à 4 dS/m)."
+        ],
+        "cautions": [
+         "Aucun historique exploitable : la rotation n'a pas pu être évaluée."
+        ],
+        "suggestion": null
+       }
+      ]
+     }
+    },
+    "retained": "proposed",
+    "next_year": {
+     "year": 2027,
+     "plan": [],
+     "unplanned": [
+      "P1"
+     ],
+     "evaluation": {
+      "verdict": "not_evaluated",
+      "lines": [],
+      "plan_issues": [],
+      "composition": [],
+      "tips": [],
+      "confidence": null
+     },
+     "explanation": {
+      "verdict": "not_evaluated",
+      "headline": "Plan proposé : non évaluable.",
+      "summary": "Aucune ligne du plan n'a pu être évaluée.",
+      "confidence_text": null,
+      "composition_text": null,
+      "issues": [],
+      "tips": [],
+      "notes": [],
+      "lines": []
+     },
+     "based_on": "proposed"
+    }
+   }
+  }
+ }
+}

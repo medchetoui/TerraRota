@@ -6,7 +6,8 @@
   "scripts": {
     "dev": "vite",
     "build": "tsc && vite build",
-    "preview": "vite preview"
+    "preview": "vite preview",
+    "test:e2e": "node e2e/fellah.e2e.mjs"
   },
   "devDependencies": {
     "@vitejs/plugin-react": "^6.1.2",
