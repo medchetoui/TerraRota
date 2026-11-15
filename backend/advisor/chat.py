@@ -114,9 +114,14 @@ def answer(question: str, ctx: dict, lang: str = "ar", scenario_id: str = "cerea
     intent = classification.get("intention", "INCONNU")
     confidence = classification.get("confiance", 0.0)
 
-    # Detect greetings and politeness
+    # Detect greetings, politeness, and assistant name calling
     q_clean = question.strip().lower()
-    if any(g in q_clean for g in ["سلام", "salam", "السلام عليكم", "صباح الخير", "مساء الخير", "bonjour", "salut", "hello", "hi"]):
+    salutation_words = [
+        "سلام", "salam", "السلام عليكم", "صباح الخير", "مساء الخير", 
+        "bonjour", "salut", "hello", "hi", "labas", "لاباس", "كي داير", "كيداير",
+        "امي فاطمه", "مي فاطمة", "مي فاطمه", "عمي احمد", "عمي أحمد", "ami ahmed", "mi fatima", "fatima", "ahmed"
+    ]
+    if any(g in q_clean for g in salutation_words):
         intent = "SALUTATION"
         confidence = 1.0
 

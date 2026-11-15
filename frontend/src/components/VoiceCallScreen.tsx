@@ -266,35 +266,36 @@ export const VoiceCallScreen: React.FC<VoiceCallScreenProps> = ({
         setErrorNotice(null);
       };
 
-      let debounceTimer: any = null;
+      let silenceTimer: any = null;
+      let accumulatedFinal = '';
 
       rec.onresult = (event: any) => {
-        let interim = '';
-        let final = '';
+        let currentInterim = '';
         for (let i = event.resultIndex; i < event.results.length; ++i) {
           if (event.results[i].isFinal) {
-            final += event.results[i][0].transcript;
+            accumulatedFinal += ' ' + event.results[i][0].transcript;
           } else {
-            interim += event.results[i][0].transcript;
+            currentInterim += event.results[i][0].transcript;
           }
         }
-        const text = (final || interim).trim();
-        if (text) {
-          setTranscript(text);
+        const currentDisplay = (accumulatedFinal + ' ' + currentInterim).trim();
+        if (currentDisplay) {
+          setTranscript(currentDisplay);
         }
 
-        // When user speaks final text or pauses after speech
-        if (final && final.trim().length > 1) {
-          clearTimeout(debounceTimer);
-          handleFarmerSpokenQuestion(final.trim());
-        } else if (text.length > 3) {
-          // If no final event fired yet but user spoke and then paused for 1.8 seconds
-          clearTimeout(debounceTimer);
-          debounceTimer = setTimeout(() => {
-            if (isCallActiveRef.current && !isSpeakingRef.current && text.length > 2) {
-              handleFarmerSpokenQuestion(text);
+        // Clear previous silence timer on every new speech token
+        clearTimeout(silenceTimer);
+
+        // Only submit the question after the user has completely finished speaking
+        // (silence pause of 2.2 seconds allows the farmer to think and speak without interruption)
+        if (currentDisplay.length >= 3) {
+          silenceTimer = setTimeout(() => {
+            if (isCallActiveRef.current && !isSpeakingRef.current && currentDisplay.length >= 3) {
+              const fullQuestion = currentDisplay;
+              accumulatedFinal = '';
+              handleFarmerSpokenQuestion(fullQuestion);
             }
-          }, 1800);
+          }, 2200);
         }
       };
 
