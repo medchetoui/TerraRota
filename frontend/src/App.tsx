@@ -12,13 +12,10 @@ import type {
 import { 
   Sprout, 
   MapPin, 
-  Navigation, 
   Volume2, 
   Mic, 
   CheckCircle2, 
-  Calendar, 
   Sun, 
-  Droplets, 
   Layers, 
   Compass, 
   Sparkles, 
@@ -27,25 +24,20 @@ import {
   TrendingUp,
   ThermometerSun,
   ShieldCheck,
-  Languages,
   User,
-  Radio,
   RefreshCw,
-  Plus,
-  Minus,
   AlertTriangle,
   BookmarkPlus,
-  Check,
   Zap,
-  HelpCircle,
   Database,
   CloudRain,
-  Flame,
   Snowflake,
   ExternalLink,
-  Info,
-  Activity,
-  Microscope
+  Microscope,
+  Sliders,
+  FileText,
+  Menu,
+  X
 } from 'lucide-react';
 import { 
   getRecommendations, 
@@ -53,8 +45,7 @@ import {
   setToken, 
   getToken, 
   createParcel, 
-  type UserProfile, 
-  type ParcelItem 
+  type UserProfile
 } from './api/client';
 import AuthModal from './components/AuthModal';
 import ParcelsModal from './components/ParcelsModal';
@@ -68,8 +59,18 @@ import { ReportsPage } from './pages/ReportsPage';
 import { DataSourcesPage } from './pages/DataSourcesPage';
 import { FarmsPage } from './pages/FarmsPage';
 import FellahQuestion from './components/FellahQuestion';
-import { Sliders, FileText, Menu, X } from 'lucide-react';
 import Intro from './components/Intro';
+
+// ─── 1. GESTION DE LA LANGUE (PERSISTANTE) ───
+const LANG_KEY = 'terrarota_lang';
+
+const getInitialLang = (): Lang => {
+  try {
+    const saved = localStorage.getItem(LANG_KEY);
+    if (saved === 'ar' || saved === 'fr' || saved === 'en') return saved;
+  } catch { /* ignore */ }
+  return 'ar'; // Langue par défaut
+};
 
 export interface FormData {
   latitude: string;
@@ -111,7 +112,6 @@ const CROP_IMAGES: Record<string, string> = {
   almond: 'https://images.unsplash.com/photo-1508746829417-e6f548d8d6ed?auto=format&fit=crop&q=80&w=800',
 };
 
-// 5 Moroccan agricultural regions
 const REGIONS = [
   { name_ar: 'جهة فاس - مكناس (حوض سايس)', name_fr: 'Fès - Meknès (Saïss)', name_en: 'Fes - Meknes (Saïss)', lat: 33.89, lon: -5.00, soil: 'clay_loam', desc_ar: 'تيرس غني، عمق خصب > 90 سم', desc_fr: 'Tirs fertile > 90cm', desc_en: 'Rich Tirs soil, depth > 90cm' },
   { name_ar: 'جهة سوس - ماسة (تارودانت / هوارة)', name_fr: 'Souss - Massa (Taroudant)', name_en: 'Souss - Massa (Taroudant)', lat: 30.42, lon: -8.87, soil: 'sandy_loam', desc_ar: 'حمري خفيف رملي نصف جاف', desc_fr: 'Hamri sableux semi-aride', desc_en: 'Sandy Hamri, semi-arid' },
@@ -119,11 +119,19 @@ const REGIONS = [
   { name_ar: 'جهة الشاوية - ورديغة (سطات)', name_fr: 'Chaouia - Settat', name_en: 'Chaouia - Settat', lat: 33.00, lon: -7.60, soil: 'clay_loam', desc_ar: 'أراضي التيرس الكبرى للحبوب', desc_fr: 'Grande zone céréalière', desc_en: 'Major cereal Tirs plain' },
   { name_ar: 'جهة الغرب - شراردة بني حسن', name_fr: 'Gharb - Kénitra', name_en: 'Gharb - Kenitra', lat: 34.26, lon: -6.58, soil: 'clay', desc_ar: 'أراضي الرمل والغرين الغنية بالمياه', desc_fr: 'Sols alluviaux riches', desc_en: 'Water-rich alluvial soil' },
 ];
+
 type Mode = 'farmer' | 'expert';
 const EXPERT_PATHS = ['/nasa', '/weather', '/soil', '/simulator', '/sources'];
 
 function MainLayout() {
-  const [lang, setLang] = useState<Lang>('ar');
+  // ─── 1. LANGUE PERSISTANTE ───
+  const [lang, setLangState] = useState<Lang>(getInitialLang);
+
+  const setLang = (l: Lang) => {
+    setLangState(l);
+    try { localStorage.setItem(LANG_KEY, l); } catch { /* ignore */ }
+  };
+
   const [isAudioPlaying, setIsAudioPlaying] = useState(false);
   const [isAuthOpen, setIsAuthOpen] = useState(false);
   const [isParcelsOpen, setIsParcelsOpen] = useState(false);
@@ -131,39 +139,35 @@ function MainLayout() {
 
   const location = useLocation();
   const navigate = useNavigate();
+  
   const [mode, setModeState] = useState<Mode>(() => {
-  try { return sessionStorage.getItem('terrarota_mode') === 'expert' ? 'expert' : 'farmer'; } catch { return 'farmer'; }
-});
-const setMode = (m: Mode) => {
-  setModeState(m);
-  try { sessionStorage.setItem('terrarota_mode', m); } catch { /* ignore */ }
-};
+    try { return sessionStorage.getItem('terrarota_mode') === 'expert' ? 'expert' : 'farmer'; } catch { return 'farmer'; }
+  });
 
-const [showIntro, setShowIntro] = useState(() => {
-  try { return !sessionStorage.getItem('terrarota_intro_seen'); } catch { return false; }
-});
+  const setMode = (m: Mode) => {
+    setModeState(m);
+    try { sessionStorage.setItem('terrarota_mode', m); } catch { /* ignore */ }
+  };
 
-// Un agriculteur ne peut pas ouvrir une page expert (même via l'URL)
-useEffect(() => {
-  if (mode === 'farmer' && EXPERT_PATHS.includes(location.pathname)) {
-    navigate('/', { replace: true });
-  }
-}, [mode, location.pathname]);
+  const [showIntro, setShowIntro] = useState(() => {
+    try { return !sessionStorage.getItem('terrarota_intro_seen'); } catch { return false; }
+  });
 
-  // Step state for the guided workflow (1: Location -> 2: Last Crop -> 3: Recommendation)
+  useEffect(() => {
+    if (mode === 'farmer' && EXPERT_PATHS.includes(location.pathname)) {
+      navigate('/', { replace: true });
+    }
+  }, [mode, location.pathname]);
+
   const [step, setStep] = useState<1 | 2 | 3>(1);
-
-  // Simplified Farmer Selections
   const [selectedRegionIndex, setSelectedRegionIndex] = useState(0);
   const [previousCrop, setPreviousCrop] = useState<CropId>('wheat_hard');
   const [waterAccess, setWaterAccess] = useState<WaterAccess>('rainfed');
   const [soilType, setSoilType] = useState<SoilType>('clay_loam');
   const [fieldSize, setFieldSize] = useState('4.8');
-  const [zoomLevel, setZoomLevel] = useState(1);
   const [customLat, setCustomLat] = useState<number | undefined>(undefined);
   const [customLon, setCustomLon] = useState<number | undefined>(undefined);
 
-  // Dynamic API State
   const [loading, setLoading] = useState(false);
   const [apiResponse, setApiResponse] = useState<RecommendationResponse | null>(null);
   const [selectedCropIndex, setSelectedCropIndex] = useState(0);
@@ -216,7 +220,6 @@ useEffect(() => {
       const lat = customLatOverride ?? customLat ?? currentRegion.lat;
       const lon = customLonOverride ?? customLon ?? currentRegion.lon;
       
-      // Artificial delay (800ms) if data is cached so the user actually sees the satellite scanning/treatment state
       const [res] = await Promise.all([
         getRecommendations({
           latitude: lat,
@@ -242,14 +245,13 @@ useEffect(() => {
     triggerAnalysis();
   }, [selectedRegionIndex, customLat, customLon, previousCrop, waterAccess, soilType]);
 
-  // One-click automatic GPS detection
   const handleAutomaticGPS = () => {
     setLoading(true);
     if ('geolocation' in navigator) {
       navigator.geolocation.getCurrentPosition(
         (pos) => {
           triggerAnalysis(pos.coords.latitude, pos.coords.longitude);
-          setStep(2); // Automatically advance to crop question
+          setStep(2);
         },
         () => {
           triggerAnalysis();
@@ -264,9 +266,12 @@ useEffect(() => {
 
   const handleSaveParcel = async () => {
     const crop = activeRecommendation?.crop_name_fr || 'Culture';
+    // ─── 3. NOM STABLE (Toujours en français) ───
+    const regionFr = customLat !== undefined ? activeRegionName : currentRegion.name_fr;
+
     try {
       await createParcel({
-        name: `Parcelle ${activeRegionName} (${crop})`,
+        name: `Parcelle ${regionFr} (${crop})`,
         latitude: activeLat,
         longitude: activeLon,
         water_access: waterAccess,
@@ -275,11 +280,9 @@ useEffect(() => {
       });
       setIsSaved(true);
       setSaveSuccessMsg(isAr ? 'تم حفظ القطعة بنجاح في حسابك !' : isEn ? 'Field parcel saved successfully!' : 'Parcelle sauvegardée avec succès !');
-      // Automatically redirect to /farms to see the saved farm
       navigate('/farms');
     } catch (err) {
       console.error('Error saving parcel', err);
-      // If unauthorized, prompt login modal
       setIsAuthOpen(true);
     }
   };
@@ -291,26 +294,24 @@ useEffect(() => {
   const annualRain = indicators?.annual_rain_mm ? Math.round(indicators.annual_rain_mm) : 340;
   const avgTemp = indicators?.mean_annual_temp_c ? Math.round(indicators.mean_annual_temp_c) : 21;
   const isRainAdequate = annualRain > 280;
-  const translateCategory = (cat: string) => {
-  if (!cat) return '';
-  const c = cat.toLowerCase();
-  if (c === 'cereal') return isAr ? 'حبوب' : isEn ? 'Cereals' : 'Céréales';
-  if (c === 'legume') return isAr ? 'قطاني' : isEn ? 'Pulses' : 'Légumineuses';
-  if (c === 'tree_crop') return isAr ? 'أشجار' : isEn ? 'Tree Crops' : 'Arboriculture';
-  if (c === 'vegetable') return isAr ? 'خضروات' : isEn ? 'Vegetables' : 'Maraîchage';
-  if (c === 'cactus') return isAr ? 'صبار' : isEn ? 'Cactus' : 'Cactus';
-  return cat;
-};
 
-  // MODIF #2a — libellé traduit du précédent cultural
+  const translateCategory = (cat: string) => {
+    if (!cat) return '';
+    const c = cat.toLowerCase();
+    if (c === 'cereal') return isAr ? 'حبوب' : isEn ? 'Cereals' : 'Céréales';
+    if (c === 'legume') return isAr ? 'قطاني' : isEn ? 'Pulses' : 'Légumineuses';
+    if (c === 'tree_crop') return isAr ? 'أشجار' : isEn ? 'Tree Crops' : 'Arboriculture';
+    if (c === 'vegetable') return isAr ? 'خضروات' : isEn ? 'Vegetables' : 'Maraîchage';
+    if (c === 'cactus') return isAr ? 'صبار' : isEn ? 'Cactus' : 'Cactus';
+    return cat;
+  };
+
   const prevCropLabel = t((previousCrop as string) === 'fallow' ? 'none' : previousCrop);
 
-  // Audio speech assistance
   const speakCurrentAdvice = () => {
     if (!('speechSynthesis' in window)) return;
     window.speechSynthesis.cancel();
     if (!isAudioPlaying) {
-      // MODIF #3 — voix trilingue avec fallbacks EN
       const rec = activeRecommendation;
       const cropName = isAr ? rec?.crop_name_ar : isEn ? (rec?.crop_name_en || rec?.crop_name_fr) : rec?.crop_name_fr;
       const reasonsList = isEn ? (rec?.reasons_en ?? rec?.reasons) : lang === 'fr' ? (rec?.reasons_fr ?? rec?.reasons) : rec?.reasons;
@@ -333,34 +334,35 @@ useEffect(() => {
 
   const path = location.pathname;
   const L = (ar: string, fr: string, en: string) => (isAr ? ar : isEn ? en : fr);
+  
   const NAV_ITEMS = [
-  // ── Agriculteur ──
-  { to: '/', icon: Layers, mode: 'farmer', label: L('الرئيسية والمحاصيل', 'Accueil & Parcelle', 'Home & Field') },
-  { to: '/recommendation', icon: TrendingUp, mode: 'farmer', label: L('توصية المحصول', 'Recommandation', 'Crop Recommendation') },
-  { to: '/planner', icon: Sparkles, mode: 'farmer', label: L('مخطط التناوب', 'Plan de rotation', 'Rotation Plan') },
-  { to: '/crops', icon: Sprout, mode: 'farmer', label: L('موسوعة المحاصيل', 'Guide des Cultures', 'Crop Guide') },
-  { to: '/farms', icon: BookmarkPlus, mode: 'farmer', label: L('ضيعاتي ومخططاتي', 'Mes Parcelles & Plans', 'My Farms & Plans') },
-  { to: '/reports', icon: FileText, mode: 'farmer', label: L('تقرير اتخاذ القرار (PDF)', 'Rapport Décisionnel', 'Decision Report (PDF)') },
-  { to: '/advisor', icon: Mic, mode: 'farmer', label: L('المرشد الصوتي (عمي أحمد)', 'Conseiller Vocal', 'Voice Advisor') },
-  // ── Spécialiste ──
-  { to: '/nasa', icon: Sun, mode: 'expert', label: L('مرصد ناسا المناخي', 'Données NASA (Climat)', 'NASA Earth Data') },
-  { to: '/weather', icon: ThermometerSun, mode: 'expert', label: L('المؤشرات الزراعية المناخية', 'Indicateurs agro-climatiques', 'Agro-climatic Indicators') },
-  { to: '/soil', icon: Compass, mode: 'expert', label: L('مرصد التربة', 'Pédologie & Sols', 'Soil Intelligence') },
-  { to: '/simulator', icon: Sliders, mode: 'expert', label: L('محاكي «ماذا لو؟»', 'Simulateur « Et si ? »', 'What-If Simulator') },
-  { to: '/sources', icon: Database, mode: 'expert', label: L('سجل بيانات ناسا', 'Registre NASA', 'NASA Data Sources') },
-];
+    { to: '/', icon: Layers, mode: 'farmer', label: L('الرئيسية والمحاصيل', 'Accueil & Parcelle', 'Home & Field') },
+    { to: '/recommendation', icon: TrendingUp, mode: 'farmer', label: L('توصية المحصول', 'Recommandation', 'Crop Recommendation') },
+    { to: '/planner', icon: Sparkles, mode: 'farmer', label: L('مخطط التناوب', 'Plan de rotation', 'Rotation Plan') },
+    { to: '/crops', icon: Sprout, mode: 'farmer', label: L('موسوعة المحاصيل', 'Guide des Cultures', 'Crop Guide') },
+    { to: '/farms', icon: BookmarkPlus, mode: 'farmer', label: L('ضيعاتي ومخططاتي', 'Mes Parcelles & Plans', 'My Farms & Plans') },
+    { to: '/reports', icon: FileText, mode: 'farmer', label: L('تقرير اتخاذ القرار (PDF)', 'Rapport Décisionnel', 'Decision Report (PDF)') },
+    { to: '/advisor', icon: Mic, mode: 'farmer', label: L('المرشد الصوتي (عمي أحمد)', 'Conseiller Vocal', 'Voice Advisor') },
+    { to: '/nasa', icon: Sun, mode: 'expert', label: L('مرصد ناسا المناخي', 'Données NASA (Climat)', 'NASA Earth Data') },
+    { to: '/weather', icon: ThermometerSun, mode: 'expert', label: L('المؤشرات الزراعية المناخية', 'Indicateurs agro-climatiques', 'Agro-climatic Indicators') },
+    { to: '/soil', icon: Compass, mode: 'expert', label: L('مرصد التربة', 'Pédologie & Sols', 'Soil Intelligence') },
+    { to: '/simulator', icon: Sliders, mode: 'expert', label: L('محاكي «ماذا لو؟»', 'Simulateur « Et si ? »', 'What-If Simulator') },
+    { to: '/sources', icon: Database, mode: 'expert', label: L('سجل بيانات ناسا', 'Registre NASA', 'NASA Data Sources') },
+  ];
+
   return (
     <AppContext.Provider value={{ t, lang, setLang, user, logout }}>
       <div className={`min-h-screen bg-[#F4EFE6] text-[#2C2416] antialiased ${isAr ? 'font-arabic' : 'font-sans'}`} dir={isAr ? 'rtl' : 'ltr'}>
+        {/* ─── 2. INTRO AVEC LA BONNE LANGUE ─── */}
         {showIntro && (
-       <Intro
-         lang='en'
-         onDone={() => {
-         try { sessionStorage.setItem('terrarota_intro_seen', '1'); } catch { /* ignore */ }
-      setShowIntro(false);
-    }}
-    />
-    )}
+          <Intro
+            lang={lang}
+            onDone={() => {
+              try { sessionStorage.setItem('terrarota_intro_seen', '1'); } catch { /* ignore */ }
+              setShowIntro(false);
+            }}
+          />
+        )}
         <div className="flex flex-col lg:flex-row min-h-screen">
           
           {/* ─── SIDEBAR OVERLAY ─── */}
@@ -371,7 +373,7 @@ useEffect(() => {
             />
           )}
 
-          {/* ─── SIDEBAR with REAL ROUTER LINKS ─── */}
+          {/* ─── SIDEBAR ─── */}
           <aside className={`
             fixed inset-y-0 ${isAr ? 'right-0' : 'left-0'} z-50
             w-72 bg-[#EFE9DC] border-x border-[#DECAB3] 
@@ -392,7 +394,6 @@ useEffect(() => {
                   </div>
                 </Link>
 
-                {/* MODIF #5a — Close Button Inside Sidebar (trilingue) */}
                 <button
                   onClick={() => setIsSidebarOpen(false)}
                   className="p-2 rounded-xl text-[#7A6B53] hover:text-[#1E331A] hover:bg-[#E4DCCB] transition-colors cursor-pointer"
@@ -410,22 +411,21 @@ useEffect(() => {
                 </div>
               </div>
 
-              {/* Navigation Links */}
-<nav className="p-3 space-y-1">
-  {NAV_ITEMS.filter((i) => i.mode === mode).map(({ to, icon: Icon, label }) => (
-    <Link
-      key={to}
-      to={to}
-      onClick={() => setIsSidebarOpen(false)}
-      className={`w-full flex items-center gap-2.5 px-3.5 py-2.5 rounded-xl text-xs font-bold transition-all ${
-        path === to ? 'bg-[#2D4A27] text-white shadow-sm' : 'text-[#5A4D3B] hover:bg-[#E5DDCF]'
-      }`}
-    >
-      <Icon className="w-4 h-4 shrink-0" />
-      <span>{label}</span>
-    </Link>
-  ))}
-</nav>
+              <nav className="p-3 space-y-1">
+                {NAV_ITEMS.filter((i) => i.mode === mode).map(({ to, icon: Icon, label }) => (
+                  <Link
+                    key={to}
+                    to={to}
+                    onClick={() => setIsSidebarOpen(false)}
+                    className={`w-full flex items-center gap-2.5 px-3.5 py-2.5 rounded-xl text-xs font-bold transition-all ${
+                      path === to ? 'bg-[#2D4A27] text-white shadow-sm' : 'text-[#5A4D3B] hover:bg-[#E5DDCF]'
+                    }`}
+                  >
+                    <Icon className="w-4 h-4 shrink-0" />
+                    <span>{label}</span>
+                  </Link>
+                ))}
+              </nav>
 
               {user && (
                 <div className="px-4">
@@ -444,7 +444,6 @@ useEffect(() => {
             </div>
 
             <div className="p-4 border-t border-[#DECAB3]/70 space-y-3">
-              {/* MODIF #5d — bouton audio trilingue */}
               <div 
                 onClick={speakCurrentAdvice}
                 className="p-3 bg-[#E7DFCF] hover:bg-[#E0D7C5] rounded-xl flex items-center justify-between text-xs text-[#524430] cursor-pointer transition-colors"
@@ -468,7 +467,6 @@ useEffect(() => {
           <main className="flex-1 overflow-y-auto">
             <header className="px-4 sm:px-6 py-4 bg-[#FAF7F2] border-b border-[#DECAB3] flex flex-wrap items-center justify-between gap-4 sticky top-0 z-30 shadow-xs">
               <div className="flex items-center gap-3 flex-wrap">
-                {/* MODIF #5b — Hamburger Button trilingue */}
                 <button
                   onClick={() => setIsSidebarOpen(!isSidebarOpen)}
                   className="p-2 rounded-xl bg-[#EFE9DC] hover:bg-[#E4DCCB] text-[#1E331A] border border-[#DECAB3] transition-colors cursor-pointer flex items-center gap-2 text-xs font-bold shadow-xs"
@@ -506,10 +504,9 @@ useEffect(() => {
                   <span>{apiResponse?.data_status === 'live' ? (isAr ? 'متصل بأقمار ناسا مباشرة' : isEn ? 'NASA Live Connection' : 'NASA Direct Live') : (isAr ? 'بيانات ناسا المناخية' : isEn ? 'NASA Climate Data' : 'NASA POWER Connecté')}</span>
                 </div>
 
-                {/* MODIF #5c — Demo Mode Button trilingue */}
                 <button
                   onClick={() => {
-                    setSelectedRegionIndex(3); // Chaouia
+                    setSelectedRegionIndex(3);
                     setPreviousCrop('wheat_hard');
                     setWaterAccess('rainfed');
                     setSoilType('clay_loam');
@@ -525,22 +522,21 @@ useEffect(() => {
               </div>
 
               <div className="flex items-center gap-3">
-<button
-  onClick={() => {
-    if (mode === 'farmer') { setMode('expert'); navigate('/nasa'); }
-    else { setMode('farmer'); navigate('/'); }
-  }}
-  className={`flex items-center gap-1.5 px-3.5 py-1.5 rounded-full text-xs font-bold border transition-colors cursor-pointer ${
-    mode === 'expert'
-      ? 'bg-[#1E331A] text-white border-[#1E331A]'
-      : 'bg-[#EFE9DC] text-[#2D4A27] border-[#D5C4AC] hover:bg-[#E5DDCF]'
-  }`}
->
-  {mode === 'expert' ? <Sprout className="w-3.5 h-3.5" /> : <Microscope className="w-3.5 h-3.5" />}
-  <span>{mode === 'expert' ? L('وضع الفلاح', 'Mode agriculteur', 'Farmer mode') : L('وضع الخبير', 'Mode expert', 'Expert mode')}</span>
-</button>
+                <button
+                  onClick={() => {
+                    if (mode === 'farmer') { setMode('expert'); navigate('/nasa'); }
+                    else { setMode('farmer'); navigate('/'); }
+                  }}
+                  className={`flex items-center gap-1.5 px-3.5 py-1.5 rounded-full text-xs font-bold border transition-colors cursor-pointer ${
+                    mode === 'expert'
+                      ? 'bg-[#1E331A] text-white border-[#1E331A]'
+                      : 'bg-[#EFE9DC] text-[#2D4A27] border-[#D5C4AC] hover:bg-[#E5DDCF]'
+                  }`}
+                >
+                  {mode === 'expert' ? <Sprout className="w-3.5 h-3.5" /> : <Microscope className="w-3.5 h-3.5" />}
+                  <span>{mode === 'expert' ? L('وضع الفلاح', 'Mode agriculteur', 'Farmer mode') : L('وضع الخبير', 'Mode expert', 'Expert mode')}</span>
+                </button>
 
-                {/* 3-Language Switcher (AR / FR / EN) */}
                 <div className="flex items-center bg-[#EFE9DC] border border-[#D5C4AC] rounded-full p-0.5 text-xs font-bold text-[#4D3F2C]">
                   <button
                     onClick={() => setLang('ar')}
@@ -599,11 +595,9 @@ useEffect(() => {
 
             <div className="p-6 md:p-8 max-w-6xl mx-auto space-y-8">
               <Routes>
-                {/* ─── ROUTE 1: "/" (SUPER SIMPLE & GUIDED WORKFLOW FOR FARMERS) ─── */}
+                {/* ─── ROUTE 1: "/" ─── */}
                 <Route path="/" element={
                   <div className="space-y-6 animate-in fade-in duration-300">
-                    
-                    {/* Visual 3-Step Progress Indicator */}
                     <div className="bg-[#FAF7F2] p-4 sm:p-5 rounded-3xl border border-[#DECAB3] shadow-xs flex items-center justify-between gap-2 max-w-3xl mx-auto">
                       <button
                         onClick={() => setStep(1)}
@@ -640,10 +634,8 @@ useEffect(() => {
                       </button>
                     </div>
 
-                    {/* ════════ STEP 1: CHOOSE REGION OR CLICK AUTO GPS ════════ */}
                     {step === 1 && (
                       <div className="space-y-6">
-                        {/* Big Automated Action Button (No technical input needed) */}
                         <div className="p-8 rounded-3xl bg-[#2D4A27] text-white shadow-md text-center space-y-4">
                           <div className="w-16 h-16 rounded-full bg-white/10 flex items-center justify-center text-emerald-300 mx-auto">
                             <Compass className="w-8 h-8 animate-pulse" />
@@ -684,7 +676,6 @@ useEffect(() => {
                           </div>
                         </div>
 
-                        {/* Visual Region Cards (Easy Tap) */}
                         <div>
                           <h3 className="text-sm font-bold text-[#7A6B53] mb-3">
                             {isAr ? 'أو اختر منطقتك الفلاحية مباشرة:' : isEn ? 'Or select your agricultural region directly:' : 'Ou sélectionnez votre région :'}
@@ -715,7 +706,6 @@ useEffect(() => {
                           </div>
                         </div>
 
-                        {/* Interactive Leaflet Map for Moroccan Field Coordinates */}
                         <div className="space-y-2 pt-2">
                           <h3 className="text-sm font-bold text-[#7A6B53]">
                             {isAr ? 'أو حدد إحداثيات حقلك على خريطة المغرب التفاعلية :' : isEn ? 'Or select field location on the interactive Morocco map :' : 'Ou cliquez sur la carte interactive du Maroc :'}
@@ -741,7 +731,6 @@ useEffect(() => {
                       </div>
                     )}
 
-                    {/* ════════ STEP 2: SIMPLE CROP & WATER QUESTION ════════ */}
                     {step === 2 && (
                       <div className="space-y-6 animate-in fade-in duration-200">
                         <div className="bg-[#FAF7F2] p-6 sm:p-8 rounded-3xl border border-[#DECAB3] shadow-sm space-y-6">
@@ -759,7 +748,6 @@ useEffect(() => {
                             </p>
                           </div>
 
-                          {/* Big Visual Buttons for Crop */}
                           <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
                             {[
                               { id: 'wheat_hard', name_ar: 'القمح الصلب 🌾', name_fr: 'Blé Dur 🌾', name_en: 'Durum Wheat 🌾' },
@@ -783,7 +771,6 @@ useEffect(() => {
                             ))}
                           </div>
 
-                          {/* Water Option */}
                           <div className="pt-4 border-t border-[#DECAB3]">
                             <label className="block text-xs font-bold text-[#1E331A] mb-2">
                               {isAr ? 'واش عندك السقي ولا معول غير على الشتا؟' : isEn ? 'Water availability / Irrigation access:' : 'Disponibilité de l\'eau :'}
@@ -812,7 +799,6 @@ useEffect(() => {
                             </div>
                           </div>
 
-                          {/* Buttons */}
                           <div className="flex items-center justify-between pt-4">
                             <button
                               onClick={() => setStep(1)}
@@ -834,7 +820,6 @@ useEffect(() => {
                           </div>
                         </div>
 
-                        {/* Interactive Leaflet Map for Moroccan Field Coordinates */}
                         <div className="space-y-2 pt-2">
                           <h3 className="text-sm font-bold text-[#7A6B53]">
                             {isAr ? 'أو حدد إحداثيات حقلك على خريطة المغرب التفاعلية :' : isEn ? 'Or select field location on the interactive Morocco map :' : 'Ou cliquez sur la carte interactive du Maroc :'}
@@ -862,7 +847,7 @@ useEffect(() => {
                   </div>
                 } />
 
-                {/* ─── ROUTE 2: "/recommendation" (توصية المحصول) ─── */}
+                {/* ─── ROUTE 2: "/recommendation" ─── */}
                 <Route path="/recommendation" element={
                   <div className="space-y-6 animate-in fade-in duration-300">
                     <div className="flex items-center justify-between flex-wrap gap-3">
@@ -871,7 +856,6 @@ useEffect(() => {
                         <h3 className="text-2xl font-black text-[#1E331A]">
                           {isAr ? `المحاصيل الأنسب لـ ${activeRegionName}` : isEn ? `Recommended Crops for ${activeRegionName}` : `Cultures recommandées pour ${activeRegionName}`}
                         </h3>
-                        {/* MODIF #2b — sous-titre trilingue avec précédent cultural */}
                         <p className="text-xs text-[#7A6B53]">
                           {L(
                             `بناءً على أمطار ناسا (${annualRain} ملم) ومحصولك السابق (${prevCropLabel})`,
@@ -891,7 +875,6 @@ useEffect(() => {
                                 selectedCropIndex === idx ? 'bg-[#2D4A27] text-white shadow-sm' : 'text-[#61513C] hover:bg-[#E5DDCF]'
                               }`}
                             >
-                              {/* MODIF #2c — fallback EN pour les onglets cultures */}
                               #{idx + 1} {isAr ? rec.crop_name_ar : isEn ? (rec.crop_name_en || rec.crop_name_fr) : rec.crop_name_fr}
                             </button>
                           ))}
@@ -905,7 +888,6 @@ useEffect(() => {
                           <RefreshCw className="w-8 h-8 animate-spin text-[#8C3A27]" />
                         </div>
                         <div>
-                          {/* MODIF #2d — textes de chargement trilingues */}
                           <h4 className="text-base font-bold text-[#1E331A]">
                             {L('جاري تحليل إحداثيات الحقل عبر أقمار ناسا...', 'Traitement des observations NASA POWER en cours...', 'Processing NASA POWER observations...')}
                           </h4>
@@ -954,7 +936,6 @@ useEffect(() => {
                               ))}
                             </div>
 
-                            {/* Scientific Evidences & Agronomic Citations (For Doctors & Engineers) */}
                             {mode === 'expert' && activeRecommendation.evidences && activeRecommendation.evidences.length > 0 && (
                               <div className="p-4 bg-[#EFE9DC] rounded-2xl border border-[#DECAB3] space-y-2.5">
                                 <div className="text-xs font-black text-[#1E331A] flex items-center gap-1.5">
@@ -982,7 +963,6 @@ useEffect(() => {
                               </div>
                             )}
 
-                            {/* ═══ MODIF #1 — Remplacement du bloc « Et si » statique par un lien vers le simulateur ═══ */}
                             {mode === 'expert' && (
                               <Link
                                 to="/simulator"
@@ -1033,7 +1013,6 @@ useEffect(() => {
                               alt={activeRecommendation.crop_name_fr}
                               className="w-full h-full object-cover"
                             />
-                            {/* MODIF #2e — badge de score trilingue */}
                             <div className="absolute top-4 start-4 bg-[#2D4A27]/90 backdrop-blur-md text-white text-xs font-black px-3.5 py-1.5 rounded-full shadow-md">
                               {isAr ? `مطابق بنسبة ${activeRecommendation.score}%` : isEn ? `Match ${activeRecommendation.score}%` : `Score ${activeRecommendation.score}%`}
                             </div>
@@ -1043,12 +1022,10 @@ useEffect(() => {
                     ) : (
                       <div className="p-8 bg-[#FAF7F2] rounded-3xl border border-[#DECAB3] text-center">
                         <RefreshCw className="w-6 h-6 animate-spin text-[#8C3A27] mx-auto mb-2" />
-                        {/* MODIF #2e — texte de secours trilingue */}
                         <p className="text-xs font-bold text-[#61513C]">{L('جاري استرجاع معطيات ناسا...', 'Calcul des recommandations...', 'Computing recommendations...')}</p>
                       </div>
                     )}
 
-                    {/* ═══ MODIF #2f — Boutons du bas de /recommendation ═══ */}
                     <div className="pt-4 flex justify-between gap-3 flex-wrap">
                       <button
                         onClick={() => { setStep(2); navigate('/'); }}
@@ -1073,7 +1050,7 @@ useEffect(() => {
                   </div>
                 } />
 
-                {/* ─── ROUTE 3: "/weather" (MODIF #4 — version trilingue complète) ─── */}
+                {/* ─── ROUTE 3: "/weather" ─── */}
                 <Route path="/weather" element={
                   <div className="space-y-6 animate-in fade-in duration-300">
                     <div className="flex flex-wrap items-center justify-between gap-4">
@@ -1229,7 +1206,7 @@ useEffect(() => {
                   </div>
                 } />
 
-                {/* ─── ROUTE 4: "/advisor" (المرشد الفلاحي الصوتي) ─── */}
+                {/* ─── ROUTE 4: "/advisor" ─── */}
                 <Route path="/advisor" element={
                   <div className="space-y-6 animate-in fade-in duration-300">
                     <div>
@@ -1306,7 +1283,7 @@ useEffect(() => {
                   </div>
                 } />
 
-                {/* ─── ROUTE 5: "/nasa" (مرصد ناسا المناخي والتتبع) ─── */}
+                {/* ─── ROUTE 5: "/nasa" ─── */}
                 <Route path="/nasa" element={
                   <NASADataPage
                     apiResponse={apiResponse}
@@ -1317,7 +1294,7 @@ useEffect(() => {
                   />
                 } />
 
-                {/* ─── ROUTE 6: "/planner" (مخطط التناوب ومقارنة السيناريوهات) ─── */}
+                {/* ─── ROUTE 6: "/planner" ─── */}
                 <Route path="/planner" element={
                   <RotationPlannerPage
                     apiResponse={apiResponse}
@@ -1332,7 +1309,7 @@ useEffect(() => {
                   />
                 } />
 
-                {/* ─── ROUTE 7: "/simulator" (محاكي الفرضيات والتغير المناخي) ─── */}
+                {/* ─── ROUTE 7: "/simulator" ─── */}
                 <Route path="/simulator" element={
                   <SimulatorPage
                     lat={activeLat}
@@ -1340,16 +1317,17 @@ useEffect(() => {
                     defaultPrevCrop={previousCrop}
                     defaultWater={waterAccess}
                     regionName={activeRegionName}
+                    soilType={soilType}
                     lang={lang}
                   />
                 } />
 
-                {/* ─── ROUTE 8: "/crops" (دليل وموسوعة المحاصيل الزراعية) ─── */}
+                {/* ─── ROUTE 8: "/crops" ─── */}
                 <Route path="/crops" element={
                   <CropLibraryPage lang={lang} />
                 } />
 
-                {/* ─── ROUTE 9: "/soil" (مرصد التربة والقدرة الحقلية) ─── */}
+                {/* ─── ROUTE 9: "/soil" ─── */}
                 <Route path="/soil" element={
                   <SoilPage
                     currentSoil={soilType}
@@ -1358,7 +1336,7 @@ useEffect(() => {
                   />
                 } />
 
-                {/* ─── ROUTE 10: "/reports" (تقرير اتخاذ القرار والتحميل PDF) ─── */}
+                {/* ─── ROUTE 10: "/reports" ─── */}
                 <Route path="/reports" element={
                   <ReportsPage
                     apiResponse={apiResponse}
@@ -1373,12 +1351,12 @@ useEffect(() => {
                   />
                 } />
 
-                {/* ─── ROUTE 11: "/sources" (سجل بيانات الأقمار الاصطناعية) ─── */}
+                {/* ─── ROUTE 11: "/sources" ─── */}
                 <Route path="/sources" element={
                   <DataSourcesPage lang={lang} />
                 } />
 
-                {/* ─── ROUTE 12: "/farms" (ضيعاتي ومخططاتي المحفوظة) ─── */}
+                {/* ─── ROUTE 12: "/farms" ─── */}
                 <Route path="/farms" element={
                   <FarmsPage
                     onSelectParcel={(p) => {

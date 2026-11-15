@@ -22,6 +22,7 @@ export default function AuthModal({ isOpen, onClose, onSuccess }: AuthModalProps
   if (!isOpen) return null;
 
   const isAr = lang === 'ar';
+  const isEn = lang === 'en';
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -33,14 +34,14 @@ export default function AuthModal({ isOpen, onClose, onSuccess }: AuthModalProps
       if (mode === 'login') {
         await loginUser({ username, password });
         const meRes = await getMe();
-        setSuccessMsg(isAr ? 'تم تسجيل الدخول بنجاح !' : 'Connexion réussie !');
+        setSuccessMsg(isAr ? 'تم تسجيل الدخول بنجاح !' : isEn ? 'Login successful!' : 'Connexion réussie !');
         setTimeout(() => {
           onSuccess(meRes.user);
           onClose();
         }, 500);
       } else {
         const regRes = await registerUser({ username, email, password });
-        setSuccessMsg(isAr ? 'تم إنشاء الحساب بنجاح !' : 'Compte créé avec succès !');
+        setSuccessMsg(isAr ? 'تم إنشاء الحساب بنجاح !' : isEn ? 'Account created successfully!' : 'Compte créé avec succès !');
         setTimeout(() => {
           onSuccess(regRes.user);
           onClose();
@@ -49,12 +50,18 @@ export default function AuthModal({ isOpen, onClose, onSuccess }: AuthModalProps
     } catch (err: unknown) {
       const e = err as { data?: { errors?: Record<string, string[]>; message?: string; detail?: string } };
       const errData = e?.data;
-      let msg = isAr ? 'معلومات الدخول غير صحيحة أو هناك خطأ في السيرفر.' : 'Identifiants invalides ou erreur serveur.';
+      let msg = isAr ? 'معلومات الدخول غير صحيحة أو هناك خطأ في السيرفر.' : isEn ? 'Invalid credentials or server error.' : 'Identifiants invalides ou erreur serveur.';
       const errorsObj = errData?.errors || (errData as unknown as { errors?: Record<string, string[]> })?.errors;
       if (errorsObj && typeof errorsObj === 'object') {
         const messages: string[] = [];
         for (const [field, fieldErrors] of Object.entries(errorsObj)) {
-          const fieldLabel = field === 'username' ? (isAr ? 'اسم المستخدم' : "Nom d'utilisateur") : field === 'email' ? 'Email' : field === 'password' ? (isAr ? 'كلمة المرور' : 'Mot de passe') : field;
+          const fieldLabel = field === 'username' 
+            ? (isAr ? 'اسم المستخدم' : isEn ? 'Username' : "Nom d'utilisateur") 
+            : field === 'email' 
+            ? 'Email' 
+            : field === 'password' 
+            ? (isAr ? 'كلمة المرور' : isEn ? 'Password' : 'Mot de passe') 
+            : field;
           const text = Array.isArray(fieldErrors) ? fieldErrors.join(', ') : String(fieldErrors);
           messages.push(`${fieldLabel}: ${text}`);
         }
@@ -88,12 +95,14 @@ export default function AuthModal({ isOpen, onClose, onSuccess }: AuthModalProps
             <ShieldCheck className="w-7 h-7" />
           </div>
           <h2 className="text-2xl font-black tracking-tight text-[#1E331A]">
-            {mode === 'login' ? (isAr ? 'فضاء الفلاح' : 'Espace Agriculteur') : (isAr ? 'إنشاء حساب جديد' : 'Créer votre compte')}
+            {mode === 'login' 
+              ? (isAr ? 'فضاء الفلاح' : isEn ? 'Farmer Space' : 'Espace Agriculteur') 
+              : (isAr ? 'إنشاء حساب جديد' : isEn ? 'Create Your Account' : 'Créer votre compte')}
           </h2>
           <p className="text-xs text-[#7A6B53] mt-1 font-medium">
             {mode === 'login'
-              ? (isAr ? 'سجل دخولك لاسترجاع أراضيك وتحليلاتك المحفوظة' : 'Connectez-vous pour retrouver vos parcelles et vos analyses sauvegardées')
-              : (isAr ? 'احفظ أراضيك وتابع التوصيات الفلاحية مع الوقت' : 'Enregistrez vos parcelles et suivez les recommandations dans le temps')}
+              ? (isAr ? 'سجل دخولك لاسترجاع أراضيك وتحليلاتك المحفوظة' : isEn ? 'Log in to access your saved fields and analyses' : 'Connectez-vous pour retrouver vos parcelles et vos analyses sauvegardées')
+              : (isAr ? 'احفظ أراضيك وتابع التوصيات الفلاحية مع الوقت' : isEn ? 'Save your fields and track crop recommendations over time' : 'Enregistrez vos parcelles et suivez les recommandations dans le temps')}
           </p>
         </div>
 
@@ -109,7 +118,7 @@ export default function AuthModal({ isOpen, onClose, onSuccess }: AuthModalProps
             }`}
           >
             <LogIn className="w-4 h-4" />
-            <span>{isAr ? 'تسجيل الدخول' : t('login')}</span>
+            <span>{isAr ? 'تسجيل الدخول' : isEn ? 'Log In' : t('login')}</span>
           </button>
           <button
             type="button"
@@ -121,7 +130,7 @@ export default function AuthModal({ isOpen, onClose, onSuccess }: AuthModalProps
             }`}
           >
             <UserPlus className="w-4 h-4" />
-            <span>{isAr ? 'إنشاء حساب جديد' : t('register')}</span>
+            <span>{isAr ? 'إنشاء حساب جديد' : isEn ? 'Register' : t('register')}</span>
           </button>
         </div>
 
@@ -142,7 +151,7 @@ export default function AuthModal({ isOpen, onClose, onSuccess }: AuthModalProps
         <form onSubmit={handleSubmit} className="space-y-4">
           <div>
             <label className="block text-xs font-bold text-[#524430] mb-1.5">
-              {isAr ? 'اسم المستخدم' : t('username')}
+              {isAr ? 'اسم المستخدم' : isEn ? 'Username' : t('username')}
             </label>
             <div className="relative">
               <User className="absolute start-3.5 top-3.5 w-4 h-4 text-[#7A6B53]" />
@@ -160,7 +169,7 @@ export default function AuthModal({ isOpen, onClose, onSuccess }: AuthModalProps
           {mode === 'register' && (
             <div>
               <label className="block text-xs font-bold text-[#524430] mb-1.5">
-                {isAr ? 'البريد الإلكتروني' : t('email')}
+                {isAr ? 'البريد الإلكتروني' : isEn ? 'Email Address' : t('email')}
               </label>
               <div className="relative">
                 <Mail className="absolute start-3.5 top-3.5 w-4 h-4 text-[#7A6B53]" />
@@ -177,7 +186,7 @@ export default function AuthModal({ isOpen, onClose, onSuccess }: AuthModalProps
 
           <div>
             <label className="block text-xs font-bold text-[#524430] mb-1.5">
-              {isAr ? 'كلمة المرور' : t('password')}
+              {isAr ? 'كلمة المرور' : isEn ? 'Password' : t('password')}
             </label>
             <div className="relative">
               <Lock className="absolute start-3.5 top-3.5 w-4 h-4 text-[#7A6B53]" />
@@ -202,12 +211,12 @@ export default function AuthModal({ isOpen, onClose, onSuccess }: AuthModalProps
             ) : mode === 'login' ? (
               <>
                 <LogIn className="w-4 h-4" />
-                <span>{isAr ? 'دخول إلى حسابي' : 'Se connecter'}</span>
+                <span>{isAr ? 'دخول إلى حسابي' : isEn ? 'Log In to My Account' : 'Se connecter'}</span>
               </>
             ) : (
               <>
                 <UserPlus className="w-4 h-4" />
-                <span>{isAr ? 'تأكيد وإنشاء الحساب' : 'Créer mon compte'}</span>
+                <span>{isAr ? 'تأكيد وإنشاء الحساب' : isEn ? 'Create My Account' : 'Créer mon compte'}</span>
               </>
             )}
           </button>

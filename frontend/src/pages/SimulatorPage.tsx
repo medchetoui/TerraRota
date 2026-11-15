@@ -1,103 +1,141 @@
 import React, { useState } from 'react';
-import { 
-  Sliders, 
-  RefreshCw, 
-  ArrowRight, 
-  AlertCircle, 
-  TrendingUp, 
-  TrendingDown, 
-  Minus, 
-  HelpCircle,
+import {
+  Sliders,
+  RefreshCw,
+  ArrowRight,
+  AlertCircle,
+  TrendingUp,
+  TrendingDown,
   Droplets,
   Thermometer,
-  Calendar,
   Sparkles,
-  ArrowLeft
+  ArrowLeft,
 } from 'lucide-react';
 import { runWhatIf } from '../api/client';
-import type { WhatIfSimulation, CropId } from '../types/api';
+import type { WhatIfSimulation } from '../types/api';
+import { translateCrop } from '../i18n/translations';
+
+type Lang = 'ar' | 'fr' | 'en';
 
 interface SimulatorPageProps {
   lat: number;
   lon: number;
   defaultPrevCrop: string;
   defaultWater: string;
+  soilType?: string; // à passer depuis App.tsx pour que le score initial soit identique à la page de recommandation
   regionName: string;
-  lang: 'ar' | 'fr' | 'en';
+  lang: Lang;
 }
 
-// Dictionnaire pour traduire les noms de cultures renvoyés par le backend
-const translateCropName = (name: string, lang: 'ar' | 'fr' | 'en'): string => {
-  if (!name) return '';
-  const n = name.toLowerCase().trim();
-  
-  if (n.includes('pois chiche') || n.includes('chickpea') || n.includes('حمص')) return lang === 'ar' ? 'الحمص' : lang === 'en' ? 'Chickpea' : 'Pois chiche';
-  if (n.includes('orge') || n.includes('barley') || n.includes('شعير')) return lang === 'ar' ? 'الشعير' : lang === 'en' ? 'Barley' : 'Orge';
-  if (n.includes('blé dur') || n.includes('durum') || n.includes('قمح صلب')) return lang === 'ar' ? 'القمح الصلب' : lang === 'en' ? 'Durum Wheat' : 'Blé dur';
-  if (n.includes('blé tendre') || n.includes('soft wheat') || n.includes('قمح طري')) return lang === 'ar' ? 'القمح الطري' : lang === 'en' ? 'Soft Wheat' : 'Blé tendre';
-  if (n.includes('olive') || n.includes('olivier') || n.includes('زيتون')) return lang === 'ar' ? 'الزيتون' : lang === 'en' ? 'Olive Tree' : 'Olivier';
-  if (n.includes('lentil') || n.includes('lentille') || n.includes('عدس')) return lang === 'ar' ? 'العدس' : lang === 'en' ? 'Lentil' : 'Lentille';
-  if (n.includes('faba') || n.includes('fève') || n.includes('فول')) return lang === 'ar' ? 'الفول' : lang === 'en' ? 'Faba Bean' : 'Fève';
-  if (n.includes('argan') || n.includes('أركان')) return lang === 'ar' ? 'الأركان' : lang === 'en' ? 'Argan Tree' : 'Arganier';
-  if (n.includes('cactus') || n.includes('figuier') || n.includes('صبار') || n.includes('هندية')) return lang === 'ar' ? 'الصبار' : lang === 'en' ? 'Cactus Pear' : 'Figuier de Barbarie';
-  if (n.includes('potato') || n.includes('pomme de terre') || n.includes('بطاطا') || n.includes('بطاطس')) return lang === 'ar' ? 'البطاطس' : lang === 'en' ? 'Potato' : 'Pomme de terre';
-  if (n.includes('tomato') || n.includes('tomate') || n.includes('طماطم')) return lang === 'ar' ? 'الطماطم' : lang === 'en' ? 'Tomato' : 'Tomate';
-  if (n.includes('almond') || n.includes('amandier') || n.includes('لوز')) return lang === 'ar' ? 'اللوز' : lang === 'en' ? 'Almond Tree' : 'Amandier';
-  if (n.includes('fallow') || n.includes('jachère') || n.includes('بور') || n.includes('راحة')) return lang === 'ar' ? 'أرض مريحة (بور)' : lang === 'en' ? 'Fallow' : 'Jachère';
-  
-  return name;
+// Champs renvoyés par le nouveau simulator.py (optionnels : l'ancien backend reste supporté)
+interface SimChange {
+  type: 'rain' | 'temperature' | 'water_access' | 'previous_crop' | 'priorities';
+  before?: number | string;
+  after?: number | string | Record<string, number>;
+  percent?: number;
+  delta?: number;
+}
+type SimulationResult = WhatIfSimulation & {
+  changes?: SimChange[];
+  winner_before_id?: string | null;
+  winner_after_id?: string | null;
 };
 
-// Dictionnaire pour traduire les modifications renvoyées par le backend
-const translateBackendText = (text: string, lang: 'ar' | 'fr' | 'en'): string => {
-  if (!text) return '';
+const WATER_LABELS: Record<string, Record<Lang, string>> = {
+  rainfed: { ar: 'بوري', fr: 'pluvial', en: 'rainfed' },
+  irrigated: { ar: 'مسقي', fr: 'irrigué', en: 'irrigated' },
+  partial: { ar: 'ري تكميلي', fr: "irrigation d'appoint", en: 'partially irrigated' },
+};
+const waterLabel = (w: unknown, lang: Lang): string => WATER_LABELS[String(w)]?.[lang] ?? String(w);
+
+const signed = (n: number | undefined): string => {
+  const v = n ?? 0;
+  return v > 0 ? `+${v}` : `${v}`;
+};
+
+// Texte d'une modification, construit à partir des DONNÉES (plus de valeurs codées en dur)
+const describeChange = (c: SimChange, lang: Lang): string => {
+  const arrow = lang === 'ar' ? '←' : '→';
+  switch (c.type) {
+    case 'rain': {
+      const pct = c.percent !== undefined ? ` (${signed(c.percent)}%)` : '';
+      return lang === 'ar'
+        ? `هطول الأمطار: ${c.before} مم ${arrow} ${c.after} مم${pct}`
+        : lang === 'en'
+        ? `Annual rainfall: ${c.before} mm ${arrow} ${c.after} mm${pct}`
+        : `Précipitations annuelles : ${c.before} mm ${arrow} ${c.after} mm${pct}`;
+    }
+    case 'temperature': {
+      const d = c.delta !== undefined ? ` (${signed(c.delta)}°C)` : '';
+      return lang === 'ar'
+        ? `متوسط الحرارة: ${c.before}°C ${arrow} ${c.after}°C${d}`
+        : lang === 'en'
+        ? `Mean temperature: ${c.before}°C ${arrow} ${c.after}°C${d}`
+        : `Température moyenne : ${c.before}°C ${arrow} ${c.after}°C${d}`;
+    }
+    case 'water_access':
+      return lang === 'ar'
+        ? `نظام الري: ${waterLabel(c.before, lang)} ${arrow} ${waterLabel(c.after, lang)}`
+        : lang === 'en'
+        ? `Water regime: ${waterLabel(c.before, lang)} ${arrow} ${waterLabel(c.after, lang)}`
+        : `Régime hydrique : ${waterLabel(c.before, lang)} ${arrow} ${waterLabel(c.after, lang)}`;
+    case 'previous_crop': {
+      const after = translateCrop(String(c.after ?? ''), lang);
+      const value = c.before ? `${translateCrop(String(c.before), lang)} ${arrow} ${after}` : after;
+      return lang === 'ar'
+        ? `المحصول السابق: ${value}`
+        : lang === 'en'
+        ? `Previous crop: ${value}`
+        : `Précédent cultural : ${value}`;
+    }
+    case 'priorities': {
+      const a = (c.after ?? {}) as Record<string, number>;
+      if (a.soil_health) {
+        return lang === 'ar' ? 'الأولوية: صحة التربة' : lang === 'en' ? 'Priority: soil health' : 'Priorité : santé du sol';
+      }
+      if (a.profitability) {
+        return lang === 'ar' ? 'الأولوية: المردودية' : lang === 'en' ? 'Priority: profitability' : 'Priorité : rentabilité';
+      }
+      return lang === 'ar' ? 'أولويات المزرعة معدّلة' : lang === 'en' ? 'Farm priorities updated' : "Priorités d'exploitation modifiées";
+    }
+    default:
+      return '';
+  }
+};
+
+// Repli pour l'ancien backend (phrases françaises) : on lit les valeurs dans le texte
+const translateLegacyChange = (text: string, lang: Lang): string => {
   const t = text.toLowerCase();
-  
-  if (t.includes('précipitations') || t.includes('rainfall') || t.includes('أمطار') || t.includes('مطر')) {
-    const match = text.match(/(\d+)\s*mm\s*→\s*(\d+)\s*mm/);
-    if (match) {
-      return lang === 'ar' 
-        ? `هطول الأمطار: ${match[1]} مم ← ${match[2]} مم` 
-        : lang === 'en' 
-        ? `Annual Rainfall: ${match[1]} mm → ${match[2]} mm` 
-        : `Précipitations annuelles : ${match[1]} mm → ${match[2]} mm`;
-    }
-    return lang === 'ar' ? 'تغير هطول الأمطار' : lang === 'en' ? 'Rainfall changed' : 'Précipitations modifiées';
+
+  const rain = text.match(/(\d+)\s*mm\s*→\s*(\d+)\s*mm/);
+  if (rain) {
+    const before = Number(rain[1]);
+    const after = Number(rain[2]);
+    return describeChange(
+      { type: 'rain', before, after, percent: before ? Math.round((after / before - 1) * 100) : undefined },
+      lang
+    );
   }
 
-  if (t.includes('warming') || t.includes('réchauffement') || t.includes('حرارة')) {
-    const match = text.match(/\+?([\d.]+)\s*°?\s*c/i);
-    if (match) {
-      return lang === 'ar' ? `ارتفاع الحرارة بـ +${match[1]}°C` : lang === 'en' ? `Warming +${match[1]}°C` : `Réchauffement +${match[1]}°C`;
-    }
-    return lang === 'ar' ? 'تعديل الحرارة' : lang === 'en' ? 'Temperature adjusted' : 'Température ajustée';
+  const temp = text.match(/([\d.]+)\s*°C\s*→\s*([\d.]+)\s*°C\s*\(([+-]?[\d.]+)\s*°C\)/i);
+  if (temp) {
+    return describeChange(
+      { type: 'temperature', before: Number(temp[1]), after: Number(temp[2]), delta: Number(temp[3]) },
+      lang
+    );
   }
 
-  if (t.includes('régime') || t.includes('hydrique') || t.includes('water') || t.includes('ري')) {
-    return lang === 'ar' ? 'نظام الري: بوري ← بوري' : lang === 'en' ? 'Water regime: rainfed → rainfed' : 'Régime hydrique : rainfed → rainfed';
+  if (t.includes('régime') || t.includes('hydrique') || t.includes('water')) {
+    const pair = text.match(/:\s*(\w+)\s*→\s*(\w+)/);
+    if (pair) return describeChange({ type: 'water_access', before: pair[1], after: pair[2] }, lang);
   }
 
-  if (t.includes('culture') || t.includes('précédent') || t.includes('crop') || t.includes('محصول')) {
-    return lang === 'ar' ? 'المحصول السابق: القمح الصلب' : lang === 'en' ? 'Previous crop: Durum Wheat' : 'Précédent cultural : Blé dur';
+  if (t.includes('précédent') || t.includes('previous')) {
+    const crop = text.split(':')[1]?.trim() ?? '';
+    return describeChange({ type: 'previous_crop', after: crop }, lang);
   }
-    if (t.includes('temp') || t.includes('réchauffement') || t.includes('حرارة')) {
-    // On cherche les températures exactes : "20.2 °C → 21.8 °C (+1.5 °C)"
-    const match = text.match(/([\d.]+)\s*°C\s*→\s*([\d.]+)\s*°C\s*\(\+?([\d.]+)\s*°C\)/i);
-    if (match) {
-      return lang === 'ar' 
-        ? `متوسط الحرارة: ${match[1]}°C ← ${match[2]}°C (+${match[3]}°C)` 
-        : lang === 'en' 
-        ? `Mean temperature: ${match[1]}°C → ${match[2]}°C (+${match[3]}°C)` 
-        : `Température moyenne : ${match[1]}°C → ${match[2]}°C (+${match[3]}°C)`;
-    }
-    
-    // Fallback si le format est différent
-    const matchSimple = text.match(/\+?([\d.]+)\s*°?\s*c/i);
-    if (matchSimple) {
-      return lang === 'ar' ? `ارتفاع الحرارة بـ +${matchSimple[1]}°C` : lang === 'en' ? `Warming +${matchSimple[1]}°C` : `Réchauffement +${matchSimple[1]}°C`;
-    }
-    return lang === 'ar' ? 'تعديل الحرارة' : lang === 'en' ? 'Temperature adjusted' : 'Température ajustée';
-  }
+
+  if (t.includes('priorit')) return describeChange({ type: 'priorities' }, lang);
 
   return text;
 };
@@ -107,6 +145,7 @@ export const SimulatorPage: React.FC<SimulatorPageProps> = ({
   lon,
   defaultPrevCrop,
   defaultWater,
+  soilType,
   regionName,
   lang,
 }) => {
@@ -120,10 +159,12 @@ export const SimulatorPage: React.FC<SimulatorPageProps> = ({
   const [priorityMode, setPriorityMode] = useState<'standard' | 'soil_health' | 'profitability'>('standard');
 
   const [loading, setLoading] = useState<boolean>(false);
-  const [simulation, setSimulation] = useState<WhatIfSimulation | null>(null);
+  const [simulation, setSimulation] = useState<SimulationResult | null>(null);
+  const [error, setError] = useState<string | null>(null);
 
   const handleRunSimulation = async () => {
     setLoading(true);
+    setError(null);
     try {
       const simulatedChanges: Record<string, any> = {
         rain_factor: rainFactor,
@@ -143,18 +184,36 @@ export const SimulatorPage: React.FC<SimulatorPageProps> = ({
         longitude: lon,
         previous_crop: defaultPrevCrop,
         water_access: defaultWater,
+        // le type du sol doit aussi partir au backend (voir client.ts et la vue Django)
+        ...(soilType ? { soil_type: soilType } : {}),
         simulated_changes: simulatedChanges,
       });
 
       if (res?.simulation) {
-        setSimulation(res.simulation);
+        setSimulation(res.simulation as SimulationResult);
+      } else {
+        setError(isAr ? 'تعذر تشغيل المحاكاة.' : isEn ? 'The simulation could not be run.' : "La simulation n'a pas pu être lancée.");
       }
     } catch (err) {
       console.error('Error running what-if simulation:', err);
+      setError(
+        isAr
+          ? 'حدث خطأ أثناء المحاكاة. تحقق من الاتصال بالخادم.'
+          : isEn
+          ? 'Something went wrong during the simulation. Check the server connection.'
+          : 'Une erreur est survenue pendant la simulation. Vérifiez la connexion au serveur.'
+      );
     } finally {
       setLoading(false);
     }
   };
+
+  // Modifications affichées : données structurées en priorité, ancien format en repli
+  const changeLabels: string[] = simulation
+    ? simulation.changes
+      ? simulation.changes.map((c) => describeChange(c, lang))
+      : (simulation.changes_applied ?? []).map((ch) => translateLegacyChange(ch, lang))
+    : [];
 
   return (
     <div className="space-y-8 animate-in fade-in duration-300">
@@ -168,7 +227,7 @@ export const SimulatorPage: React.FC<SimulatorPageProps> = ({
           {isAr ? `اختبار الفرضيات الزراعية لـ ${regionName}` : isEn ? `Hypothesis Simulator: ${regionName}` : `Simulateur d'Hypothèses : ${regionName}`}
         </h2>
         <p className="text-xs sm:text-sm text-[#7A6B53] max-w-3xl leading-relaxed">
-          {isAr 
+          {isAr
             ? 'ماذا يحدث إذا انخفضت الأمطار بنسبة 20% ؟ أو إذا قمت بإدخال الري الموضعي ؟ غير الفرضيات أسفله ولاحظ كيف تتغير ترتيبات المحاصيل بدقة.'
             : isEn
             ? 'Simulate hypothetical climate variations (drought, warming, irrigation investments) to observe real-time recommendation rank changes without affecting NASA truth.'
@@ -183,7 +242,7 @@ export const SimulatorPage: React.FC<SimulatorPageProps> = ({
               ? 'تنبيه علمي : تعديل هذه الفرضيات هو محاكاة افتراضية لأغراض الدراسة، ولا يغير القياسات التاريخية لأقمار ناسا.'
               : isEn
               ? 'Integrity Guarantee: These parameters are hypothetical simulations and in no way alter baseline NASA satellite truth.'
-              : 'Garantie d\'intégrité : Ces paramètres sont des simulations hypothétiques et ne modifient en aucun cas les observations satellitaires NASA de référence.'}
+              : "Garantie d'intégrité : Ces paramètres sont des simulations hypothétiques et ne modifient en aucun cas les observations satellitaires NASA de référence."}
           </span>
         </div>
       </div>
@@ -207,12 +266,12 @@ export const SimulatorPage: React.FC<SimulatorPageProps> = ({
                 {rainFactor === 1.0 ? (isAr ? '0% (مناخ ناسا الفعلي)' : isEn ? '0% (NASA Real Climate)' : '0% (Climat NASA Réel)') : `${Math.round((rainFactor - 1.0) * 100)}%`}
               </span>
             </div>
-            <input 
-              type="range" 
-              min="0.5" 
-              max="1.5" 
-              step="0.1" 
-              value={rainFactor} 
+            <input
+              type="range"
+              min="0.5"
+              max="1.5"
+              step="0.1"
+              value={rainFactor}
               onChange={(e) => setRainFactor(parseFloat(e.target.value))}
               className="w-full accent-[#8C3A27] cursor-pointer"
             />
@@ -232,12 +291,12 @@ export const SimulatorPage: React.FC<SimulatorPageProps> = ({
               </span>
               <span className="text-[#8C3A27] font-black">+{tempDelta.toFixed(1)} °C</span>
             </div>
-            <input 
-              type="range" 
-              min="0.0" 
-              max="4.0" 
-              step="0.5" 
-              value={tempDelta} 
+            <input
+              type="range"
+              min="0.0"
+              max="4.0"
+              step="0.5"
+              value={tempDelta}
               onChange={(e) => setTempDelta(parseFloat(e.target.value))}
               className="w-full accent-[#8C3A27] cursor-pointer"
             />
@@ -250,7 +309,7 @@ export const SimulatorPage: React.FC<SimulatorPageProps> = ({
 
           {/* Water Access Toggle */}
           <div className="space-y-2">
-            <label className="block text-xs font-bold text-[#1E331A]">{isAr ? 'نظام الري' : isEn ? 'Irrigation Regime' : 'Régime d\'Irrigation'}</label>
+            <label className="block text-xs font-bold text-[#1E331A]">{isAr ? 'نظام الري' : isEn ? 'Irrigation Regime' : "Régime d'Irrigation"}</label>
             <div className="grid grid-cols-2 gap-2">
               <button
                 type="button"
@@ -339,20 +398,26 @@ export const SimulatorPage: React.FC<SimulatorPageProps> = ({
               </>
             )}
           </button>
+
+          {error && (
+            <div className="p-3 rounded-xl bg-red-50 border border-red-200 text-xs font-semibold text-red-800">
+              {error}
+            </div>
+          )}
         </div>
 
         {/* Results Panel */}
         <div className="lg:col-span-7 space-y-6">
           {simulation ? (
             <div className="bg-[#FAF7F2] p-6 rounded-3xl border border-[#DECAB3] shadow-xs space-y-6">
-              {/* Winner Transition */}
+              {/* Winner Transition (par identifiant de culture, traduit dans la langue courante) */}
               <div className="p-5 rounded-2xl bg-[#EFE9DC] border border-[#DECAB3] flex items-center justify-between flex-wrap gap-4">
                 <div>
                   <div className="text-[11px] font-bold text-[#7A6B53]">
                     {isAr ? 'الخيار رقم 1 قبل المحاكاة' : isEn ? 'Top Choice Before Simulation' : 'Choix N°1 avant simulation'}
                   </div>
                   <div className="text-lg font-black text-[#1E331A]">
-                    {translateCropName(simulation.winner_before, lang)}
+                    {translateCrop(simulation.winner_before_id || simulation.winner_before, lang)}
                   </div>
                 </div>
                 {isAr ? (
@@ -365,7 +430,7 @@ export const SimulatorPage: React.FC<SimulatorPageProps> = ({
                     {isAr ? 'الخيار رقم 1 بعد المحاكاة' : isEn ? 'Top Choice AFTER Simulation' : 'Choix N°1 APRÈS simulation'}
                   </div>
                   <div className="text-xl font-black text-[#8C3A27]">
-                    {translateCropName(simulation.winner_after, lang)}
+                    {translateCrop(simulation.winner_after_id || simulation.winner_after, lang)}
                   </div>
                 </div>
               </div>
@@ -376,18 +441,24 @@ export const SimulatorPage: React.FC<SimulatorPageProps> = ({
                   {isAr ? 'التعديلات المطبقة' : isEn ? 'Applied Modifications' : 'Modifications appliquées'}
                 </h4>
                 <div className="flex flex-wrap gap-2">
-                  {simulation.changes_applied.map((ch, i) => (
-                    <span key={i} className="text-xs bg-[#EFE9DC] text-[#4D3F2C] px-3 py-1 rounded-full font-semibold border border-[#DECAB3]">
-                      {translateBackendText(ch, lang)}
+                  {changeLabels.length === 0 ? (
+                    <span className="text-xs text-[#7A6B53] font-semibold">
+                      {isAr ? 'لا توجد تعديلات' : isEn ? 'No changes applied' : 'Aucune modification'}
                     </span>
-                  ))}
+                  ) : (
+                    changeLabels.map((label, i) => (
+                      <span key={i} className="text-xs bg-[#EFE9DC] text-[#4D3F2C] px-3 py-1 rounded-full font-semibold border border-[#DECAB3]">
+                        {label}
+                      </span>
+                    ))
+                  )}
                 </div>
               </div>
 
               {/* Crop Comparisons Table */}
               <div>
                 <h4 className="text-xs font-bold text-[#1E331A] mb-3">
-                  {isAr ? 'الأثر على نقاط التوافق (قبل مقابل بعد)' : isEn ? 'Impact on Crop Affinity Scores (Before vs After)' : 'Impact sur les Scores d\'Affinité (Avant vs Après)'}
+                  {isAr ? 'الأثر على نقاط التوافق (قبل مقابل بعد)' : isEn ? 'Impact on Crop Affinity Scores (Before vs After)' : "Impact sur les Scores d'Affinité (Avant vs Après)"}
                 </h4>
                 <div className="overflow-x-auto">
                   <table className="w-full text-xs text-left">
@@ -400,7 +471,8 @@ export const SimulatorPage: React.FC<SimulatorPageProps> = ({
                       </tr>
                     </thead>
                     <tbody className="divide-y divide-[#DECAB3]/50">
-                      {simulation.crop_comparisons.slice(0, 8).map((c) => (
+                      {/* Toutes les cultures : les cultures éliminées par la simulation ne sont plus coupées */}
+                      {simulation.crop_comparisons.map((c) => (
                         <tr key={c.crop_id} className="hover:bg-[#EFE9DC]/40">
                           <td className="py-2.5 font-bold text-[#1E331A] flex items-center gap-1.5">
                             <span>{c.crop_emoji}</span>
