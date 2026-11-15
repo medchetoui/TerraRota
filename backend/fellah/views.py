@@ -2,16 +2,18 @@
 en phrases darija enregistrées, construite sur la sortie du moteur du Membre 2 (moteur/engine, report.analyze).
 
 Aucun modèle de langage, aucun appel réseau : réponse instantanée, jamais de nombre inventé.
-Les clips audio (voix humaine) sont dans fellah/darija/audio/ ; un clip absent = texte seul.
+Les clips audio (voix humaine) sont servis par le frontend : frontend/public/audio/darija/<id>.wav
+(dossier modifiable avec la variable FELLAH_AUDIO_DIR) ; un clip absent = texte seul.
 """
 import csv
 import json
+import os
 import time
 from datetime import datetime
 from pathlib import Path
 
 from django.conf import settings
-from django.http import FileResponse, Http404
+from django.http import Http404
 from rest_framework import status
 from rest_framework.decorators import api_view
 from rest_framework.response import Response
@@ -19,8 +21,10 @@ from rest_framework.response import Response
 from .darija import repondre_darija as RD
 
 DARIJA_DIR = Path(RD.__file__).resolve().parent
-AUDIO_DIR = DARIJA_DIR / "audio"
-JOURNAL_VOIX = Path(settings.BASE_DIR) / "sorties" / "voix_app_journal.jsonl"
+AUDIO_DIR = Path(os.environ.get("FELLAH_AUDIO_DIR")
+                 or Path(settings.BASE_DIR).parent / "frontend" / "public" / "audio" / "darija")
+AUDIO_URL = "/audio/darija/"
+SORTIES = Path(settings.BASE_DIR) / "sorties"
 SCENARIO_DEFAUT = "cereales_apres_cereale"
 SCENARIOS = {
     "cereales_apres_cereale": {"darija": "قمح من بعد قمح", "fr": "Blé après blé (plan à corriger)"},
@@ -43,7 +47,7 @@ def _phrases(resultat):
             "id": i,
             "darija": modeles[i]["texte_darija"],
             "fr": modeles[i]["traduction_fr"],
-            "audio": f"/api/v1/fellah/audio/{i}.wav" if (AUDIO_DIR / f"{i}.wav").exists() else None,
+            "audio": f"{AUDIO_URL}{i}.wav" if (AUDIO_DIR / f"{i}.wav").exists() else None,
         } for i in groupe])
     return out
 
@@ -83,21 +87,16 @@ def question(request):
     })
 
 
-def audio(request, clip):
-    if clip not in RD.modeles() or not (AUDIO_DIR / f"{clip}.wav").exists():
-        raise Http404("clip absent")
-    return FileResponse(open(AUDIO_DIR / f"{clip}.wav", "rb"), content_type="audio/wav")
-
-
 @api_view(["POST"])
 def journal(request):
     """Essai de reconnaissance vocale (test des 10 questions) ; seulement en développement (DEBUG)."""
     if not settings.DEBUG:
         raise Http404()
-    champs = ("methode", "langue", "attendu_id", "transcription", "intention", "culture", "ms")
+    champs = ("methode", "langue", "attendu_id", "transcription", "intention", "culture", "reponse", "erreur", "ms")
     ligne = {k: request.data.get(k) for k in champs}
-    ligne["quand"] = datetime.now().isoformat(timespec="seconds")
-    JOURNAL_VOIX.parent.mkdir(parents=True, exist_ok=True)
-    with open(JOURNAL_VOIX, "a", encoding="utf-8") as f:
+    maintenant = datetime.now()
+    ligne["quand"] = maintenant.isoformat(timespec="seconds")
+    SORTIES.mkdir(parents=True, exist_ok=True)
+    with open(SORTIES / f"voix_app_{maintenant:%Y%m%d}.jsonl", "a", encoding="utf-8") as f:
         f.write(json.dumps(ligne, ensure_ascii=False) + "\n")
     return Response(ligne)

@@ -1,0 +1,2 @@
+Clips darija de « سول بالدارجة » (voix humaine, WAV mono 16 bits, 16000 ou 22050 Hz), nommés exactement
+comme dans CLIPS_DEMO_HIBA.md (dépôt du Membre 3). Clip absent = réponse en texte seul.

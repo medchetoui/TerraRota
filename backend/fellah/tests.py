@@ -38,6 +38,7 @@ def test_ten_voice_questions_get_expected_type_in_both_scripts(client, scenario)
             r = poser(client, texte, scenario).json()
             assert r["intention"] == q["type_attendu"], texte
             assert not q["culture_attendue"] or r["culture"] == q["culture_attendue"], texte
+            assert not re.search(r"[0-9٠-٩]", r["texte"]), texte
 
 
 def test_answer_is_darija_without_numbers_and_ends_with_advisor(client):
@@ -71,19 +72,31 @@ def test_audio_only_for_known_existing_clips(client, tmp_path, monkeypatch):
     with wave.open(str(tmp_path / "hiba_hors_sujet.wav"), "wb") as w:
         w.setnchannels(1), w.setsampwidth(2), w.setframerate(16000), w.writeframes(b"\x00\x00" * 160)
     r = poser(client, "شحال غادي نحصد؟").json()
-    assert r["phrases"][0][0]["audio"] == "/api/v1/fellah/audio/hiba_hors_sujet.wav"
-    assert client.get("/api/v1/fellah/audio/hiba_hors_sujet.wav").status_code == 200
-    assert client.get("/api/v1/fellah/audio/hiba_mostachar.wav").status_code == 404
-    assert client.get("/api/v1/fellah/audio/..%2Fsettings.wav").status_code == 404
+    assert r["phrases"][0][0]["audio"] == "/audio/darija/hiba_hors_sujet.wav"
+    r = poser(client, "واش نبقى نزرع القمح؟").json()
+    assert [p["audio"] for g in r["phrases"] for p in g if p["id"] == "hiba_mostachar"] == [None]
+
+
+def test_default_audio_folder_is_frontend_public():
+    assert views.AUDIO_DIR.parts[-4:] == ("frontend", "public", "audio", "darija")
 
 
 def test_voice_journal_only_in_debug(client, tmp_path, monkeypatch):
-    monkeypatch.setattr(views, "JOURNAL_VOIX", tmp_path / "journal.jsonl")
+    monkeypatch.setattr(views, "SORTIES", tmp_path)
     essai = {"methode": "navigateur", "langue": "ar-MA", "attendu_id": "V01", "transcription": "شنو نزرع",
-             "intention": "QUOI_PLANTER", "culture": None, "ms": 1200, "autre": "ignoré"}
+             "intention": "QUOI_PLANTER", "culture": None, "reponse": "سول المستشار", "erreur": None,
+             "ms": 1200, "autre": "ignoré"}
     with override_settings(DEBUG=True):
         assert client.post("/api/v1/fellah/journal/", essai, format="json").status_code == 200
-    ligne = json.loads((tmp_path / "journal.jsonl").read_text(encoding="utf-8"))
-    assert ligne["attendu_id"] == "V01" and "autre" not in ligne
+    [journal] = tmp_path.glob("voix_app_*.jsonl")
+    ligne = json.loads(journal.read_text(encoding="utf-8"))
+    assert ligne["attendu_id"] == "V01" and ligne["reponse"] == "سول المستشار" and "autre" not in ligne
     with override_settings(DEBUG=False):
         assert client.post("/api/v1/fellah/journal/", essai, format="json").status_code == 404
+
+
+@pytest.mark.parametrize("texte", ["سلام", "salam", "السلام، لاباس؟", "شنو هي عاصمة فرنسا؟", "؟؟", "123"])
+def test_greetings_and_noise_get_a_clean_answer(client, texte):
+    r = poser(client, texte)
+    assert r.status_code == 200 and r.json()["intention"] == "HORS_PERIMETRE"
+    assert "سول المستشار" in r.json()["texte"] and not re.search(r"[0-9]", r.json()["texte"])
