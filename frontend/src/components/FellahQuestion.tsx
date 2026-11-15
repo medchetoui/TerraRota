@@ -300,7 +300,11 @@ function FellahQuestionPanel({ parcelle = null, regionName = '' }: Props) {
             {clips.length === 0 ? <VolumeX className="w-5 h-5" /> : <Volume2 className="w-5 h-5" />}
             <span>{clips.length === 0 ? 'الصوت مازال ما تسجلش' : playing ? 'وقف' : 'سمع الجواب'}</span>
           </button>
-          {setup && <div className="text-[10px] text-[#7A6B53]" dir="ltr">{setup.badge}</div>}
+          <div className="text-[10px] text-[#7A6B53]" dir="ltr" data-testid="badge-source">
+            {answer.scenario === 'parcelle'
+              ? `Votre parcelle — moteur du Membre 2, climat NASA (${parcelle?.data_status ?? 'inconnu'})`
+              : setup?.badge}
+          </div>
         </div>
       )}
     </div>

@@ -233,6 +233,8 @@ try {
   verifier('… réponse calculée sur la parcelle, sans chiffre', surParcelle.length > 0 && !/[0-9٠-٩]/.test(surParcelle), surParcelle);
   const sol = await poserEcrit('واش الأرض ديالي مزيانة؟');
   verifier('… sol inconnu du formulaire → « aucune information », pas de valeur inventée', sol.includes('ما عندنا حتى معلومة'), sol);
+  verifier('… badge « Votre parcelle », pas « données d’exemple »', (await evaluer(
+    `document.querySelector('[data-testid=badge-source]').innerText`)).startsWith('Votre parcelle'));
   await evaluer(`document.querySelector('[data-testid=mode-demo]').click()`);
   await attendreQue(`!document.querySelector('[data-testid=resume-parcelle]')`);
   const demo = await poserEcrit('شنو نزرع هاد العام؟');
