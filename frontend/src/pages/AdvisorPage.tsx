@@ -3,6 +3,7 @@ import { Phone, MessageSquare, Sparkles, Scale, RefreshCw, CheckCircle, AlertTri
 import { FarmerContextPanel } from '../components/FarmerContextPanel';
 import { VoiceCallScreen } from '../components/VoiceCallScreen';
 import { AdvisorChat } from '../components/AdvisorChat';
+import FellahQuestion from '../components/FellahQuestion';
 import {
   getAdvisorContext,
   askAdvisor,
@@ -253,6 +254,9 @@ export const AdvisorPage: React.FC<AdvisorPageProps> = ({ lang }) => {
         lang={lang}
         onSelectParcel={(id) => loadContext(id)}
       />
+
+      {/* Classic Darija Quick Question Box (Member 3 component & test harness compatibility) */}
+      <FellahQuestion lang={lang} />
 
       {/* Interactive AI Voice Call Screen (if active) */}
       {isCallActive && (

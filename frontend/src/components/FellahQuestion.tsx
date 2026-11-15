@@ -31,13 +31,13 @@ function recognitionCtor(): RecognitionCtor | null {
 
 const UI_STRINGS = {
   ar: {
-    title: 'سول بالدارجة (عمي أحمد)',
+    title: 'سول بالدارجة',
     subtitle: 'طرح سؤالك بالصوت أو بالكتابة واحصل على نصيحة فلاحية دقيقة ومسموعة',
     scenarioLabel: 'البلان',
     micListening: 'كنسمعك… تكلم دابا',
     micIdle: 'ضغط و سول بصوتك',
     micAria: 'سجل سؤالك',
-    inputPlaceholder: 'اكتب سؤالك هنا (مثلاً: شنو نزرع هاد العام؟)',
+    inputPlaceholder: 'اكتب سؤالك',
     sendAria: 'صيفط',
     serviceDown: 'الخدمة ما خدامةش دابا.',
     unsupportedBrowser: 'هاد المتصفح ما كيسمعش الصوت. يمكنك كتابة سؤالك.',
@@ -384,11 +384,11 @@ export default function FellahQuestion({ lang = 'ar' }: FellahQuestionProps) {
         <div className="rounded-2xl bg-white border border-[#DECAB3] p-4 space-y-3 shadow-xs" data-testid="fellah-reponse" data-question={answer.question}>
           {answer.phrases.map((groupe, k) => (
             <div key={k} className="space-y-1">
-              <div className="text-lg font-semibold leading-relaxed text-[#1E331A]">
-                {isAr ? groupe.map((p) => p.darija).join(' ') : groupe.map((p) => p.fr).join(' ')}
+              <div className="text-xl font-semibold leading-relaxed text-[#1E331A]">
+                {groupe.map((p) => p.darija).join(' ')}
               </div>
               <div className="text-xs text-[#7A6B53]">
-                {isAr ? groupe.map((p) => p.fr).join(' ') : groupe.map((p) => p.darija).join(' ')}
+                {groupe.map((p) => p.fr).join(' ')}
               </div>
             </div>
           ))}
@@ -396,15 +396,18 @@ export default function FellahQuestion({ lang = 'ar' }: FellahQuestionProps) {
           <button
             type="button"
             onClick={play}
+            disabled={clips.length === 0}
             className={`w-full py-3 rounded-2xl font-bold flex items-center justify-center gap-2 transition-all cursor-pointer ${
-              playing ? 'bg-[#8C3A27] text-white animate-pulse' : 'bg-[#EFE9DC] hover:bg-[#E2D8C6] text-[#1E331A]'
+              clips.length === 0 ? 'bg-[#EFE9DC] text-[#1E331A] opacity-50 cursor-not-allowed' : playing ? 'bg-[#8C3A27] text-white animate-pulse' : 'bg-[#EFE9DC] hover:bg-[#E2D8C6] text-[#1E331A]'
             }`}
           >
-            {playing ? <VolumeX className="w-5 h-5" /> : <Volume2 className="w-5 h-5" />}
-            <span>{playing ? ui.stopVoice : ui.listenAnswer}</span>
-            <span className="text-[11px] font-normal opacity-70">
-              ({clips.length > 0 ? ui.recordedVoice : ui.synthesizedVoice})
-            </span>
+            {clips.length === 0 ? <VolumeX className="w-5 h-5" /> : playing ? <VolumeX className="w-5 h-5" /> : <Volume2 className="w-5 h-5" />}
+            <span>{clips.length === 0 ? 'الصوت مازال ما تسجلش' : playing ? ui.stopVoice : ui.listenAnswer}</span>
+            {clips.length > 0 && (
+              <span className="text-[11px] font-normal opacity-70">
+                ({ui.recordedVoice})
+              </span>
+            )}
           </button>
 
           {setup && (
