@@ -25,6 +25,7 @@ INSTALLED_APPS = [
     'indicators',
     'recommendation',
     'fields',
+    'advisor',
 ]
 
 MIDDLEWARE = [

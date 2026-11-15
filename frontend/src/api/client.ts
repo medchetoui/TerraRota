@@ -315,3 +315,103 @@ export async function validateFellahPhrase(id: string, texte_darija?: string): P
     body: JSON.stringify(texte_darija === undefined ? { action: 'ok' } : { action: 'modifier', texte_darija }),
   });
 }
+
+// ─── Real-Time AI Agricultural Advisor (Context-Aware) ───────
+import type {
+  AdvisorContextResponse,
+  AdvisorChatResponse,
+  AdvisorHistoryResponse,
+  AdvisorSessionDetailResponse,
+  AdvisorCompareResponse,
+  PlanProposalResponse,
+} from '../types/api';
+
+export async function getAdvisorContext(parcelId?: number): Promise<AdvisorContextResponse> {
+  const query = parcelId ? `?parcel_id=${parcelId}` : '';
+  return request<AdvisorContextResponse>(`/advisor/context/${query}`);
+}
+
+export async function askAdvisor(
+  question: string,
+  lang: 'ar' | 'fr' | 'en' = 'ar',
+  sessionId?: number | null,
+  parcelId?: number | null,
+  scenarioId?: string,
+  persona: 'ami_ahmed' | 'mi_fatima' = 'ami_ahmed'
+): Promise<AdvisorChatResponse> {
+  return request<AdvisorChatResponse>('/advisor/chat/', {
+    method: 'POST',
+    body: JSON.stringify({
+      question,
+      lang,
+      session_id: sessionId,
+      parcel_id: parcelId,
+      scenario_id: scenarioId || 'cereales_apres_cereale',
+      persona,
+    }),
+  });
+}
+
+export async function getAdvisorSpeechAudio(
+  text: string,
+  lang: 'ar' | 'fr' | 'en' = 'ar',
+  persona: 'ami_ahmed' | 'mi_fatima' = 'ami_ahmed'
+): Promise<Blob | null> {
+  try {
+    const response = await fetch('/api/v1/advisor/voice/speak/', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ text, lang, persona }),
+    });
+    if (response.ok) {
+      return await response.blob();
+    }
+  } catch (err) {
+    console.warn('getAdvisorSpeechAudio failed:', err);
+  }
+  return null;
+}
+
+export async function getAdvisorHistory(): Promise<AdvisorHistoryResponse> {
+  return request<AdvisorHistoryResponse>('/advisor/history/');
+}
+
+export async function getAdvisorSession(sessionId: number): Promise<AdvisorSessionDetailResponse> {
+  return request<AdvisorSessionDetailResponse>(`/advisor/history/${sessionId}/`);
+}
+
+export async function compareCropsAdvisor(
+  cropA: string,
+  cropB: string,
+  lang: 'ar' | 'fr' | 'en' = 'ar',
+  parcelId?: number | null
+): Promise<AdvisorCompareResponse> {
+  return request<AdvisorCompareResponse>('/advisor/compare/', {
+    method: 'POST',
+    body: JSON.stringify({ crop_a: cropA, crop_b: cropB, lang, parcel_id: parcelId }),
+  });
+}
+
+export async function proposePlanChange(
+  cropId: string,
+  reason: string,
+  lang: 'ar' | 'fr' | 'en' = 'ar',
+  parcelId?: number | null,
+  sessionId?: number | null
+): Promise<PlanProposalResponse> {
+  return request<PlanProposalResponse>('/advisor/plan-proposal/', {
+    method: 'POST',
+    body: JSON.stringify({ crop_id: cropId, reason, lang, parcel_id: parcelId, session_id: sessionId }),
+  });
+}
+
+export async function approvePlanProposal(
+  proposalId: number,
+  action: 'approve' | 'reject',
+  feedback?: string
+): Promise<{ status: string; message: string; plan_id: number; plan_status: string }> {
+  return request(`/advisor/plan-proposal/${proposalId}/approve/`, {
+    method: 'POST',
+    body: JSON.stringify({ action, feedback }),
+  });
+}

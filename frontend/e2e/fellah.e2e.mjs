@@ -46,7 +46,7 @@ let ws;
 let id = 0;
 const enAttente = new Map();
 let erreursConsole = [];
-const ATTENDUES = /recommendations|NASA API query error|ERR_BLOCKED_BY_CLIENT|fellah\/phrases\/hiba_et\//;
+const ATTENDUES = /recommendations|NASA API query error|ERR_BLOCKED_BY_CLIENT|fellah\/phrases\/hiba_et\/|\/api\/v1\/advisor\//;
 
 function cdp(method, params = {}) {
   return new Promise((ok, ko) => {
@@ -146,7 +146,9 @@ try {
       d.error ? ko(new Error(d.error.message)) : ok(d.result);
     } else if (d.method === 'Fetch.requestPaused') {
       const requestId = d.params.requestId;
-      if (recommandation === 'fictive') {
+      if (d.params.request.url.includes('/api/v1/advisor/')) {
+        cdp('Fetch.failRequest', { requestId, errorReason: 'BlockedByClient' }).catch(() => undefined);
+      } else if (recommandation === 'fictive') {
         cdp('Fetch.fulfillRequest', { requestId, responseCode: 200,
           responseHeaders: [{ name: 'Content-Type', value: 'application/json' }],
           body: Buffer.from(JSON.stringify(FAUSSE_REPONSE_RECO)).toString('base64') }).catch(() => undefined);
@@ -165,7 +167,7 @@ try {
   await cdp('Runtime.enable');
   await cdp('Log.enable');
   await cdp('Network.enable');
-  await cdp('Fetch.enable', { patterns: [{ urlPattern: '*/api/v1/recommendations*' }] });
+  await cdp('Fetch.enable', { patterns: [{ urlPattern: '*/api/v1/recommendations*' }, { urlPattern: '*/api/v1/advisor/*' }] });
 
   // 1. Page /advisor : chargement, champ texte, micro, réponses
   await ouvrirAdvisor();
@@ -203,6 +205,21 @@ try {
     await attendreQue(`window.__clipsJoues.length >= ${urls.length}`, 20000).catch(() => undefined);
     const joues = await evaluer(`window.__clipsJoues.map((u) => new URL(u).pathname)`);
     verifier('🔊 joue les clips présents, dans l’ordre', JSON.stringify(joues) === JSON.stringify(urls), joues.join(', '));
+    for (const q of ['شنو نزرع هاد العام؟', 'علاش هاد النصيحة؟', 'واش خاصني نسقي؟', 'واش نتيق فهاد النصيحة؟', 'شحال غادي نحصد؟']) {
+      const attendus = await (await fetch(`${BASE}/api/v1/fellah/question/`, { method: 'POST', headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ question: q }) })).json().then((r) => ({ urls: r.phrases.flat().map((p) => p.audio).filter(Boolean),
+          synthese: r.phrases.flat().some((p) => p.audio && p.voix === 'synthese') }));
+      await poserEcrit(q);
+      await evaluer(`window.__clipsJoues = []`);
+      await evaluer(`[...document.querySelectorAll('[data-testid=fellah-reponse] button')].at(-1).click()`);
+      await attendreQue(`window.__clipsJoues.length >= ${attendus.urls.length}`, 30000).catch(() => undefined);
+      const lus = await evaluer(`window.__clipsJoues.map((u) => new URL(u).pathname)`);
+      const etiquette = await evaluer(`document.querySelector('[data-testid=voix-synthese]')?.innerText || ''`);
+      verifier(`🔊 « ${q} » : ${attendus.urls.length} clip(s) joués dans l’ordre${attendus.synthese ? ' + étiquette « voix de synthèse »' : ''}`,
+        attendus.urls.length > 0 && JSON.stringify(lus) === JSON.stringify(attendus.urls) && (!attendus.synthese || etiquette.includes('voix de synthèse')),
+        etiquette);
+      await evaluer(`[...document.querySelectorAll('[data-testid=fellah-reponse] button')].at(-1).innerText.includes('إيقاف') && [...document.querySelectorAll('[data-testid=fellah-reponse] button')].at(-1).click()`);
+    }
     const rep = await fetch(BASE + urls[0]);
     verifier('clip servi en audio/wav', rep.ok && (rep.headers.get('content-type') || '').includes('audio/wav'), rep.headers.get('content-type'));
   } else {
@@ -251,11 +268,13 @@ try {
   verifier('… phrase en grand, nom de fichier affiché', /^hiba_\w+\.wav$/.test(await evaluer(
     `document.querySelector('[data-testid=nom-fichier]').innerText`)) && (await evaluer(`document.querySelector('[data-testid=phrase]').innerText`)).length > 0);
   await evaluer(`document.querySelector('[data-testid=enregistrement] input[type=checkbox]').click()`);
-  const libre = await evaluer(`fetch('/api/v1/fellah/phrases/').then((r) => r.json()).then((d) => d.phrases.find((p) => !p.present && !p.demo)?.id || '')`);
+  // phrase hors démo SANS enregistrement humain (absente ou en voix de synthèse) ; le clip d'origine est remis à l'identique
+  const libre = await evaluer(`fetch('/api/v1/fellah/phrases/').then((r) => r.json()).then((d) => d.phrases.find((p) => !p.demo && (!p.present || p.voix === 'synthese'))?.id || '')`);
   if (libre) {
     const manifeste = join(AUDIO_DIR, 'enregistrements.json');
     const avantManifeste = existsSync(manifeste) ? readFileSync(manifeste) : null;
     const fichier = join(AUDIO_DIR, `${libre}.wav`);
+    const avantClip = existsSync(fichier) ? readFileSync(fichier) : null;
     try {
       await evaluer(`[...document.querySelectorAll('[data-testid=enregistrement] button[title]')].find((b) => b.title === ${JSON.stringify(libre)}).click()`);
       await attendreQue(`document.querySelector('[data-testid=nom-fichier]').innerText === ${JSON.stringify(libre + '.wav')}`);
@@ -272,7 +291,7 @@ try {
       verifier('… fichier WAV mono 16 bits 16000 Hz', entete.toString('ascii', 0, 4) === 'RIFF' && entete.readUInt16LE(22) === 1
         && entete.readUInt32LE(24) === 16000 && entete.readUInt16LE(34) === 16);
     } finally {
-      rmSync(fichier, { force: true });
+      if (avantClip) writeFileSync(fichier, avantClip); else rmSync(fichier, { force: true });
       if (avantManifeste) writeFileSync(manifeste, avantManifeste); else rmSync(manifeste, { force: true });
     }
   } else {

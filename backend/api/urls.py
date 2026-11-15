@@ -30,4 +30,7 @@ urlpatterns = [
 
     # Questions du fellah en darija (Membre 3, sur le moteur du Membre 2)
     path("fellah/", include("fellah.urls")),
+
+    # Real-Time AI Agricultural Advisor (Context-Aware, Real Voice Call & Memory)
+    path("advisor/", include("advisor.urls")),
 ]

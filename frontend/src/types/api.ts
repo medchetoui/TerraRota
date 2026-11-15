@@ -323,3 +323,164 @@ export interface DecisionReportResponse {
   status: string;
   report: DecisionReport;
 }
+
+// ─── AI Agricultural Advisor ────────────────────────────────
+
+export interface AdvisorContextFarmer {
+  username: string;
+  first_name: string;
+  is_demo: boolean;
+}
+
+export interface AdvisorContextParcel {
+  id: number | null;
+  name: string;
+  latitude: number;
+  longitude: number;
+  region: string;
+  water_access: string;
+  soil_type: string;
+  soil_ph?: number | null;
+  organic_matter_pct?: number | null;
+  soil_depth_cm?: number | null;
+  field_size_ha?: number | null;
+  notes?: string;
+  is_demo: boolean;
+}
+
+export interface AdvisorContextRotation {
+  crop_id: string;
+  season: string;
+  year: number;
+  yield_kg_ha?: number | null;
+  irrigation_used?: boolean;
+}
+
+export interface AdvisorContextData {
+  farmer: AdvisorContextFarmer;
+  parcels: AdvisorContextParcel[];
+  active_parcel: AdvisorContextParcel | null;
+  previous_crop: string;
+  rotation_history: AdvisorContextRotation[];
+  priorities: Record<string, number>;
+  active_plan: any;
+  indicators: Indicators | null;
+  is_demo: boolean;
+}
+
+export interface AdvisorContextResponse {
+  status: string;
+  context: AdvisorContextData;
+  provenance: Provenance | null;
+}
+
+export interface AdvisorChatResult {
+  intent: string;
+  intent_label: { ar: string; fr: string; en: string };
+  confidence: number;
+  answer_text: string;
+  darija_phrases: string[];
+  evidence: ScientificEvidence[];
+  followup_suggestions: string[];
+  top_crop: {
+    crop_id: string;
+    name_fr: string;
+    name_ar: string;
+    name_en: string;
+    emoji: string;
+    score: number;
+    reasons: string[];
+    cautions: string[];
+  } | null;
+  all_recommendations: Array<{
+    crop_id: string;
+    name: string;
+    emoji: string;
+    score: number;
+    rank: number;
+  }>;
+  data_sources: string[];
+  is_personalized: boolean;
+  context_summary: {
+    region: string;
+    soil: string;
+    water: string;
+    previous_crop: string;
+    field_size: string;
+  };
+  ms: number;
+}
+
+export interface AdvisorChatResponse {
+  status: string;
+  session_id: number;
+  result: AdvisorChatResult;
+}
+
+export interface AdvisorMessageItem {
+  id: number;
+  role: 'user' | 'ai';
+  content: string;
+  intent: string;
+  ai_response: AdvisorChatResult | null;
+  created_at: string;
+}
+
+export interface AdvisorSessionItem {
+  id: number;
+  lang: string;
+  parcel_id: number | null;
+  started_at: string;
+  last_activity: string;
+  message_count: number;
+  last_message_preview?: string;
+  messages?: AdvisorMessageItem[];
+}
+
+export interface AdvisorHistoryResponse {
+  status: string;
+  sessions: AdvisorSessionItem[];
+}
+
+export interface AdvisorSessionDetailResponse {
+  status: string;
+  session: AdvisorSessionItem;
+}
+
+export interface AdvisorCropComparisonItem {
+  crop_id: string;
+  name: string;
+  name_ar: string;
+  emoji: string;
+  score: number | null;
+  rank: number | null;
+  eligible: boolean;
+  reasons: string[];
+  cautions: string[];
+  evidences: ScientificEvidence[];
+  water_req: [number, number];
+  nitrogen_fixation: boolean;
+  category: string;
+}
+
+export interface AdvisorCompareResponse {
+  status: string;
+  comparison: {
+    crop_a: AdvisorCropComparisonItem;
+    crop_b: AdvisorCropComparisonItem;
+    winner_crop_id: string;
+    verdict: string;
+    comparison_basis: any;
+  };
+}
+
+export interface PlanProposalResponse {
+  status: string;
+  proposal_id: number;
+  proposal_status: string;
+  proposed_crop: string;
+  explanation: string;
+  confirm_prompt: string;
+  warning: string;
+}
+
