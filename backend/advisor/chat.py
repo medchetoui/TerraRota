@@ -187,7 +187,8 @@ def answer(question: str, ctx: dict, lang: str = "ar", scenario_id: str = "cerea
     plan_action_words = [
         "رباطها", "ربطها", "ربط", "خطة", "الخطة", "خطتي", "الخطة الرسمية", "البلان", "بلان", 
         "ضيفها", "زيدها", "اعتمدها", "صافي ربط", "صافي ديرها", "طبقها",
-        "lier au plan", "ajouter au plan", "valider le plan", "link to plan", "add to plan", "confirm plan"
+        "lier au plan", "ajouter au plan", "valider le plan", "link to plan", "add to plan", "confirm plan",
+        "insérer", "inserer", "mets dans mon plan", "mettre dans mon plan", "dans mon plan"
     ]
     if intent == "INCONNU" and any(w in q_clean for w in plan_action_words):
         intent = "ACTION_PLAN"
@@ -198,27 +199,30 @@ def answer(question: str, ctx: dict, lang: str = "ar", scenario_id: str = "cerea
         classification = comprendre.classer(question, "mots_cles")
         intent = classification.get("intention", "INCONNU")
         confidence = classification.get("confiance", 0.0)
-        confidence = 1.0
 
-    # Fallback keyword classification for French and English queries
+    # Fallback keyword classification for French, English, and Darija queries
     if intent == "INCONNU":
         q_lower = question.lower()
-        if any(w in q_lower for w in ["que planter", "quoi planter", "quelle culture", "what to plant", "what should i plant", "which crop"]):
+        if any(w in q_lower for w in [
+            "que planter", "quoi planter", "quelle culture", "what to plant", "what should i plant", "which crop",
+            "plan agriculture", "plan d'acte", "plan agricole", "que puis-je faire", "qu'est-ce que je peux faire",
+            "mon plan", "farm plan", "cropping plan", "conseil pour cette année", "cette saison", "cette annee", "ce que je peux planter"
+        ]):
             intent = "QUOI_PLANTER"
             confidence = 0.9
-        elif any(w in q_lower for w in ["pourquoi", "why", "justifi", "raison", "reason"]):
+        elif any(w in q_lower for w in ["pourquoi", "why", "justifi", "raison", "reason", "pour quelles raisons"]):
             intent = "POURQUOI"
             confidence = 0.9
-        elif any(w in q_lower for w in ["pluie", "pleuvoir", "précipitation", "rain", "rainfall", "météo", "weather", "climat", "climate"]):
+        elif any(w in q_lower for w in ["pluie", "pleuvoir", "précipitation", "rain", "rainfall", "météo", "weather", "climat", "climate", "chta", "chhta"]):
             intent = "PLUIE_METEO"
             confidence = 0.9
-        elif any(w in q_lower for w in ["sol", "terre", "soil", "texture", "ph", "argil"]):
+        elif any(w in q_lower for w in ["sol", "terre", "soil", "texture", "ph", "argil", "tirs", "hamri"]):
             intent = "SOL"
             confidence = 0.9
-        elif any(w in q_lower for w in ["eau", "irrigation", "irrig", "water", "arros"]):
+        elif any(w in q_lower for w in ["eau", "irrigation", "irrig", "water", "arros", "lma", "saqy"]):
             intent = "EAU_IRRIGATION"
             confidence = 0.9
-        elif any(w in q_lower for w in ["fiab", "confiance", "trust", "reliab", "nasa"]):
+        elif any(w in q_lower for w in ["fiab", "confiance", "trust", "reliab", "nasa", "satellite", "scientif"]):
             intent = "FIABILITE"
             confidence = 0.9
 
@@ -715,24 +719,29 @@ def _build_personalized_answer(
                 f"Agronomic rules are based on INRA Morocco and FAO scientific references."
             )
 
-    # ── HORS_PERIMETRE / INCONNU ──────────────────────────────────
+    # ── HORS_PERIMETRE / INCONNU (Gentle fallback that guides the farmer) ────────
     else:
+        # Instead of rejecting the farmer abruptly, provide a helpful contextual synthesis and guide them:
+        crop_suggestion = top_crop.get("crop_name_ar" if lang == "ar" else "crop_name_fr" if lang == "fr" else "crop_name_en", "المحصول الأنسب") if top_crop else ""
+        crop_emoji = top_crop.get("crop_emoji", "🌱") if top_crop else "🌱"
+
         if lang == "ar":
             return (
-                "هاد السؤال خارج نطاق خدمتي الحالية. أنا مختص في: اختيار المحصول المناسب، "
-                "الدورة الزراعية، المناخ والتربة، والري. سول سؤالاً حول هاد المواضيع."
+                f"فهمتك أ سي {farmer_name}! بخصوص أرضك فـ {region}، أنا كنركز على مساعدتك فاختيار أحسن محصول، التناوب الزراعي، وضبط السقي حسب طقس ناسا والتربة. "
+                f"حالياً، أحسن خيار كيبان ملائم هو {crop_suggestion} {crop_emoji}. "
+                f"واش بغيتي نربطوه بالخطة، أو نسولو على محصول آخر باغي تديرو؟"
             )
         elif lang == "fr":
             return (
-                "Cette question dépasse mon périmètre actuel. Je suis spécialisé dans : "
-                "le choix de culture, la rotation agronomique, le climat, le sol et l'irrigation. "
-                "Posez une question sur ces sujets."
+                f"Je comprends {farmer_name} ! Pour optimiser votre parcelle à {region}, je vous guide sur le choix de culture, la rotation et l'irrigation selon les satellites NASA. "
+                f"Actuellement, la culture la plus avantageuse est {crop_suggestion} {crop_emoji}. "
+                f"Voulez-vous l'ajouter à votre plan d'exploitation ou comparer avec une autre culture ?"
             )
         else:
             return (
-                "This question is outside my current scope. I specialize in: "
-                "crop selection, rotation planning, climate analysis, soil assessment, and irrigation. "
-                "Please ask about one of these topics."
+                f"I understand, {farmer_name}! To optimize your field in {region}, I focus on selecting the best crop, rotation strategy, and irrigation based on NASA satellite data. "
+                f"Currently, the best match for your land is {crop_suggestion} {crop_emoji}. "
+                f"Would you like to link this to your farm plan or compare with another crop?"
             )
 
 
