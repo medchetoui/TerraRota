@@ -28,6 +28,32 @@ from recommendation.whatif import simulate_whatif
 from recommendation.rules import CROPS
 
 
+# Map agricultural terms and crop names to their canonical IDs
+CROP_KEYWORDS = {
+    "potato": ["بطاطا", "البطاطا", "بطاطس", "البطاطس", "pomme de terre", "potato", "potatoes"],
+    "tomato": ["طماطم", "الطماطم", "ماطيشة", "الماطيشة", "tomate", "tomato", "tomatoes"],
+    "wheat_hard": ["قمح صلب", "القمح الصلب", "زرع صلب", "durum", "blé dur"],
+    "wheat_soft": ["قمح طري", "القمح الطري", "قمح لين", "القمح اللين", "قمح", "القمح", "blé tendre", "blé", "wheat"],
+    "barley": ["شعير", "الشعير", "orge", "barley"],
+    "olive": ["زيتون", "الزيتون", "olive", "olivier"],
+    "argan": ["أركان", "الأركان", "اركان", "الاركان", "argan", "arganier"],
+    "chickpea": ["حمص", "الحمص", "pois chiche", "chickpea"],
+    "lentil": ["عدس", "العدس", "lentille", "lentil"],
+    "almond": ["لوز", "اللوز", "amandier", "almond"],
+    "faba_bean": ["فول", "الفول", "fève", "faba"],
+    "cactus_pear": ["هندية", "الهندية", "كرموس النصارى", "figuier de barbarie", "cactus"],
+}
+
+
+def _detect_mentioned_crop(text: str) -> str | None:
+    """Finds if a specific crop was mentioned in the farmer question."""
+    t = text.lower()
+    for crop_id, syns in CROP_KEYWORDS.items():
+        if any(s in t for s in syns):
+            return crop_id
+    return None
+
+
 INTENTS_MAPPING = {
     "QUOI_PLANTER": {
         "ar": "شنو نزرع هاد الموسم",
@@ -146,6 +172,23 @@ def answer(question: str, ctx: dict, lang: str = "ar", scenario_id: str = "cerea
         elif any(w in q_lower for w in ["fiab", "confiance", "trust", "reliab", "nasa"]):
             intent = "FIABILITE"
             confidence = 0.9
+
+    # Detect mentioned crop in farmer's query (e.g., "بغيت نزرع البطاطا", "واش ندير اللوز")
+    mentioned_crop_id = _detect_mentioned_crop(question)
+    if mentioned_crop_id and intent in ("INCONNU", "HORS_PERIMETRE"):
+        intent = "AVIS_CULTURE"
+        confidence = 0.95
+
+    # Check for general planting intention in Moroccan Darija
+    q_dar = question.lower()
+    if intent in ("INCONNU", "HORS_PERIMETRE"):
+        if any(term in q_dar for term in ["نزرع", "نفرع", "ندير", "نغرس", "نبدل", "نديرو", "نحط", "بغيت"]):
+            if mentioned_crop_id:
+                intent = "AVIS_CULTURE"
+                confidence = 0.95
+            else:
+                intent = "QUOI_PLANTER"
+                confidence = 0.9
 
     # 2. Build farmer inputs for the recommendation engine
     active_parcel = ctx.get("active_parcel") or {}
@@ -464,6 +507,62 @@ def _build_personalized_answer(
                 f"{f', pH: {ph}' if ph else ''}"
                 f"{f', organic matter: {om}%' if om else ''}. "
                 f"{'Excellent soil for cereals and pulses with good water retention capacity.' if soil in ('clay', 'clay_loam') else 'Your soil requires organic matter inputs to improve fertility.' if soil in ('sandy', 'sandy_loam') else 'Soil is in good condition for cultivation.'}"
+            )
+
+    # ── AVIS_CULTURE (الرأي والتحليل في محصول محدد طلبه الفلاح) ────────
+    elif intent == "AVIS_CULTURE":
+        target_crop_id = _detect_mentioned_crop(question) or (top_crop["crop_id"] if top_crop else "potato")
+        crop_info = CROPS.get(target_crop_id, {})
+        c_name_ar = crop_info.get("name_ar", target_crop_id)
+        c_name_fr = crop_info.get("name_fr", target_crop_id)
+        c_name_en = crop_info.get("name_en", target_crop_id)
+        c_emoji = crop_info.get("emoji", "🌱")
+        water_req = crop_info.get("water_req_mm", [400, 600])
+
+        # Evaluate suitability of the requested crop based on parcel water & soil
+        has_enough_water = (water == "irrigated") or (water == "partial") or (rain_mm and rain_mm >= water_req[0])
+        is_potato_or_tomato = target_crop_id in ("potato", "tomato")
+
+        if lang == "ar":
+            if is_potato_or_tomato and water == "rainfed":
+                return (
+                    f"بالنسبة لـ {c_name_ar} {c_emoji}، راها فكرة ممتازة ولكن خاصها رد البال! "
+                    f"البطاطا كتحتاج ما بين {water_req[0]} و{water_req[1]} ملم من الماء، "
+                    f"وحسب معطيات ناسا الأرض ديالك مسجلة {rain_mm} ملم والوضع عندك بوري (بدون سقي). "
+                    f"إلا كان عندك بئر أو سقي موضعي تبارك الله تزرعها وتجيب محصول وافر، "
+                    f"أما إلا معتمد غير على الشتا، فمن الأحسن تعزل الحمص أو الشعير باش تتفادى خسارة المصاريف. "
+                    f"واش عندك إمكانية السقي التكميلي فالأرض؟"
+                )
+            else:
+                return (
+                    f"بخصوص زراعة {c_name_ar} {c_emoji} فالأرض ديالك بـ {region}، "
+                    f"المعطيات كتبين أنها ممكنة ومناسبة! "
+                    f"احتياجها المائي كيتراوح بين {water_req[0]}-{water_req[1]} ملم، والتربة ديالك ({soil}) كتوفر ظروف جيدة للجذور. "
+                    f"خاصك فقط تتبع مواعيد الغرس المناسبة وتراقب الحرارة ({temp_c}°C). "
+                    f"واش بغيتي نقترح عليك برنامج التسميد أو الدورة الزراعية المناسبة ليها؟"
+                )
+        elif lang == "fr":
+            if is_potato_or_tomato and water == "rainfed":
+                return (
+                    f"Concernant {c_name_fr} {c_emoji}, c'est une culture à haute valeur mais exigeante en eau ! "
+                    f"Elle requiert entre {water_req[0]} et {water_req[1]} mm. "
+                    f"Avec une pluviométrie NASA de {rain_mm} mm/an en régime pluvial, "
+                    f"cette culture nécessite impérativement une irrigation d'appoint. "
+                    f"Si vous disposez d'un point d'eau, c'est très rentable ; sinon, privilégiez le pois chiche ou l'orge."
+                )
+            else:
+                return (
+                    f"Concernant la culture de {c_name_fr} {c_emoji} sur votre parcelle à {region}, "
+                    f"les conditions agronomiques sont adaptées. "
+                    f"Besoins en eau : {water_req[0]}-{water_req[1]} mm, compatibles avec votre gestion actuelle. "
+                    f"Souhaitez-vous voir la rotation idéale pour cette parcelle ?"
+                )
+        else:
+            return (
+                f"Regarding {c_name_en} {c_emoji} on your land in {region}: "
+                f"Water requirement is {water_req[0]}-{water_req[1]} mm. "
+                f"{'Under rainfed conditions, supplemental irrigation is required.' if water == 'rainfed' and is_potato_or_tomato else 'Your current soil and moisture conditions are favorable.'} "
+                f"Would you like to explore rotation recommendations?"
             )
 
     # ── FIABILITE ─────────────────────────────────────────────────
