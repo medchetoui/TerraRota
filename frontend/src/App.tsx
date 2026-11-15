@@ -67,6 +67,7 @@ import { SoilPage } from './pages/SoilPage';
 import { ReportsPage } from './pages/ReportsPage';
 import { DataSourcesPage } from './pages/DataSourcesPage';
 import { FarmsPage } from './pages/FarmsPage';
+import { AdvisorPage } from './pages/AdvisorPage';
 import FellahQuestion from './components/FellahQuestion';
 import { Sliders, FileText, Menu, X } from 'lucide-react';
 import Intro from './components/Intro';
@@ -1229,68 +1230,9 @@ useEffect(() => {
                   </div>
                 } />
 
-                {/* ─── ROUTE 4: "/advisor" (المرشد الفلاحي الصوتي) ─── */}
+                {/* ─── ROUTE 4: "/advisor" (المرشد الفلاحي الصوتي الذكي) ─── */}
                 <Route path="/advisor" element={
-                  <div className="space-y-6 animate-in fade-in duration-300">
-                    <div>
-                      <div className="text-xs font-bold text-[#8C3A27]">
-                        {isAr ? 'المرشد الصوتي الذكي' : isEn ? 'Smart Voice Advisor' : 'Assistant Vocal Intelligent'}
-                      </div>
-                      <h3 className="text-2xl font-black text-[#1E331A]">
-                        {isAr ? 'سول عمي أحمد بصوتك بالدارجة' : isEn ? 'Ask Ami Ahmed With Your Voice' : 'Posez vos questions à Ami Ahmed'}
-                      </h3>
-                    </div>
-
-                    <FellahQuestion />
-
-                    <div className="bg-[#FAF7F2] p-8 rounded-3xl border border-[#DECAB3] shadow-sm max-w-2xl mx-auto text-center space-y-6">
-                      <div className="w-20 h-20 rounded-full bg-[#8C3A27]/10 text-[#8C3A27] flex items-center justify-center font-bold mx-auto">
-                        <Mic className="w-10 h-10" />
-                      </div>
-
-                      <div>
-                        <h4 className="text-xl font-bold text-[#1E331A]">
-                          {isAr ? 'اللاقط جاهز.. تكلم مباشرة بالدارجة' : isEn ? 'Microphone ready.. Speak directly' : 'Micro prêt.. parlez directement'}
-                        </h4>
-                        <p className="text-xs text-[#61513C] mt-2">
-                          {isAr 
-                            ? 'لا داعي للكتابة. اضغط على الزر وسول عمي أحمد على كمية البذور، مواعيد الحرث، أو كيفية التعامل مع تقلبات الطقس.'
-                            : isEn
-                            ? 'No need to type. Click and ask Ami Ahmed about seeding rates, soil prep, or adapting to weather fluctuations.'
-                            : 'Pas besoin d\'écrire. Cliquez et posez vos questions sur les semis, l\'engrais ou la météo.'}
-                        </p>
-                      </div>
-
-                      <div className="p-4 rounded-2xl bg-[#EFE9DC] border border-[#DECAB3]">
-                        <div className="flex items-center justify-center gap-1.5 mb-2">
-                          <span className={`w-1.5 h-4 rounded-full ${isAudioPlaying ? 'bg-emerald-600 animate-bounce' : 'bg-[#8C3A27]'}`}></span>
-                          <span className={`w-1.5 h-7 rounded-full ${isAudioPlaying ? 'bg-emerald-600 animate-bounce delay-75' : 'bg-[#8C3A27]'}`}></span>
-                          <span className={`w-1.5 h-10 rounded-full ${isAudioPlaying ? 'bg-emerald-600 animate-bounce delay-150' : 'bg-[#2D4A27]'}`}></span>
-                          <span className={`w-1.5 h-6 rounded-full ${isAudioPlaying ? 'bg-emerald-600 animate-bounce delay-100' : 'bg-[#8C3A27]'}`}></span>
-                          <span className={`w-1.5 h-3 rounded-full ${isAudioPlaying ? 'bg-emerald-600 animate-bounce' : 'bg-[#8C3A27]'}`}></span>
-                        </div>
-                        <div className="text-xs text-[#7A6B53] font-semibold">
-                          {isAudioPlaying 
-                            ? (isAr ? 'عمي أحمد كيشرح لك التوصية دابا...' : isEn ? 'Ami Ahmed is speaking now...' : 'Ami Ahmed est en train de parler...') 
-                            : (isAr ? 'اضغط أسفله لبدء الاستماع' : isEn ? 'Press below to start audio guidance' : 'Appuyez ci-dessous')}
-                        </div>
-                      </div>
-
-                      <button 
-                        onClick={speakCurrentAdvice}
-                        className={`w-full py-4 px-6 rounded-2xl font-bold text-sm flex items-center justify-center gap-3 shadow-md transition-all cursor-pointer ${
-                          isAudioPlaying ? 'bg-[#8C3A27] text-white animate-pulse' : 'bg-[#2D4A27] hover:bg-[#1E331A] text-white'
-                        }`}
-                      >
-                        <Volume2 className="w-5 h-5" />
-                        <span>
-                          {isAudioPlaying 
-                            ? (isAr ? 'إيقاف الصوت' : isEn ? 'Stop Audio' : 'Arrêter la voix') 
-                            : (isAr ? 'استمع إلى نصيحة عمي أحمد لأرضك' : isEn ? 'Listen to Ami Ahmed\'s Agricultural Advice' : 'Écouter le conseil vocal')}
-                        </span>
-                      </button>
-                    </div>
-                  </div>
+                  <AdvisorPage lang={lang} />
                 } />
 
                 {/* ─── ROUTE 5: "/nasa" (مرصد ناسا المناخي والتتبع) ─── */}
