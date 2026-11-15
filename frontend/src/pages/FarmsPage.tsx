@@ -3,32 +3,41 @@ import {
   BookmarkPlus, 
   MapPin, 
   Trash2, 
-  Layers, 
-  CheckCircle2, 
-  AlertTriangle, 
-  Clock, 
-  Plus, 
-  Sparkles,
-  ArrowRight
+  Layers,
+  CheckCircle2,
+  AlertTriangle
 } from 'lucide-react';
 import { getParcels, deleteParcel, getPlans, type ParcelItem } from '../api/client';
 import type { FarmPlan } from '../types/api';
+import { 
+  t as translate, 
+  formatParcelName, 
+  translatePlanTitle, 
+  translateRejectionReason,
+  translateCrop,
+  type Lang 
+} from '../i18n/translations';
 
 interface FarmsPageProps {
   onSelectParcel: (parcel: ParcelItem) => void;
-  lang: 'ar' | 'fr' | 'en';
+  lang: Lang;
 }
 
 export const FarmsPage: React.FC<FarmsPageProps> = ({ onSelectParcel, lang }) => {
   const isAr = lang === 'ar';
   const isEn = lang === 'en';
 
+  // On utilise la fonction t() de translations.ts
+  const t = (key: Parameters<typeof translate>[1]) => translate(lang, key);
+
   const [parcels, setParcels] = useState<ParcelItem[]>([]);
   const [plans, setPlans] = useState<FarmPlan[]>([]);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(false);
 
   const loadData = async () => {
     setLoading(true);
+    setError(false);
     try {
       const [parcelsRes, plansRes] = await Promise.all([
         getParcels().catch(() => ({ status: 'ok', parcels: [] })),
@@ -38,6 +47,7 @@ export const FarmsPage: React.FC<FarmsPageProps> = ({ onSelectParcel, lang }) =>
       setPlans(plansRes.plans || []);
     } catch (err) {
       console.error('Error loading farms/plans:', err);
+      setError(true);
     } finally {
       setLoading(false);
     }
@@ -48,7 +58,7 @@ export const FarmsPage: React.FC<FarmsPageProps> = ({ onSelectParcel, lang }) =>
   }, []);
 
   const handleDelete = async (id: number) => {
-    if (!confirm('Supprimer cette parcelle ?')) return;
+    if (!confirm(t('farms_confirmDelete'))) return;
     try {
       await deleteParcel(id);
       loadData();
@@ -63,30 +73,32 @@ export const FarmsPage: React.FC<FarmsPageProps> = ({ onSelectParcel, lang }) =>
       <div className="p-6 sm:p-8 rounded-3xl bg-[#FAF7F2] border border-[#DECAB3] shadow-xs space-y-3">
         <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-[#EFE9DC] text-xs font-bold text-[#2D4A27]">
           <BookmarkPlus className="w-4 h-4 text-[#8C3A27]" />
-          <span>{isAr ? 'إدارة الأراضي والمخططات الفلاحية' : isEn ? 'My Farms & Rotation Plans' : 'Mes Parcelles & Plans de Rotation'}</span>
+          <span>{t('farms_badge')}</span>
         </div>
         <h2 className="text-2xl sm:text-3xl font-black text-[#1E331A]">
-          {isAr ? 'الضيعات والمخططات المحفوظة' : isEn ? 'Saved Farms & Rotation Plans' : 'Exploitations & Plans Enregistrés'}
+          {t('farms_title')}
         </h2>
         <p className="text-xs sm:text-sm text-[#7A6B53] max-w-2xl">
-          {isAr
-            ? 'تتبع أراضيك الفلاحية، واسترجع التوصيات السابقة والمخططات المعتمدة لكل موسم زراعي.'
-            : isEn
-            ? 'Access your saved agricultural parcels and review the historical record of your approved crop-rotation plans.'
-            : 'Consultez vos parcelles agricoles sauvegardées et retrouvez l\'historique de vos plans de rotation approuvés.'}
+          {t('farms_intro')}
         </p>
       </div>
 
       {loading ? (
-        <div className="p-12 text-center text-sm font-bold text-[#7A6B53]">{isAr ? 'جاري تحميل ضيعاتك...' : isEn ? 'Loading your farms...' : 'Chargement de vos exploitations...'}</div>
+        <div className="p-12 text-center text-sm font-bold text-[#7A6B53]">
+          {t('farms_loading')}
+        </div>
+      ) : error ? (
+        <div className="p-12 text-center text-sm font-bold text-red-600 bg-red-50 rounded-3xl border border-red-200">
+          {t('farms_loadError')}
+        </div>
       ) : (
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
           {/* Saved Parcels List */}
           <div className="lg:col-span-7 space-y-4">
             <h3 className="text-base font-extrabold text-[#1E331A] flex items-center justify-between">
-              <span>{isAr ? 'الأراضي الفلاحية المحفوظة' : isEn ? 'Saved Parcels' : 'Parcelles Enregistrées'}</span>
+              <span>{t('farms_savedParcels')}</span>
               <span className="text-xs bg-[#EFE9DC] px-2.5 py-1 rounded-full text-[#7A6B53]">
-                {parcels.length} {isAr ? 'أرض' : isEn ? 'parcel(s)' : 'parcelle(s)'}
+                {parcels.length} {t('farms_parcelCount')}
               </span>
             </h3>
 
@@ -94,7 +106,7 @@ export const FarmsPage: React.FC<FarmsPageProps> = ({ onSelectParcel, lang }) =>
               <div className="p-8 text-center bg-[#FAF7F2] rounded-3xl border border-[#DECAB3] space-y-2">
                 <MapPin className="w-8 h-8 text-[#DECAB3] mx-auto" />
                 <p className="text-xs text-[#7A6B53]">
-                  {isAr ? 'لا توجد أراضٍ محفوظة بعد. قم بحفظ نتيجة التوصية من الصفحة الرئيسية.' : isEn ? 'No parcels saved yet. Save a recommendation result from the main page.' : 'Aucune parcelle sauvegardée pour l\'instant.'}
+                  {t('farms_noParcels')}
                 </p>
               </div>
             ) : (
@@ -107,10 +119,11 @@ export const FarmsPage: React.FC<FarmsPageProps> = ({ onSelectParcel, lang }) =>
                     <div className="space-y-1">
                       <div className="font-extrabold text-sm text-[#1E331A] flex items-center gap-2">
                         <MapPin className="w-4 h-4 text-[#8C3A27]" />
-                        <span>{p.name}</span>
+                        {/* On utilise formatParcelName de translations.ts */}
+                        <span>{formatParcelName(p.name, lang)}</span>
                       </div>
                       <div className="text-xs text-[#7A6B53]">
-                        {p.latitude.toFixed(4)}°N, {p.longitude.toFixed(4)}°E • {p.field_size_ha || 4.8} Ha • {p.water_access === 'irrigated' ? (isAr ? '💧 مسقي' : isEn ? '💧 Irrigated' : '💧 Irrigué') : (isAr ? '🌧️ بور' : isEn ? '🌧️ Rainfed' : '🌧️ Pluvial')}
+                        {p.latitude.toFixed(4)}°N, {p.longitude.toFixed(4)}°E • {p.field_size_ha || 4.8} Ha • {p.water_access === 'irrigated' ? t('farms_irrigated') : t('farms_rainfed')}
                       </div>
                     </div>
 
@@ -119,12 +132,12 @@ export const FarmsPage: React.FC<FarmsPageProps> = ({ onSelectParcel, lang }) =>
                         onClick={() => onSelectParcel(p)}
                         className="px-3.5 py-1.5 rounded-xl bg-[#2D4A27] hover:bg-[#1E331A] text-white text-xs font-bold transition-colors cursor-pointer"
                       >
-                        {isAr ? 'تحليل' : isEn ? 'Analyze' : 'Analyser'}
+                        {t('farms_analyze')}
                       </button>
                       <button
                         onClick={() => handleDelete(p.id)}
                         className="p-1.5 rounded-xl hover:bg-red-50 text-red-600 transition-colors cursor-pointer"
-                        title={isAr ? 'حذف' : isEn ? 'Delete' : 'Supprimer'}
+                        title={t('farms_delete')}
                       >
                         <Trash2 className="w-4 h-4" />
                       </button>
@@ -138,14 +151,14 @@ export const FarmsPage: React.FC<FarmsPageProps> = ({ onSelectParcel, lang }) =>
           {/* Saved Plans List */}
           <div className="lg:col-span-5 space-y-4">
             <h3 className="text-base font-extrabold text-[#1E331A]">
-              {isAr ? 'مخططات التناوب المعتمدة' : isEn ? 'Validated Rotation Plans' : 'Plans de Rotation Validés'}
+              {t('farms_plansTitle')}
             </h3>
 
             {plans.length === 0 ? (
               <div className="p-8 text-center bg-[#FAF7F2] rounded-3xl border border-[#DECAB3] space-y-2">
                 <Layers className="w-8 h-8 text-[#DECAB3] mx-auto" />
                 <p className="text-xs text-[#7A6B53]">
-                  {isAr ? 'لم يتم اعتماد أي مخطط بعد. انتقل إلى مخطط التناوب لاعتماد استراتيجية.' : isEn ? 'No validated rotation plans yet. Go to Rotation Planner to adopt a strategy.' : 'Aucun plan validé pour le moment.'}
+                  {t('farms_noPlans')}
                 </p>
               </div>
             ) : (
@@ -156,21 +169,34 @@ export const FarmsPage: React.FC<FarmsPageProps> = ({ onSelectParcel, lang }) =>
                     className="p-4 rounded-2xl bg-[#FAF7F2] border border-[#DECAB3] space-y-2"
                   >
                     <div className="flex items-center justify-between">
-                      <span className="font-extrabold text-xs text-[#1E331A]">{pl.title}</span>
+                      <span className="font-extrabold text-xs text-[#1E331A]">
+                        {/* On utilise translatePlanTitle de translations.ts */}
+                        {translatePlanTitle(pl.title, lang)}
+                      </span>
                       <span className={`text-[10px] font-black px-2 py-0.5 rounded-full ${
                         pl.status === 'approved' ? 'bg-emerald-100 text-emerald-800' :
                         pl.status === 'rejected' ? 'bg-amber-100 text-amber-800' :
                         'bg-blue-100 text-blue-800'
                       }`}>
-                        {pl.status === 'approved' ? (isAr ? '✓ معتمد' : isEn ? '✓ Approved' : '✓ Approuvé') : pl.status === 'rejected' ? (isAr ? '✕ مرفوض' : isEn ? '✕ Rejected' : '✕ Rejeté') : (isAr ? 'مقترح' : isEn ? 'Proposed' : 'Proposé')}
+                        {pl.status === 'approved' ? t('farms_approved') : 
+                         pl.status === 'rejected' ? t('farms_rejected') : 
+                         t('farms_proposed')}
                       </span>
                     </div>
+                    
                     {pl.selected_crop && (
                       <div className="text-xs text-[#8C3A27] font-bold">
-                        {isAr ? `المحصول المعتمد: ${pl.selected_crop}` : isEn ? `Selected Crop: ${pl.selected_crop}` : `Culture retenue : ${pl.selected_crop}`}
+                        {t('farms_selectedCrop')}: {translateCrop(pl.selected_crop, lang)}
                       </div>
                     )}
-                    {pl.farmer_feedback && (
+                    
+                    {pl.rejection_reason && (
+                      <div className="text-[11px] text-amber-800 bg-amber-50 p-2 rounded-lg border border-amber-200 mt-1">
+                        {t('farms_reason')}: {translateRejectionReason(pl.rejection_reason, lang)}
+                      </div>
+                    )}
+
+                    {pl.farmer_feedback && pl.farmer_feedback !== 'approved_by_farmer' && (
                       <div className="text-[11px] text-[#61513C] italic">
                         "{pl.farmer_feedback}"
                       </div>

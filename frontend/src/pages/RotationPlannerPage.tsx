@@ -52,7 +52,7 @@ export const RotationPlannerPage: React.FC<RotationPlannerPageProps> = ({
   const [rejectionReason, setRejectionReason] = useState('');
   const [isRejectModalOpen, setIsRejectModalOpen] = useState(false);
 
-  // Dictionnaire pour traduire les raisons de refus
+  // Dictionnaire avec les CODES COURTS pour le backend
   const REJECTION_REASONS = [
     { key: 'water', fr: 'Besoins en eau excessifs', ar: 'احتياجات مائية مفرطة', en: 'Excessive water needs' },
     { key: 'seeds', fr: 'Semences non disponibles sur le marché local', ar: 'البذور غير متوفرة في السوق المحلية', en: 'Seeds not available in the local market' },
@@ -60,7 +60,6 @@ export const RotationPlannerPage: React.FC<RotationPlannerPageProps> = ({
     { key: 'pref', fr: 'Préférence personnelle pour une autre culture', ar: 'تفضيل شخصي لمحصول آخر', en: 'Personal preference for another crop' },
   ];
 
-  // MODIFIÉ : Utilisation des champs renvoyés par le backend (badge_fr, badge_ar, badge_en)
   const getStrategyBadge = (scenario: Scenario) => {
     if (isAr) return (scenario as any).badge_ar || scenario.badge;
     if (isEn) return (scenario as any).badge_en || scenario.badge;
@@ -98,11 +97,12 @@ export const RotationPlannerPage: React.FC<RotationPlannerPageProps> = ({
     setApprovalStatus('approving');
     try {
       await createPlan({
-        title: `Plan ${activeScenario.title_fr} (${regionName})`,
+        // On envoie un titre neutre basé sur l'ID pour éviter le texte en dur
+        title: `Plan Approuvé: ${activeScenario.id}`, 
         status: 'approved',
         selected_crop: activeScenario.crop_sequence[0]?.crop_id || 'chickpea',
         crop_sequence: activeScenario.crop_sequence,
-        farmer_feedback: 'Approuvé par l\'agriculteur après comparaison des scénarios.',
+        farmer_feedback: 'approved_by_farmer', // Code court au lieu de la phrase
       });
       setApprovalStatus('approved');
       if (onPlanSaved) onPlanSaved();
@@ -114,12 +114,19 @@ export const RotationPlannerPage: React.FC<RotationPlannerPageProps> = ({
 
   const handleRejectPlan = async () => {
     if (!activeScenario) return;
+    
+    // On récupère la clé du dictionnaire (ex: 'water', 'pref')
+    const reasonKey = REJECTION_REASONS.find(r => 
+      (isAr ? r.ar : isEn ? r.en : r.fr) === rejectionReason
+    )?.key || 'pref';
+
     try {
       await createPlan({
-        title: `Plan Rejeté : ${activeScenario.title_fr}`,
+        // Titre neutre
+        title: `Plan Rejeté: ${activeScenario.id}`,
         status: 'rejected',
         selected_crop: activeScenario.crop_sequence[0]?.crop_id || '',
-        rejection_reason: rejectionReason || 'Préférence pour une autre stratégie culturale',
+        rejection_reason: reasonKey, // On envoie le code court ("pref")
         crop_sequence: activeScenario.crop_sequence,
       });
       setApprovalStatus('rejected');
@@ -270,7 +277,6 @@ export const RotationPlannerPage: React.FC<RotationPlannerPageProps> = ({
                     <div className="h-full bg-cyan-700 rounded-full" style={{ width: `${activeScenario.resilience_score}%` }}></div>
                   </div>
                   <div className="text-[11px] text-[#7A6B53]">
-                    {/* MODIFIÉ : Utilisation de water_demand_level_ar / _en / _fr */}
                     {isAr 
                       ? `الطلب المائي: ${(activeScenario as any).water_demand_level_ar || activeScenario.water_demand_level}` 
                       : isEn 
@@ -304,7 +310,6 @@ export const RotationPlannerPage: React.FC<RotationPlannerPageProps> = ({
                     <span>{isAr ? 'المكاسب والمزايا الزراعية' : isEn ? 'Agronomic Benefits' : 'Bénéfices Agronomiques'}</span>
                   </div>
                   <ul className="space-y-1.5 text-xs text-[#4D3F2C]">
-                    {/* MODIFIÉ : Utilisation de advantages_ar / _en / _fr */}
                     {((isAr ? (activeScenario as any).advantages_ar : isEn ? (activeScenario as any).advantages_en : (activeScenario as any).advantages_fr) || activeScenario.advantages)?.map((adv: string, i: number) => (
                       <li key={i} className="flex items-start gap-2">
                         <span className="text-emerald-700 font-bold">•</span>
@@ -320,7 +325,6 @@ export const RotationPlannerPage: React.FC<RotationPlannerPageProps> = ({
                     <span>{isAr ? 'النقاط الواجب مراعاتها والمخاطر' : isEn ? 'Precautions & Tradeoffs' : 'Précautions & Arbitrages'}</span>
                   </div>
                   <ul className="space-y-1.5 text-xs text-[#4D3F2C]">
-                    {/* MODIFIÉ : Utilisation de risks_ar / _en / _fr */}
                     {((isAr ? (activeScenario as any).risks_ar : isEn ? (activeScenario as any).risks_en : (activeScenario as any).risks_fr) || activeScenario.risks)?.map((risk: string, i: number) => (
                       <li key={i} className="flex items-start gap-2">
                         <span className="text-[#8C3A27] font-bold">•</span>
@@ -336,7 +340,6 @@ export const RotationPlannerPage: React.FC<RotationPlannerPageProps> = ({
                 <ShieldCheck className="w-4 h-4 text-[#2D4A27] shrink-0 mt-0.5" />
                 <div>
                   <strong className="text-[#1E331A]">{isAr ? 'الأساس العلمي:' : isEn ? 'Scientific Justification:' : 'Justification Scientifique :'}</strong>{' '}
-                  {/* MODIFIÉ : Utilisation de scientific_basis_ar / _en / _fr */}
                   {isAr 
                     ? ((activeScenario as any).scientific_basis_ar || activeScenario.scientific_basis) 
                     : isEn 
