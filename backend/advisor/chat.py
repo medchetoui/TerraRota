@@ -90,6 +90,16 @@ INTENTS_MAPPING = {
         "fr": "Avis sur une culture spécifique",
         "en": "Opinion on a specific crop",
     },
+    "REMERCIEMENT": {
+        "ar": "شكر وامتنان",
+        "fr": "Remerciement",
+        "en": "Gratitude",
+    },
+    "EXPLICATION_DETAIL": {
+        "ar": "طلب تفاصيل إضافية",
+        "fr": "Demande de détails supplémentaires",
+        "en": "Request for more details",
+    },
     "HORS_PERIMETRE": {
         "ar": "سؤال خارج نطاق الخدمة",
         "fr": "Question hors périmètre",
@@ -135,20 +145,44 @@ def answer(question: str, ctx: dict, lang: str = "ar", scenario_id: str = "cerea
     Returns:
         dict with intent, answer_text, darija_phrases, evidence, followups, etc.
     """
-    # 1. Classify intent using existing Darija NLP
-    classification = comprendre.classer(question, "mots_cles")
-    intent = classification.get("intention", "INCONNU")
-    confidence = classification.get("confiance", 0.0)
+    q_clean = question.strip().lower()
+
+    # Detect gratitude, thanks, and politeness
+    gratitude_words = [
+        "شكرا", "شكرًا", "بارك الله فيك", "الله يجازيك", "الله يحفظك", "لهلا يخطيك", 
+        "merci", "thank you", "thanks", "c'est gentil", "يعطيك الصحة", "مشكور"
+    ]
+    intent = "INCONNU"
+    confidence = 0.0
+
+    if any(w in q_clean for w in gratitude_words):
+        intent = "REMERCIEMENT"
+        confidence = 1.0
 
     # Detect greetings, politeness, and assistant name calling
-    q_clean = question.strip().lower()
     salutation_words = [
         "سلام", "salam", "السلام عليكم", "صباح الخير", "مساء الخير", 
         "bonjour", "salut", "hello", "hi", "labas", "لاباس", "كي داير", "كيداير",
         "امي فاطمه", "مي فاطمة", "مي فاطمه", "عمي احمد", "عمي أحمد", "ami ahmed", "mi fatima", "fatima", "ahmed"
     ]
-    if any(g in q_clean for g in salutation_words):
+    if intent == "INCONNU" and any(g in q_clean for g in salutation_words):
         intent = "SALUTATION"
+        confidence = 1.0
+
+    # Detect follow-up explanation requests: "زيدي اشرحي لي", "زيد فسر لي", "ما فهمتش مزيان", "تفاصيل"
+    explain_more_words = [
+        "اشرح", "شرح", "زيدي", "زيد", "فسر", "وضح", "تفاصيل", "أكثر", "اكثر", 
+        "explique", "plus de détails", "détail", "more details", "tell me more", "elaborate"
+    ]
+    if intent == "INCONNU" and any(w in q_clean for w in explain_more_words):
+        intent = "EXPLICATION_DETAIL"
+        confidence = 0.95
+
+    # 1. Classify intent using existing Darija NLP
+    if intent not in ("SALUTATION", "REMERCIEMENT", "EXPLICATION_DETAIL"):
+        classification = comprendre.classer(question, "mots_cles")
+        intent = classification.get("intention", "INCONNU")
+        confidence = classification.get("confiance", 0.0)
         confidence = 1.0
 
     # Fallback keyword classification for French and English queries
@@ -563,6 +597,59 @@ def _build_personalized_answer(
                 f"Water requirement is {water_req[0]}-{water_req[1]} mm. "
                 f"{'Under rainfed conditions, supplemental irrigation is required.' if water == 'rainfed' and is_potato_or_tomato else 'Your current soil and moisture conditions are favorable.'} "
                 f"Would you like to explore rotation recommendations?"
+            )
+
+    # ── REMERCIEMENT (الشكر والامتنان) ───────────────────────────
+    elif intent == "REMERCIEMENT":
+        if lang == "ar":
+            return (
+                f"العفو أ سي {farmer_name}! ربي يحفظك ويسخر ليك فالأرض ديالك. "
+                f"أنا دائماً هنا رهن إشارتك، إلا احتجتي أي استشارة أو بغيتي تجرب سيناريو جديد تفضل سولني."
+            )
+        elif lang == "fr":
+            return (
+                f"De rien {farmer_name} ! Ce fut un plaisir. "
+                f"Je reste à votre entière disposition pour vos parcelles et vos futures récoltes."
+            )
+        else:
+            return (
+                f"You're very welcome {farmer_name}! May your harvest be blessed. "
+                f"I'm always here to assist you with any questions about your crops and farm plans."
+            )
+
+    # ── EXPLICATION_DETAIL (طلب شرح إضافي وتفاصيل) ───────────────
+    elif intent == "EXPLICATION_DETAIL":
+        top_name_ar = top_crop.get("crop_name_ar", "هاد المحصول") if top_crop else "المحصول الموصى به"
+        top_name_fr = top_crop.get("crop_name_fr", "cette culture") if top_crop else "la culture"
+        evidences = top_crop.get("evidences", []) if top_crop else []
+        evidence_text = evidences[0].get("source", "") if evidences else "تجارب المعهد الوطني للبحث الزراعي (INRA)"
+        cautions = top_crop.get("cautions", []) if top_crop else []
+        caution_text = cautions[0] if cautions else ""
+
+        if lang == "ar":
+            return (
+                f"بكل فرح وسرور أ سي {farmer_name}! نزيد نوضح ليك بالتفصيل: "
+                f"بالنسبة لـ {top_name_ar}، الميزة الكبيرة ديالو أنه كيتحمل تقلبات المناخ فمنطقة {region}، "
+                f"بحيث الجذور ديالو كتمشي حتى للعمق فالتربة ({soil}) وكتستغل الرطوبة المتبقية. "
+                f"من ناحية أخرى، التناوب بعد {prev_crop_name} كيكسر دورة الحشرات والآفات لي كتقيس الحبوب. "
+                f"وحسب {evidence_text}، المردودية الاقتصادية ديالو مستقرة حتى فسنوات قلة الشتا. "
+                f"{'خاصك فقط ترد بالك لـ: ' + caution_text if caution_text else ''} "
+                f"واش بغيتي نربطو هاد التوصية بالخطة الرسمية ديال الأرض، أو نقارنو مع محصول آخر؟"
+            )
+        elif lang == "fr":
+            return (
+                f"Avec grand plaisir {farmer_name} ! Voici les détails techniques : "
+                f"Pour {top_name_fr}, son enracinement profond valorise la réserve hydrique de votre sol ({soil}). "
+                f"La rotation après {prev_crop_name} interrompt le cycle des bio-agresseurs. "
+                f"Les références scientifiques ({evidence_text}) démontrent une résilience économique remarquable. "
+                f"Souhaitez-vous valider cette culture dans votre plan ou faire une comparaison ?"
+            )
+        else:
+            return (
+                f"Gladly, {farmer_name}! Here are the technical details: "
+                f"This recommendation capitalizes on your {soil} soil moisture retention. "
+                f"Rotating after {prev_crop_name} breaks pest cycles and optimizes soil health based on {evidence_text}. "
+                f"Would you like to compare with an alternative crop or add this to your plan?"
             )
 
     # ── FIABILITE ─────────────────────────────────────────────────
