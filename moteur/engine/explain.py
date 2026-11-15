@@ -105,6 +105,8 @@ def explain_line(line, crops, standalone=True):
     reasons, cautions = [], []
     for ex in line["exclusions"]:
         crit_label, unit = CRITERIA.get(ex["criterion"], (ex["criterion"], ""))
+        if ex["criterion"] == "temp_c" and line.get("window"):
+            crit_label = f"La température moyenne de {line['window']['period_fr']}"
         low, high = ex["allowed_range"]
         reasons.append(
             f"{crit_label} ({_with_unit(ex['value'], unit)}) est hors de ce que cette culture supporte "
@@ -114,6 +116,8 @@ def explain_line(line, crops, standalone=True):
     if not line["exclusions"]:
         for item in line.get("criteria", []):
             crit_label, unit = CRITERIA.get(item["criterion"], (item["criterion"], ""))
+            if item["criterion"] == "temp_c" and line.get("window"):
+                crit_label = f"La température moyenne de {line['window']['period_fr']}"
             opt_low, opt_high = item["optimal"]
             ideal = f"de {_with_unit(opt_low, unit)} à {_with_unit(opt_high, unit)}"
             value = _with_unit(item["value"], unit)

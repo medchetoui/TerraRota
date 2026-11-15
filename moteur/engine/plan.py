@@ -30,13 +30,47 @@ def _criteria_details(conditions, crop, ignore=()):
                         "optimal": [opt_low, opt_high], "tolerated": [low, high]})
     return details
 
+MONTHS_FR = ["janvier", "février", "mars", "avril", "mai", "juin", "juillet",
+             "août", "septembre", "octobre", "novembre", "décembre"]
+
+
+def _window_conditions(parcel, crop, config, ignore):
+    """Temperature moyenne sur la duree du cycle, pour le meilleur mois de depart.
+    Les seuils de pluie ECOCROP sont annuels : la pluie reste le cumul annuel."""
+    monthly = parcel["monthly"]
+    cycle = crop["cycle_days"]
+    months = max(1, min(12, round(sum(cycle) / len(cycle) / 30)))
+    temps = crop.get("temp_c")
+    mid = (temps[1] + temps[2]) / 2 if temps else None
+    best = None
+    for start in range(12):
+        temp = sum(monthly["temp_c"][(start + i) % 12] for i in range(months)) / months
+        cond = {**parcel.get("conditions", {}), "temp_c": round(temp, 1)}
+        score = score_crop(cond, crop, config, ignore=ignore)["score"]
+        if score is None:
+            continue
+        key = (score, -abs(temp - mid) if mid is not None else 0)
+        if best is None or key > best[0]:
+            best = (key, start, cond)
+    if best is None:
+        return parcel.get("conditions", {}), None
+    _, start, cond = best
+    if months >= 12:
+        period = "toute l'année"
+    elif months == 1:
+        period = MONTHS_FR[start]
+    else:
+        period = f"{MONTHS_FR[start]} à {MONTHS_FR[(start + months - 1) % 12]}"
+    return cond, {"start_month": start + 1, "months": months, "period_fr": period}
 
 def _assess(crop_key, parcel, crops, config):
     """Evalue UNE culture sur UNE parcelle (score, exclusions, rotation)."""
     crop = crops[crop_key]
-    conditions = parcel.get("conditions", {})
     irrigated = bool(parcel.get("irrigated"))
     ignore = ("rain_mm",) if irrigated else ()
+    conditions, window = parcel.get("conditions", {}), None
+    if parcel.get("monthly") and crop.get("cycle_days"):
+        conditions, window = _window_conditions(parcel, crop, config, ignore)
 
     scored = score_crop(conditions, crop, config, ignore=ignore)
     exclusions = evaluate_rules(scored, conditions, crop, irrigated=irrigated)
@@ -61,6 +95,7 @@ def _assess(crop_key, parcel, crops, config):
         "missing": scored["missing"],
         "confidence": confidence,
         "criteria": _criteria_details(conditions, crop, ignore),
+        "window": window,
     }
 
 
@@ -260,6 +295,7 @@ def evaluate_plan(plan, parcels, crops=None, config=None):
                 missing=result["missing"],
                 confidence=result["confidence"],
                 criteria=result["criteria"],
+                window=result["window"],
                 alternatives=alternatives,
             )
         lines.append(line)

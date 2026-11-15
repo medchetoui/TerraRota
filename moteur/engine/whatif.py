@@ -37,6 +37,12 @@ def apply_changes(parcels, changes, previous_year):
             cond["rain_mm"] = round(cond["rain_mm"] * changes["rain_factor"], 1)
         if "temp_delta" in changes and cond.get("temp_c") is not None:
             cond["temp_c"] = round(cond["temp_c"] + changes["temp_delta"], 1)
+        monthly = parcel.get("monthly")
+        if monthly:
+            if "rain_factor" in changes:
+                monthly["rain_mm"] = [round(v * changes["rain_factor"], 1) for v in monthly["rain_mm"]]
+            if "temp_delta" in changes:
+                monthly["temp_c"] = [round(v + changes["temp_delta"], 1) for v in monthly["temp_c"]]    
         cond.update(changes.get("set", {}))
         if "irrigated" in changes:
             parcel["irrigated"] = changes["irrigated"]

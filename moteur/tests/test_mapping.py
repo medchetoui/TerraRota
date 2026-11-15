@@ -66,3 +66,9 @@ def test_engine_runs_without_soil_and_says_what_is_missing():
     assert set(line["missing"]) == {"ph", "salinity_dsm"}
     assert line["score"] is not None                 # le calcul se fait sur le climat
     assert line["confidence"]["percent"] < 85        # la fiabilité baisse
+def test_monthly_profile_is_complete_and_consistent():
+    parcel, meta = to_engine_parcel(fake_climate())
+    monthly = parcel["monthly"]
+    assert len(monthly["temp_c"]) == 12 and monthly["temp_c"][0] == 20.0
+    assert monthly["rain_mm"][0] == 31.0 and monthly["rain_mm"][1] == 28.0
+    assert sum(monthly["rain_mm"]) == parcel["conditions"]["rain_mm"]      # même total que le cumul annuel    
