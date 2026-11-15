@@ -176,3 +176,22 @@ def test_odd_plot_inputs_never_crash(client, parcelle):
 
 def test_plot_must_be_an_object(client):
     assert client.post(URL, {"question": "واش؟", "parcelle": "P1"}, format="json").status_code == 400
+
+
+# ─── Transcriptions en arabe standard ou en mélange (reconnaissance vocale du navigateur) ───
+
+@pytest.mark.parametrize("texte,attendu,culture", [
+    ("ماذا أزرع هذا العام؟", "QUOI_PLANTER", None),
+    ("هل أستمر في القمح؟", "AVIS_CULTURE", "ble_tendre"),
+    ("لماذا هذه النصيحة؟", "POURQUOI", None),
+    ("هل ستمطر كثيرا؟", "PLUIE_METEO", None),
+    ("هل أرضي جيدة؟", "SOL", None),
+    ("ليس لدي ري ماذا أفعل؟", "EAU_IRRIGATION", None),
+    ("هل أزرع العدس؟", "AVIS_CULTURE", "lentille"),
+    ("هل أضع السماد؟", "HORS_PERIMETRE", None),
+    ("هل أثق في هذه النصيحة؟", "FIABILITE", None),
+    ("كم سيكون المحصول؟", "HORS_PERIMETRE", None),
+])
+def test_standard_arabic_transcripts_get_the_darija_type(client, texte, attendu, culture):
+    r = poser(client, texte).json()
+    assert r["intention"] == attendu and (culture is None or r["culture"] == culture)
