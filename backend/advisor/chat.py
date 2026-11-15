@@ -113,6 +113,12 @@ def answer(question: str, ctx: dict, lang: str = "ar", scenario_id: str = "cerea
     intent = classification.get("intention", "INCONNU")
     confidence = classification.get("confiance", 0.0)
 
+    # Detect greetings and politeness
+    q_clean = question.strip().lower()
+    if any(g in q_clean for g in ["سلام", "salam", "السلام عليكم", "صباح الخير", "مساء الخير", "bonjour", "salut", "hello", "hi"]):
+        intent = "SALUTATION"
+        confidence = 1.0
+
     # Fallback keyword classification for French and English queries
     if intent == "INCONNU":
         q_lower = question.lower()
@@ -255,8 +261,30 @@ def _build_personalized_answer(
     rain_mm = round(indicators["annual_rain_mm"]) if indicators else None
     temp_c = round(indicators["mean_annual_temp_c"], 1) if indicators else None
 
+    # ── SALUTATION ───────────────────────────────────────────────
+    if intent == "SALUTATION":
+        if lang == "ar":
+            return (
+                f"وعليكم السلام ورحمة الله أ سي {farmer_name}! مرحباً بك. "
+                f"أنا عمي أحمد، المستشار الفلاحي ديالك لأرض {region}. "
+                f"أنا مربوط مباشرة بأقمار ناسا وكنعرف طبيعة التربة ديالك ({soil}). "
+                f"تفضل سولني: شنو باغي تزرع، واش تكمل بالقمح، أو حالة الشتا فهاد الموسم؟"
+            )
+        elif lang == "fr":
+            return (
+                f"Bonjour et bienvenue {farmer_name} ! Je suis Ami Ahmed, votre conseiller agricole pour la région de {region}. "
+                f"Connecté aux satellites NASA et aux données de votre sol ({soil}), "
+                f"je suis à votre écoute : quelle culture envisager, rotation ou météo ?"
+            )
+        else:
+            return (
+                f"Hello and welcome {farmer_name}! I am Ami Ahmed, your agricultural advisor for {region}. "
+                f"Connected directly to NASA satellites and your soil data ({soil}), "
+                f"feel free to ask: what to plant, crop rotation, or rainfall conditions."
+            )
+
     # ── QUOI_PLANTER ──────────────────────────────────────────────
-    if intent == "QUOI_PLANTER":
+    elif intent == "QUOI_PLANTER":
         if top_crop:
             crop_name = top_crop.get(
                 "crop_name_en" if lang == "en" else "crop_name_fr",

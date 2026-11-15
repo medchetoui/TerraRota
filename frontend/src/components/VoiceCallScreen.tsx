@@ -93,7 +93,7 @@ export const VoiceCallScreen: React.FC<VoiceCallScreenProps> = ({
     };
   }, []);
 
-  // Web Speech Synthesis (TTS)
+  // Web Speech Synthesis (TTS) - Enhanced with Natural Voices (Arabic/French/English)
   const speakText = (text: string, onEnd?: () => void) => {
     if (!('speechSynthesis' in window)) {
       if (onEnd) onEnd();
@@ -105,8 +105,30 @@ export const VoiceCallScreen: React.FC<VoiceCallScreenProps> = ({
     setCurrentAiSpeech(text);
 
     const utterance = new SpeechSynthesisUtterance(text);
-    utterance.lang = isAr ? 'ar-MA' : isEn ? 'en-US' : 'fr-FR';
-    utterance.rate = 0.95;
+    const targetLang = isAr ? 'ar' : isEn ? 'en' : 'fr';
+    utterance.lang = isAr ? 'ar-XA' : isEn ? 'en-US' : 'fr-FR';
+
+    // Pick the most natural human-like voice available in the user's OS / browser
+    const voices = window.speechSynthesis.getVoices();
+    if (voices && voices.length > 0) {
+      // Prioritize natural Google / Microsoft Neural / Apple voices
+      const matchingVoices = voices.filter((v) =>
+        v.lang.toLowerCase().startsWith(targetLang)
+      );
+
+      const naturalVoice = matchingVoices.find((v) =>
+        /natural|neural|google|premium|enhanced/i.test(v.name)
+      ) || matchingVoices.find((v) => !/desktop/i.test(v.name)) || matchingVoices[0];
+
+      if (naturalVoice) {
+        utterance.voice = naturalVoice;
+        utterance.lang = naturalVoice.lang;
+      }
+    }
+
+    // Warm, respectful advisory pace & pitch
+    utterance.rate = isAr ? 0.92 : 0.96;
+    utterance.pitch = 0.95; // Slightly deeper, warm advisor tone
 
     utterance.onend = () => {
       isSpeakingRef.current = false;
@@ -116,7 +138,8 @@ export const VoiceCallScreen: React.FC<VoiceCallScreenProps> = ({
       }
     };
 
-    utterance.onerror = () => {
+    utterance.onerror = (e) => {
+      console.warn('SpeechSynthesis error:', e);
       isSpeakingRef.current = false;
       if (isCallActiveRef.current) {
         if (onEnd) onEnd();
@@ -124,6 +147,8 @@ export const VoiceCallScreen: React.FC<VoiceCallScreenProps> = ({
       }
     };
 
+    // Chrome bug workaround: ensure resume before speak
+    window.speechSynthesis.resume();
     window.speechSynthesis.speak(utterance);
   };
 

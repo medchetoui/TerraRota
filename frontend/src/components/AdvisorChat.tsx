@@ -35,8 +35,21 @@ export const AdvisorChat: React.FC<AdvisorChatProps> = ({
     if (!('speechSynthesis' in window)) return;
     window.speechSynthesis.cancel();
     const utterance = new SpeechSynthesisUtterance(text);
-    utterance.lang = isAr ? 'ar-MA' : isEn ? 'en-US' : 'fr-FR';
-    utterance.rate = 0.95;
+    const targetLang = isAr ? 'ar' : isEn ? 'en' : 'fr';
+    utterance.lang = isAr ? 'ar-XA' : isEn ? 'en-US' : 'fr-FR';
+
+    const voices = window.speechSynthesis.getVoices();
+    if (voices && voices.length > 0) {
+      const matching = voices.filter((v) => v.lang.toLowerCase().startsWith(targetLang));
+      const natural = matching.find((v) => /natural|neural|google|premium|enhanced/i.test(v.name)) || matching[0];
+      if (natural) {
+        utterance.voice = natural;
+        utterance.lang = natural.lang;
+      }
+    }
+    utterance.rate = isAr ? 0.92 : 0.96;
+    utterance.pitch = 0.95;
+    window.speechSynthesis.resume();
     window.speechSynthesis.speak(utterance);
   };
 
