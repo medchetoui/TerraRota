@@ -76,13 +76,13 @@ export const CropLibraryPage: React.FC<CropLibraryPageProps> = ({ lang }) => {
         {/* Search & Category Filter */}
         <div className="flex flex-col sm:flex-row gap-3 pt-2">
           <div className="relative flex-1">
-            <Search className="w-4 h-4 text-[#7A6B53] absolute left-3 top-3" />
+            <Search className={`w-4 h-4 text-[#7A6B53] absolute ${isAr ? 'right-3' : 'left-3'} top-3`} />
             <input 
               type="text" 
               placeholder={isAr ? 'ابحث عن محصول أو اسم علمي...' : isEn ? 'Search crop by common or scientific name...' : 'Rechercher une culture (nom commun ou scientifique)...'}
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              className="w-full pl-9 pr-4 py-2.5 rounded-xl bg-[#EFE9DC] border border-[#DECAB3] text-xs font-bold text-[#3B3020] outline-none"
+              className={`w-full ${isAr ? 'pr-9 pl-4' : 'pl-9 pr-4'} py-2.5 rounded-xl bg-[#EFE9DC] border border-[#DECAB3] text-xs font-bold text-[#3B3020] outline-none`}
             />
           </div>
 
@@ -144,28 +144,28 @@ export const CropLibraryPage: React.FC<CropLibraryPageProps> = ({ lang }) => {
                 <div className="p-2 rounded-xl bg-[#EFE9DC]">
                   <div className="text-[#7A6B53] font-bold">{isAr ? 'الماء المطلوب' : isEn ? 'Water Required' : 'Eau Requise'}</div>
                   <div className="font-extrabold text-[#1E331A]">
-                    {crop.water_req_mm ? `${crop.water_req_mm[0]} - ${crop.water_req_mm[1]} mm` : 'Variable'}
+                    {crop.water_req_mm ? `${crop.water_req_mm[0]} - ${crop.water_req_mm[1]} mm` : (isAr ? 'متغير' : isEn ? 'Variable' : 'Variable')}
                   </div>
                 </div>
 
                 <div className="p-2 rounded-xl bg-[#EFE9DC]">
                   <div className="text-[#7A6B53] font-bold">{isAr ? 'الحرارة المثالية' : isEn ? 'Optimal Temp' : 'Temp. Optimale'}</div>
                   <div className="font-extrabold text-[#1E331A]">
-                    {crop.temp_opt_c ? `${crop.temp_opt_c[0]} - ${crop.temp_opt_c[1]} °C` : 'Tempérée'}
+                    {crop.temp_opt_c ? `${crop.temp_opt_c[0]} - ${crop.temp_opt_c[1]} °C` : (isAr ? 'معتدل' : isEn ? 'Temperate' : 'Tempérée')}
                   </div>
                 </div>
 
                 <div className="p-2 rounded-xl bg-[#EFE9DC]">
                   <div className="text-[#7A6B53] font-bold">{isAr ? 'موسم الزرع' : isEn ? 'Sowing Season' : 'Période Semis'}</div>
                   <div className="font-extrabold text-[#1E331A] truncate">
-                    {crop.sowing_season || 'Automne'}
+                    {crop.sowing_season || (isAr ? 'الخريف' : isEn ? 'Autumn' : 'Automne')}
                   </div>
                 </div>
 
                 <div className="p-2 rounded-xl bg-[#EFE9DC]">
                   <div className="text-[#7A6B53] font-bold">{isAr ? 'عمق الجذور' : isEn ? 'Root Depth' : 'Profondeur Racines'}</div>
                   <div className="font-extrabold text-[#1E331A]">
-                    {crop.root_depth_cm ? `${crop.root_depth_cm} cm` : 'Moyenne'}
+                    {crop.root_depth_cm ? `${crop.root_depth_cm} cm` : (isAr ? 'متوسط' : isEn ? 'Medium' : 'Moyenne')}
                   </div>
                 </div>
               </div>
@@ -188,10 +188,10 @@ export const CropLibraryPage: React.FC<CropLibraryPageProps> = ({ lang }) => {
               <div>
                 <span className="text-3xl">{selectedCrop.emoji}</span>
                 <h3 className="text-2xl font-black text-[#1E331A] mt-1">
-                  {isAr ? selectedCrop.name_ar : selectedCrop.name_fr} ({selectedCrop.name_en})
+                  {isAr ? selectedCrop.name_ar : isEn ? (selectedCrop.name_en || selectedCrop.name_fr) : selectedCrop.name_fr}
                 </h3>
                 <p className="text-xs italic text-[#7A6B53] font-serif">
-                  {selectedCrop.scientific_name} • Famille: {selectedCrop.family}
+                  {selectedCrop.scientific_name} • {isAr ? 'العائلة:' : isEn ? 'Family:' : 'Famille:'} {selectedCrop.family}
                 </p>
               </div>
               <button 
@@ -204,29 +204,43 @@ export const CropLibraryPage: React.FC<CropLibraryPageProps> = ({ lang }) => {
 
             <div className="space-y-3 text-xs text-[#4D3F2C]">
               <div className="p-3 rounded-2xl bg-[#EFE9DC] space-y-1">
-                <div className="font-bold text-[#1E331A]">Rôle Agronomique dans la Rotation</div>
-                <p className="text-[#61513C]">
+                <div className="font-bold text-[#1E331A]">
+                  {isAr ? 'الدور الزراعي في الدورة' : isEn ? 'Agronomic Role in Rotation' : 'Rôle Agronomique dans la Rotation'}
+                </div>
+                <p className="text-[#61513C] leading-relaxed">
                   {selectedCrop.nitrogen_fixation 
-                    ? 'Fixe biologiquement entre 40 et 100 kg d\'azote minéralisable par hectare grâce aux nodosités racinaires Rhizobium. Excellent précédent pour céréales.'
+                    ? (isAr 
+                        ? 'يثبت بيولوجياً ما بين 40 و 100 كغ من النيتروجين القابل للتمعدن لكل هكتار بفضل العقد الجذرية. محصول سابق ممتاز للحبوب.'
+                        : isEn
+                        ? 'Biologically fixes 40 to 100 kg of mineralizable nitrogen per hectare via Rhizobium root nodules. Excellent preceding crop for cereals.'
+                        : 'Fixe biologiquement entre 40 et 100 kg d\'azote minéralisable par hectare grâce aux nodosités racinaires Rhizobium. Excellent précédent pour céréales.')
                     : selectedCrop.soil_effect === 'depleting'
-                    ? 'Culture exigeante qui prélève des quantités substantielles d\'azote et d\'éléments minéraux. Nécessite une alternance avec une légumineuse.'
-                    : 'Culture pérenne ou rustique participant à la stabilisation des sols et à la lutte contre l\'érosion éolienne et hydrique.'}
+                    ? (isAr
+                        ? 'محصول متطلب يستنزف كميات كبيرة من النيتروجين والعناصر المعدنية. يتطلب التناوب مع القطاني.'
+                        : isEn
+                        ? 'Demanding crop that depletes substantial amounts of nitrogen and minerals. Requires rotation with legumes.'
+                        : 'Culture exigeante qui prélève des quantités substantielles d\'azote et d\'éléments minéraux. Nécessite une alternance avec une légumineuse.')
+                    : (isAr
+                        ? 'محصول معمر أو قوي يساهم في استقرار التربة ومكافحة التعرية الهوائية والمائية.'
+                        : isEn
+                        ? 'Perennial or hardy crop contributing to soil stabilization and combating wind and water erosion.'
+                        : 'Culture pérenne ou rustique participant à la stabilisation des sols et à la lutte contre l\'érosion éolienne et hydrique.')}
                 </p>
               </div>
 
               <div className="grid grid-cols-2 gap-2">
                 <div className="p-2.5 rounded-xl bg-[#EFE9DC]">
-                  <span className="font-bold block text-[#7A6B53]">Besoins en eau :</span>
-                  <span className="font-extrabold text-sm">{selectedCrop.water_req_mm ? `${selectedCrop.water_req_mm[0]}-${selectedCrop.water_req_mm[1]} mm` : 'Non renseigné'}</span>
+                  <span className="font-bold block text-[#7A6B53]">{isAr ? 'احتياجات المياه:' : isEn ? 'Water Needs:' : 'Besoins en eau :'}</span>
+                  <span className="font-extrabold text-sm">{selectedCrop.water_req_mm ? `${selectedCrop.water_req_mm[0]}-${selectedCrop.water_req_mm[1]} mm` : (isAr ? 'غير محدد' : isEn ? 'Not specified' : 'Non renseigné')}</span>
                 </div>
                 <div className="p-2.5 rounded-xl bg-[#EFE9DC]">
-                  <span className="font-bold block text-[#7A6B53]">Récolte :</span>
-                  <span className="font-extrabold text-sm">{selectedCrop.harvest_season || 'Printemps / Été'}</span>
+                  <span className="font-bold block text-[#7A6B53]">{isAr ? 'موسم الحصاد:' : isEn ? 'Harvest:' : 'Récolte :'}</span>
+                  <span className="font-extrabold text-sm">{selectedCrop.harvest_season || (isAr ? 'الربيع / الصيف' : isEn ? 'Spring / Summer' : 'Printemps / Été')}</span>
                 </div>
               </div>
 
               <div className="p-3 rounded-2xl bg-[#EFE9DC]/70 border border-[#DECAB3] text-[11px] text-[#61513C]">
-                <strong>Référence Scientifique :</strong> {selectedCrop.source}
+                <strong>{isAr ? 'المرجع العلمي:' : isEn ? 'Scientific Reference:' : 'Référence Scientifique :'}</strong> {selectedCrop.source}
               </div>
             </div>
 
@@ -235,7 +249,7 @@ export const CropLibraryPage: React.FC<CropLibraryPageProps> = ({ lang }) => {
                 onClick={() => setSelectedCrop(null)}
                 className="px-5 py-2.5 rounded-xl bg-[#2D4A27] text-white text-xs font-bold cursor-pointer"
               >
-                Fermer
+                {isAr ? 'إغلاق' : isEn ? 'Close' : 'Fermer'}
               </button>
             </div>
           </div>

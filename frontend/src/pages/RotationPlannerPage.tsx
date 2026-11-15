@@ -11,7 +11,8 @@ import {
   ArrowRight, 
   BookmarkCheck,
   RefreshCw,
-  Info
+  Info,
+  X
 } from 'lucide-react';
 import { getScenarios, createPlan, updatePlan } from '../api/client';
 import type { Scenario, RecommendationResponse } from '../types/api';
@@ -50,6 +51,21 @@ export const RotationPlannerPage: React.FC<RotationPlannerPageProps> = ({
   const [approvalStatus, setApprovalStatus] = useState<'idle' | 'approving' | 'approved' | 'rejected'>('idle');
   const [rejectionReason, setRejectionReason] = useState('');
   const [isRejectModalOpen, setIsRejectModalOpen] = useState(false);
+
+  // Dictionnaire pour traduire les raisons de refus
+  const REJECTION_REASONS = [
+    { key: 'water', fr: 'Besoins en eau excessifs', ar: 'احتياجات مائية مفرطة', en: 'Excessive water needs' },
+    { key: 'seeds', fr: 'Semences non disponibles sur le marché local', ar: 'البذور غير متوفرة في السوق المحلية', en: 'Seeds not available in the local market' },
+    { key: 'cash', fr: 'Contrainte de trésorerie / investissement initial', ar: 'قيود مالية / تكلفة الاستثمار الأولي', en: 'Cash flow constraint / initial investment' },
+    { key: 'pref', fr: 'Préférence personnelle pour une autre culture', ar: 'تفضيل شخصي لمحصول آخر', en: 'Personal preference for another crop' },
+  ];
+
+  // MODIFIÉ : Utilisation des champs renvoyés par le backend (badge_fr, badge_ar, badge_en)
+  const getStrategyBadge = (scenario: Scenario) => {
+    if (isAr) return (scenario as any).badge_ar || scenario.badge;
+    if (isEn) return (scenario as any).badge_en || scenario.badge;
+    return (scenario as any).badge_fr || scenario.badge;
+  };
 
   useEffect(() => {
     async function loadScenarios() {
@@ -138,7 +154,7 @@ export const RotationPlannerPage: React.FC<RotationPlannerPageProps> = ({
         <div className="p-12 bg-[#FAF7F2] rounded-3xl border border-[#DECAB3] text-center space-y-3">
           <RefreshCw className="w-8 h-8 animate-spin text-[#8C3A27] mx-auto" />
           <p className="text-sm font-bold text-[#1E331A]">
-            {isAr ? 'جاري توليد سيناريوهات التناوب الزراعي...' : 'Génération des scénarios de rotation agronomiques...'}
+            {isAr ? 'جاري توليد سيناريوهات التناوب الزراعي...' : isEn ? 'Generating agronomic rotation scenarios...' : 'Génération des scénarios de rotation agronomiques...'}
           </p>
         </div>
       ) : scenarios.length > 0 ? (
@@ -159,13 +175,7 @@ export const RotationPlannerPage: React.FC<RotationPlannerPageProps> = ({
                 }`}
               >
                 <div className="text-[10px] opacity-75 font-semibold">
-                  #{i + 1} {
-                    isEn 
-                      ? (sc.strategy_type === 'soil_restoration' ? 'INRA Morocco Recommended' : sc.strategy_type === 'water_saving' ? 'Drought-Resilient' : sc.strategy_type === 'profitability' ? 'High Net Margin' : 'Balanced & Sustainable')
-                      : isAr 
-                      ? sc.badge
-                      : sc.badge
-                  }
+                  #{i + 1} {getStrategyBadge(sc)}
                 </div>
                 <div>{isAr ? sc.title_ar : isEn ? sc.title_en : sc.title_fr}</div>
               </button>
@@ -179,13 +189,7 @@ export const RotationPlannerPage: React.FC<RotationPlannerPageProps> = ({
               <div className="flex items-center justify-between flex-wrap gap-4">
                 <div>
                   <span className="text-xs font-extrabold px-3 py-1 bg-[#8C3A27] text-white rounded-full">
-                    {
-                      isEn 
-                        ? (activeScenario.strategy_type === 'soil_restoration' ? 'INRA Morocco Recommended' : activeScenario.strategy_type === 'water_saving' ? 'Drought-Resilient' : activeScenario.strategy_type === 'profitability' ? 'High Net Margin' : 'Balanced & Sustainable')
-                        : isAr 
-                        ? activeScenario.badge
-                        : activeScenario.badge
-                    }
+                    {getStrategyBadge(activeScenario)}
                   </span>
                   <h3 className="text-2xl sm:text-3xl font-black text-[#1E331A] mt-2">
                     {isAr ? activeScenario.title_ar : isEn ? activeScenario.title_en : activeScenario.title_fr}
@@ -196,12 +200,12 @@ export const RotationPlannerPage: React.FC<RotationPlannerPageProps> = ({
                 {approvalStatus === 'approved' ? (
                   <div className="flex items-center gap-2 px-4 py-2 rounded-2xl bg-emerald-700 text-white text-xs font-black shadow-sm">
                     <BookmarkCheck className="w-4 h-4" />
-                    <span>{isAr ? 'تم اعتماد المخطط بنجاح ✓' : 'Plan Officiellement Approuvé ✓'}</span>
+                    <span>{isAr ? 'تم اعتماد المخطط بنجاح ✓' : isEn ? 'Plan Officially Adopted ✓' : 'Plan Officiellement Approuvé ✓'}</span>
                   </div>
                 ) : approvalStatus === 'rejected' ? (
                   <div className="flex items-center gap-2 px-4 py-2 rounded-2xl bg-amber-800 text-white text-xs font-black shadow-sm">
                     <AlertTriangle className="w-4 h-4" />
-                    <span>{isAr ? 'تم رفض المخطط وتوثيق السبب' : 'Plan Rejeté / En Révision'}</span>
+                    <span>{isAr ? 'تم رفض المخطط وتوثيق السبب' : isEn ? 'Plan Rejected / Under Review' : 'Plan Rejeté / En Révision'}</span>
                   </div>
                 ) : null}
               </div>
@@ -249,7 +253,9 @@ export const RotationPlannerPage: React.FC<RotationPlannerPageProps> = ({
                   <div className="w-full h-2.5 rounded-full bg-white/50 overflow-hidden">
                     <div className="h-full bg-[#2D4A27] rounded-full" style={{ width: `${activeScenario.soil_health_score}%` }}></div>
                   </div>
-                  <div className="text-[11px] text-[#7A6B53]">{isAr ? `تثبيت الأزوت: ${activeScenario.n_fixation_kg_ha}` : isEn ? `N-Fixation: ${activeScenario.n_fixation_kg_ha}` : `Fixation N : ${activeScenario.n_fixation_kg_ha}`}</div>
+                  <div className="text-[11px] text-[#7A6B53]">
+                    {isAr ? `تثبيت الأزوت: ${activeScenario.n_fixation_kg_ha}` : isEn ? `N-Fixation: ${activeScenario.n_fixation_kg_ha}` : `Fixation N : ${activeScenario.n_fixation_kg_ha}`}
+                  </div>
                 </div>
 
                 <div className="p-4 rounded-2xl bg-[#EFE9DC] border border-[#DECAB3] space-y-2">
@@ -263,7 +269,14 @@ export const RotationPlannerPage: React.FC<RotationPlannerPageProps> = ({
                   <div className="w-full h-2.5 rounded-full bg-white/50 overflow-hidden">
                     <div className="h-full bg-cyan-700 rounded-full" style={{ width: `${activeScenario.resilience_score}%` }}></div>
                   </div>
-                  <div className="text-[11px] text-[#7A6B53]">{isAr ? `الطلب المائي: ${activeScenario.water_demand_level}` : isEn ? `Demand: ${activeScenario.water_demand_level}` : `Demande : ${activeScenario.water_demand_level}`}</div>
+                  <div className="text-[11px] text-[#7A6B53]">
+                    {/* MODIFIÉ : Utilisation de water_demand_level_ar / _en / _fr */}
+                    {isAr 
+                      ? `الطلب المائي: ${(activeScenario as any).water_demand_level_ar || activeScenario.water_demand_level}` 
+                      : isEn 
+                      ? `Demand: ${(activeScenario as any).water_demand_level_en || activeScenario.water_demand_level}` 
+                      : `Demande : ${(activeScenario as any).water_demand_level_fr || activeScenario.water_demand_level}`}
+                  </div>
                 </div>
 
                 <div className="p-4 rounded-2xl bg-[#EFE9DC] border border-[#DECAB3] space-y-2">
@@ -277,7 +290,9 @@ export const RotationPlannerPage: React.FC<RotationPlannerPageProps> = ({
                   <div className="w-full h-2.5 rounded-full bg-white/50 overflow-hidden">
                     <div className="h-full bg-amber-700 rounded-full" style={{ width: `${activeScenario.profitability_score}%` }}></div>
                   </div>
-                  <div className="text-[11px] text-[#7A6B53]">{isAr ? `المرونة الإجمالية: ${activeScenario.resilience_score}%` : isEn ? `Overall Resilience: ${activeScenario.resilience_score}%` : `Résilience Globale : ${activeScenario.resilience_score}%`}</div>
+                  <div className="text-[11px] text-[#7A6B53]">
+                    {isAr ? `المرونة الإجمالية: ${activeScenario.resilience_score}%` : isEn ? `Overall Resilience: ${activeScenario.resilience_score}%` : `Résilience Globale : ${activeScenario.resilience_score}%`}
+                  </div>
                 </div>
               </div>
 
@@ -289,7 +304,8 @@ export const RotationPlannerPage: React.FC<RotationPlannerPageProps> = ({
                     <span>{isAr ? 'المكاسب والمزايا الزراعية' : isEn ? 'Agronomic Benefits' : 'Bénéfices Agronomiques'}</span>
                   </div>
                   <ul className="space-y-1.5 text-xs text-[#4D3F2C]">
-                    {activeScenario.advantages.map((adv, i) => (
+                    {/* MODIFIÉ : Utilisation de advantages_ar / _en / _fr */}
+                    {((isAr ? (activeScenario as any).advantages_ar : isEn ? (activeScenario as any).advantages_en : (activeScenario as any).advantages_fr) || activeScenario.advantages)?.map((adv: string, i: number) => (
                       <li key={i} className="flex items-start gap-2">
                         <span className="text-emerald-700 font-bold">•</span>
                         <span>{adv}</span>
@@ -304,7 +320,8 @@ export const RotationPlannerPage: React.FC<RotationPlannerPageProps> = ({
                     <span>{isAr ? 'النقاط الواجب مراعاتها والمخاطر' : isEn ? 'Precautions & Tradeoffs' : 'Précautions & Arbitrages'}</span>
                   </div>
                   <ul className="space-y-1.5 text-xs text-[#4D3F2C]">
-                    {activeScenario.risks.map((risk, i) => (
+                    {/* MODIFIÉ : Utilisation de risks_ar / _en / _fr */}
+                    {((isAr ? (activeScenario as any).risks_ar : isEn ? (activeScenario as any).risks_en : (activeScenario as any).risks_fr) || activeScenario.risks)?.map((risk: string, i: number) => (
                       <li key={i} className="flex items-start gap-2">
                         <span className="text-[#8C3A27] font-bold">•</span>
                         <span>{risk}</span>
@@ -318,11 +335,17 @@ export const RotationPlannerPage: React.FC<RotationPlannerPageProps> = ({
               <div className="p-4 rounded-2xl bg-[#EFE9DC]/70 border border-[#DECAB3] text-xs text-[#61513C] flex items-start gap-2.5">
                 <ShieldCheck className="w-4 h-4 text-[#2D4A27] shrink-0 mt-0.5" />
                 <div>
-                  <strong className="text-[#1E331A]">{isAr ? 'الأساس العلمي:' : isEn ? 'Scientific Justification:' : 'Justification Scientifique :'}</strong> {activeScenario.scientific_basis}
+                  <strong className="text-[#1E331A]">{isAr ? 'الأساس العلمي:' : isEn ? 'Scientific Justification:' : 'Justification Scientifique :'}</strong>{' '}
+                  {/* MODIFIÉ : Utilisation de scientific_basis_ar / _en / _fr */}
+                  {isAr 
+                    ? ((activeScenario as any).scientific_basis_ar || activeScenario.scientific_basis) 
+                    : isEn 
+                    ? ((activeScenario as any).scientific_basis_en || activeScenario.scientific_basis) 
+                    : ((activeScenario as any).scientific_basis_fr || activeScenario.scientific_basis)}
                 </div>
               </div>
 
-              {/* Farmer Decision Actions (Spec Part 9) */}
+              {/* Farmer Decision Actions */}
               <div className="pt-4 border-t border-[#DECAB3] flex flex-wrap items-center justify-between gap-4">
                 <div className="text-xs text-[#7A6B53]">
                   {isAr 
@@ -361,28 +384,31 @@ export const RotationPlannerPage: React.FC<RotationPlannerPageProps> = ({
           {isRejectModalOpen && (
             <div className="fixed inset-0 z-50 bg-black/50 flex items-center justify-center p-4">
               <div className="bg-[#FAF7F2] p-6 rounded-3xl max-w-md w-full border border-[#DECAB3] shadow-xl space-y-4">
-                <h4 className="text-lg font-black text-[#1E331A]">
-                  {isAr ? 'سبب طلب التعديل أو الرفض' : 'Motif de révision du plan'}
-                </h4>
+                <div className="flex items-center justify-between">
+                  <h4 className="text-lg font-black text-[#1E331A]">
+                    {isAr ? 'سبب طلب التعديل أو الرفض' : isEn ? 'Reason for Review / Rejection' : 'Motif de révision du plan'}
+                  </h4>
+                  <button onClick={() => setIsRejectModalOpen(false)} className="text-[#7A6B53] hover:text-[#1E331A]">
+                    <X className="w-5 h-5" />
+                  </button>
+                </div>
+                
                 <p className="text-xs text-[#7A6B53]">
-                  {isAr ? 'ساعدنا على تحسين الاقتراح : ما هو العائق الرئيسي؟' : 'Indiquez la contrainte non satisfaite pour ajuster l\'algorithme :'}
+                  {isAr ? 'ساعدنا على تحسين الاقتراح : ما هو العائق الرئيسي؟' : isEn ? 'Help us improve the proposal: what is the main constraint?' : 'Indiquez la contrainte non satisfaite pour ajuster l\'algorithme :'}
                 </p>
 
                 <div className="space-y-2">
-                  {[
-                    'Besoins en eau excessifs',
-                    'Semences non disponibles sur le marché local',
-                    'Contrainte de trésorerie / investissement initial',
-                    'Préférence personnelle pour une autre culture',
-                  ].map((r, i) => (
+                  {REJECTION_REASONS.map((r) => (
                     <button
-                      key={i}
-                      onClick={() => setRejectionReason(r)}
+                      key={r.key}
+                      onClick={() => setRejectionReason(isAr ? r.ar : isEn ? r.en : r.fr)}
                       className={`w-full text-start p-2.5 rounded-xl text-xs font-bold border transition-colors cursor-pointer ${
-                        rejectionReason === r ? 'bg-[#8C3A27] text-white border-[#8C3A27]' : 'bg-[#EFE9DC] text-[#4D3F2C] border-[#DECAB3]'
+                        rejectionReason === (isAr ? r.ar : isEn ? r.en : r.fr) 
+                          ? 'bg-[#8C3A27] text-white border-[#8C3A27]' 
+                          : 'bg-[#EFE9DC] text-[#4D3F2C] border-[#DECAB3]'
                       }`}
                     >
-                      {r}
+                      {isAr ? r.ar : isEn ? r.en : r.fr}
                     </button>
                   ))}
                 </div>
@@ -390,15 +416,15 @@ export const RotationPlannerPage: React.FC<RotationPlannerPageProps> = ({
                 <div className="flex justify-end gap-2 pt-3">
                   <button
                     onClick={() => setIsRejectModalOpen(false)}
-                    className="px-4 py-2 rounded-xl text-xs font-bold text-[#61513C] cursor-pointer"
+                    className="px-4 py-2 rounded-xl text-xs font-bold text-[#61513C] hover:bg-[#EFE9DC] cursor-pointer"
                   >
-                    Annuler
+                    {isAr ? 'إلغاء' : isEn ? 'Cancel' : 'Annuler'}
                   </button>
                   <button
                     onClick={handleRejectPlan}
                     className="px-5 py-2 rounded-xl bg-[#8C3A27] text-white text-xs font-bold cursor-pointer"
                   >
-                    Confirmer
+                    {isAr ? 'تأكيد' : isEn ? 'Confirm' : 'Confirmer'}
                   </button>
                 </div>
               </div>
@@ -407,7 +433,9 @@ export const RotationPlannerPage: React.FC<RotationPlannerPageProps> = ({
         </div>
       ) : (
         <div className="p-8 text-center bg-[#FAF7F2] rounded-3xl border border-[#DECAB3]">
-          <p className="text-xs text-[#7A6B53]">Aucun scénario disponible pour ces critères.</p>
+          <p className="text-xs text-[#7A6B53]">
+            {isAr ? 'لا توجد سيناريوهات متاحة لهذه المعايير.' : isEn ? 'No scenarios available for these criteria.' : 'Aucun scénario disponible pour ces critères.'}
+          </p>
         </div>
       )}
     </div>

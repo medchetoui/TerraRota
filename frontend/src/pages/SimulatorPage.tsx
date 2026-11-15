@@ -11,7 +11,8 @@ import {
   Droplets,
   Thermometer,
   Calendar,
-  Sparkles
+  Sparkles,
+  ArrowLeft
 } from 'lucide-react';
 import { runWhatIf } from '../api/client';
 import type { WhatIfSimulation, CropId } from '../types/api';
@@ -24,6 +25,82 @@ interface SimulatorPageProps {
   regionName: string;
   lang: 'ar' | 'fr' | 'en';
 }
+
+// Dictionnaire pour traduire les noms de cultures renvoyés par le backend
+const translateCropName = (name: string, lang: 'ar' | 'fr' | 'en'): string => {
+  if (!name) return '';
+  const n = name.toLowerCase().trim();
+  
+  if (n.includes('pois chiche') || n.includes('chickpea') || n.includes('حمص')) return lang === 'ar' ? 'الحمص' : lang === 'en' ? 'Chickpea' : 'Pois chiche';
+  if (n.includes('orge') || n.includes('barley') || n.includes('شعير')) return lang === 'ar' ? 'الشعير' : lang === 'en' ? 'Barley' : 'Orge';
+  if (n.includes('blé dur') || n.includes('durum') || n.includes('قمح صلب')) return lang === 'ar' ? 'القمح الصلب' : lang === 'en' ? 'Durum Wheat' : 'Blé dur';
+  if (n.includes('blé tendre') || n.includes('soft wheat') || n.includes('قمح طري')) return lang === 'ar' ? 'القمح الطري' : lang === 'en' ? 'Soft Wheat' : 'Blé tendre';
+  if (n.includes('olive') || n.includes('olivier') || n.includes('زيتون')) return lang === 'ar' ? 'الزيتون' : lang === 'en' ? 'Olive Tree' : 'Olivier';
+  if (n.includes('lentil') || n.includes('lentille') || n.includes('عدس')) return lang === 'ar' ? 'العدس' : lang === 'en' ? 'Lentil' : 'Lentille';
+  if (n.includes('faba') || n.includes('fève') || n.includes('فول')) return lang === 'ar' ? 'الفول' : lang === 'en' ? 'Faba Bean' : 'Fève';
+  if (n.includes('argan') || n.includes('أركان')) return lang === 'ar' ? 'الأركان' : lang === 'en' ? 'Argan Tree' : 'Arganier';
+  if (n.includes('cactus') || n.includes('figuier') || n.includes('صبار') || n.includes('هندية')) return lang === 'ar' ? 'الصبار' : lang === 'en' ? 'Cactus Pear' : 'Figuier de Barbarie';
+  if (n.includes('potato') || n.includes('pomme de terre') || n.includes('بطاطا') || n.includes('بطاطس')) return lang === 'ar' ? 'البطاطس' : lang === 'en' ? 'Potato' : 'Pomme de terre';
+  if (n.includes('tomato') || n.includes('tomate') || n.includes('طماطم')) return lang === 'ar' ? 'الطماطم' : lang === 'en' ? 'Tomato' : 'Tomate';
+  if (n.includes('almond') || n.includes('amandier') || n.includes('لوز')) return lang === 'ar' ? 'اللوز' : lang === 'en' ? 'Almond Tree' : 'Amandier';
+  if (n.includes('fallow') || n.includes('jachère') || n.includes('بور') || n.includes('راحة')) return lang === 'ar' ? 'أرض مريحة (بور)' : lang === 'en' ? 'Fallow' : 'Jachère';
+  
+  return name;
+};
+
+// Dictionnaire pour traduire les modifications renvoyées par le backend
+const translateBackendText = (text: string, lang: 'ar' | 'fr' | 'en'): string => {
+  if (!text) return '';
+  const t = text.toLowerCase();
+  
+  if (t.includes('précipitations') || t.includes('rainfall') || t.includes('أمطار') || t.includes('مطر')) {
+    const match = text.match(/(\d+)\s*mm\s*→\s*(\d+)\s*mm/);
+    if (match) {
+      return lang === 'ar' 
+        ? `هطول الأمطار: ${match[1]} مم ← ${match[2]} مم` 
+        : lang === 'en' 
+        ? `Annual Rainfall: ${match[1]} mm → ${match[2]} mm` 
+        : `Précipitations annuelles : ${match[1]} mm → ${match[2]} mm`;
+    }
+    return lang === 'ar' ? 'تغير هطول الأمطار' : lang === 'en' ? 'Rainfall changed' : 'Précipitations modifiées';
+  }
+
+  if (t.includes('warming') || t.includes('réchauffement') || t.includes('حرارة')) {
+    const match = text.match(/\+?([\d.]+)\s*°?\s*c/i);
+    if (match) {
+      return lang === 'ar' ? `ارتفاع الحرارة بـ +${match[1]}°C` : lang === 'en' ? `Warming +${match[1]}°C` : `Réchauffement +${match[1]}°C`;
+    }
+    return lang === 'ar' ? 'تعديل الحرارة' : lang === 'en' ? 'Temperature adjusted' : 'Température ajustée';
+  }
+
+  if (t.includes('régime') || t.includes('hydrique') || t.includes('water') || t.includes('ري')) {
+    return lang === 'ar' ? 'نظام الري: بوري ← بوري' : lang === 'en' ? 'Water regime: rainfed → rainfed' : 'Régime hydrique : rainfed → rainfed';
+  }
+
+  if (t.includes('culture') || t.includes('précédent') || t.includes('crop') || t.includes('محصول')) {
+    return lang === 'ar' ? 'المحصول السابق: القمح الصلب' : lang === 'en' ? 'Previous crop: Durum Wheat' : 'Précédent cultural : Blé dur';
+  }
+    if (t.includes('temp') || t.includes('réchauffement') || t.includes('حرارة')) {
+    // On cherche les températures exactes : "20.2 °C → 21.8 °C (+1.5 °C)"
+    const match = text.match(/([\d.]+)\s*°C\s*→\s*([\d.]+)\s*°C\s*\(\+?([\d.]+)\s*°C\)/i);
+    if (match) {
+      return lang === 'ar' 
+        ? `متوسط الحرارة: ${match[1]}°C ← ${match[2]}°C (+${match[3]}°C)` 
+        : lang === 'en' 
+        ? `Mean temperature: ${match[1]}°C → ${match[2]}°C (+${match[3]}°C)` 
+        : `Température moyenne : ${match[1]}°C → ${match[2]}°C (+${match[3]}°C)`;
+    }
+    
+    // Fallback si le format est différent
+    const matchSimple = text.match(/\+?([\d.]+)\s*°?\s*c/i);
+    if (matchSimple) {
+      return lang === 'ar' ? `ارتفاع الحرارة بـ +${matchSimple[1]}°C` : lang === 'en' ? `Warming +${matchSimple[1]}°C` : `Réchauffement +${matchSimple[1]}°C`;
+    }
+    return lang === 'ar' ? 'تعديل الحرارة' : lang === 'en' ? 'Temperature adjusted' : 'Température ajustée';
+  }
+
+  return text;
+};
 
 export const SimulatorPage: React.FC<SimulatorPageProps> = ({
   lat,
@@ -205,6 +282,7 @@ export const SimulatorPage: React.FC<SimulatorPageProps> = ({
               className="w-full p-2.5 rounded-xl bg-[#EFE9DC] border border-[#DECAB3] text-xs font-bold text-[#3B3020] outline-none cursor-pointer"
             >
               <option value="wheat_hard">🌾 {isAr ? 'القمح الصلب' : isEn ? 'Durum Wheat' : 'Blé dur'}</option>
+              <option value="wheat_soft">🍞 {isAr ? 'القمح الطري' : isEn ? 'Soft Wheat' : 'Blé tendre'}</option>
               <option value="barley">🌾 {isAr ? 'الشعير' : isEn ? 'Barley' : 'Orge'}</option>
               <option value="chickpea">🫘 {isAr ? 'الحمص (مثبت للأزوت)' : isEn ? 'Chickpea (N-Fixing)' : 'Pois chiche (Légumineuse fixatrice N)'}</option>
               <option value="fallow">🌿 {isAr ? 'راحة الأرض (فالاو)' : isEn ? 'Fallow (Rested soil)' : 'Jachère (Sol reposé)'}</option>
@@ -273,14 +351,22 @@ export const SimulatorPage: React.FC<SimulatorPageProps> = ({
                   <div className="text-[11px] font-bold text-[#7A6B53]">
                     {isAr ? 'الخيار رقم 1 قبل المحاكاة' : isEn ? 'Top Choice Before Simulation' : 'Choix N°1 avant simulation'}
                   </div>
-                  <div className="text-lg font-black text-[#1E331A]">{simulation.winner_before}</div>
+                  <div className="text-lg font-black text-[#1E331A]">
+                    {translateCropName(simulation.winner_before, lang)}
+                  </div>
                 </div>
-                <ArrowRight className="w-6 h-6 text-[#8C3A27] hidden sm:block" />
+                {isAr ? (
+                  <ArrowLeft className="w-6 h-6 text-[#8C3A27] hidden sm:block" />
+                ) : (
+                  <ArrowRight className="w-6 h-6 text-[#8C3A27] hidden sm:block" />
+                )}
                 <div>
                   <div className="text-[11px] font-bold text-[#8C3A27]">
                     {isAr ? 'الخيار رقم 1 بعد المحاكاة' : isEn ? 'Top Choice AFTER Simulation' : 'Choix N°1 APRÈS simulation'}
                   </div>
-                  <div className="text-xl font-black text-[#8C3A27]">{simulation.winner_after}</div>
+                  <div className="text-xl font-black text-[#8C3A27]">
+                    {translateCropName(simulation.winner_after, lang)}
+                  </div>
                 </div>
               </div>
 
@@ -292,7 +378,7 @@ export const SimulatorPage: React.FC<SimulatorPageProps> = ({
                 <div className="flex flex-wrap gap-2">
                   {simulation.changes_applied.map((ch, i) => (
                     <span key={i} className="text-xs bg-[#EFE9DC] text-[#4D3F2C] px-3 py-1 rounded-full font-semibold border border-[#DECAB3]">
-                      {ch}
+                      {translateBackendText(ch, lang)}
                     </span>
                   ))}
                 </div>

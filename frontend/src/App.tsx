@@ -44,7 +44,8 @@ import {
   Snowflake,
   ExternalLink,
   Info,
-  Activity
+  Activity,
+  Microscope
 } from 'lucide-react';
 import { 
   getRecommendations, 
@@ -67,6 +68,7 @@ import { ReportsPage } from './pages/ReportsPage';
 import { DataSourcesPage } from './pages/DataSourcesPage';
 import { FarmsPage } from './pages/FarmsPage';
 import { Sliders, FileText, Menu, X } from 'lucide-react';
+import Intro from './components/Intro';
 
 export interface FormData {
   latitude: string;
@@ -116,6 +118,8 @@ const REGIONS = [
   { name_ar: 'جهة الشاوية - ورديغة (سطات)', name_fr: 'Chaouia - Settat', name_en: 'Chaouia - Settat', lat: 33.00, lon: -7.60, soil: 'clay_loam', desc_ar: 'أراضي التيرس الكبرى للحبوب', desc_fr: 'Grande zone céréalière', desc_en: 'Major cereal Tirs plain' },
   { name_ar: 'جهة الغرب - شراردة بني حسن', name_fr: 'Gharb - Kénitra', name_en: 'Gharb - Kenitra', lat: 34.26, lon: -6.58, soil: 'clay', desc_ar: 'أراضي الرمل والغرين الغنية بالمياه', desc_fr: 'Sols alluviaux riches', desc_en: 'Water-rich alluvial soil' },
 ];
+type Mode = 'farmer' | 'expert';
+const EXPERT_PATHS = ['/nasa', '/weather', '/soil', '/simulator', '/sources'];
 
 function MainLayout() {
   const [lang, setLang] = useState<Lang>('ar');
@@ -126,6 +130,24 @@ function MainLayout() {
 
   const location = useLocation();
   const navigate = useNavigate();
+  const [mode, setModeState] = useState<Mode>(() => {
+  try { return sessionStorage.getItem('terrarota_mode') === 'expert' ? 'expert' : 'farmer'; } catch { return 'farmer'; }
+});
+const setMode = (m: Mode) => {
+  setModeState(m);
+  try { sessionStorage.setItem('terrarota_mode', m); } catch { /* ignore */ }
+};
+
+const [showIntro, setShowIntro] = useState(() => {
+  try { return !sessionStorage.getItem('terrarota_intro_seen'); } catch { return false; }
+});
+
+// Un agriculteur ne peut pas ouvrir une page expert (même via l'URL)
+useEffect(() => {
+  if (mode === 'farmer' && EXPERT_PATHS.includes(location.pathname)) {
+    navigate('/', { replace: true });
+  }
+}, [mode, location.pathname]);
 
   // Step state for the guided workflow (1: Location -> 2: Last Crop -> 3: Recommendation)
   const [step, setStep] = useState<1 | 2 | 3>(1);
@@ -268,20 +290,38 @@ function MainLayout() {
   const annualRain = indicators?.annual_rain_mm ? Math.round(indicators.annual_rain_mm) : 340;
   const avgTemp = indicators?.mean_annual_temp_c ? Math.round(indicators.mean_annual_temp_c) : 21;
   const isRainAdequate = annualRain > 280;
+  const translateCategory = (cat: string) => {
+  if (!cat) return '';
+  const c = cat.toLowerCase();
+  if (c === 'cereal') return isAr ? 'حبوب' : isEn ? 'Cereals' : 'Céréales';
+  if (c === 'legume') return isAr ? 'قطاني' : isEn ? 'Pulses' : 'Légumineuses';
+  if (c === 'tree_crop') return isAr ? 'أشجار' : isEn ? 'Tree Crops' : 'Arboriculture';
+  if (c === 'vegetable') return isAr ? 'خضروات' : isEn ? 'Vegetables' : 'Maraîchage';
+  if (c === 'cactus') return isAr ? 'صبار' : isEn ? 'Cactus' : 'Cactus';
+  return cat;
+};
+
+  // MODIF #2a — libellé traduit du précédent cultural
+  const prevCropLabel = t((previousCrop as string) === 'fallow' ? 'none' : previousCrop);
 
   // Audio speech assistance
   const speakCurrentAdvice = () => {
     if (!('speechSynthesis' in window)) return;
     window.speechSynthesis.cancel();
     if (!isAudioPlaying) {
-      const cropName = isAr ? activeRecommendation?.crop_name_ar : activeRecommendation?.crop_name_fr;
-      const reasonsText = activeRecommendation?.reasons?.slice(0, 2).join('. ') || '';
-      const text = isAr 
+      // MODIF #3 — voix trilingue avec fallbacks EN
+      const rec = activeRecommendation;
+      const cropName = isAr ? rec?.crop_name_ar : isEn ? (rec?.crop_name_en || rec?.crop_name_fr) : rec?.crop_name_fr;
+      const reasonsList = isEn ? (rec?.reasons_en ?? rec?.reasons) : lang === 'fr' ? (rec?.reasons_fr ?? rec?.reasons) : rec?.reasons;
+      const reasonsText = reasonsList?.slice(0, 2).join('. ') || '';
+      const text = isAr
         ? `السلام عليكم يا فلاحنا. بناءً على صور الأقمار الاصطناعية ديال ناسا فـ ${currentRegion.name_ar}، أحسن محصول موصى به لأرضك هو ${cropName}. ${reasonsText}.`
+        : isEn
+        ? `Hello dear farmer. Based on NASA satellite observations for ${currentRegion.name_en}, the recommended crop for your field is ${cropName}. ${reasonsText}.`
         : `Bonjour cher agriculteur. Selon les observations satellites NASA pour la région de ${currentRegion.name_fr}, la culture recommandée pour votre parcelle est ${cropName}. ${reasonsText}.`;
-      
+
       const utterance = new SpeechSynthesisUtterance(text);
-      utterance.lang = isAr ? 'ar-MA' : 'fr-FR';
+      utterance.lang = isAr ? 'ar-MA' : isEn ? 'en-US' : 'fr-FR';
       utterance.onend = () => setIsAudioPlaying(false);
       setIsAudioPlaying(true);
       window.speechSynthesis.speak(utterance);
@@ -291,10 +331,35 @@ function MainLayout() {
   };
 
   const path = location.pathname;
-
+  const L = (ar: string, fr: string, en: string) => (isAr ? ar : isEn ? en : fr);
+  const NAV_ITEMS = [
+  // ── Agriculteur ──
+  { to: '/', icon: Layers, mode: 'farmer', label: L('الرئيسية والمحاصيل', 'Accueil & Parcelle', 'Home & Field') },
+  { to: '/recommendation', icon: TrendingUp, mode: 'farmer', label: L('توصية المحصول', 'Recommandation', 'Crop Recommendation') },
+  { to: '/planner', icon: Sparkles, mode: 'farmer', label: L('مخطط التناوب', 'Plan de rotation', 'Rotation Plan') },
+  { to: '/crops', icon: Sprout, mode: 'farmer', label: L('موسوعة المحاصيل', 'Guide des Cultures', 'Crop Guide') },
+  { to: '/farms', icon: BookmarkPlus, mode: 'farmer', label: L('ضيعاتي ومخططاتي', 'Mes Parcelles & Plans', 'My Farms & Plans') },
+  { to: '/reports', icon: FileText, mode: 'farmer', label: L('تقرير اتخاذ القرار (PDF)', 'Rapport Décisionnel', 'Decision Report (PDF)') },
+  { to: '/advisor', icon: Mic, mode: 'farmer', label: L('المرشد الصوتي (عمي أحمد)', 'Conseiller Vocal', 'Voice Advisor') },
+  // ── Spécialiste ──
+  { to: '/nasa', icon: Sun, mode: 'expert', label: L('مرصد ناسا المناخي', 'Données NASA (Climat)', 'NASA Earth Data') },
+  { to: '/weather', icon: ThermometerSun, mode: 'expert', label: L('المؤشرات الزراعية المناخية', 'Indicateurs agro-climatiques', 'Agro-climatic Indicators') },
+  { to: '/soil', icon: Compass, mode: 'expert', label: L('مرصد التربة', 'Pédologie & Sols', 'Soil Intelligence') },
+  { to: '/simulator', icon: Sliders, mode: 'expert', label: L('محاكي «ماذا لو؟»', 'Simulateur « Et si ? »', 'What-If Simulator') },
+  { to: '/sources', icon: Database, mode: 'expert', label: L('سجل بيانات ناسا', 'Registre NASA', 'NASA Data Sources') },
+];
   return (
     <AppContext.Provider value={{ t, lang, setLang, user, logout }}>
       <div className={`min-h-screen bg-[#F4EFE6] text-[#2C2416] antialiased ${isAr ? 'font-arabic' : 'font-sans'}`} dir={isAr ? 'rtl' : 'ltr'}>
+        {showIntro && (
+       <Intro
+         lang='en'
+         onDone={() => {
+         try { sessionStorage.setItem('terrarota_intro_seen', '1'); } catch { /* ignore */ }
+      setShowIntro(false);
+    }}
+    />
+    )}
         <div className="flex flex-col lg:flex-row min-h-screen">
           
           {/* ─── SIDEBAR OVERLAY ─── */}
@@ -326,11 +391,11 @@ function MainLayout() {
                   </div>
                 </Link>
 
-                {/* Close Button Inside Sidebar */}
+                {/* MODIF #5a — Close Button Inside Sidebar (trilingue) */}
                 <button
                   onClick={() => setIsSidebarOpen(false)}
                   className="p-2 rounded-xl text-[#7A6B53] hover:text-[#1E331A] hover:bg-[#E4DCCB] transition-colors cursor-pointer"
-                  title={isAr ? 'إغلاق القائمة' : 'Fermer le menu'}
+                  title={L('إغلاق القائمة', 'Fermer le menu', 'Close menu')}
                 >
                   <X className="w-5 h-5" />
                 </button>
@@ -345,128 +410,21 @@ function MainLayout() {
               </div>
 
               {/* Navigation Links */}
-              <nav className="p-3 space-y-1">
-                <Link 
-                  to="/"
-                  onClick={() => setIsSidebarOpen(false)}
-                  className={`w-full flex items-center gap-2.5 px-3.5 py-2.5 rounded-xl text-xs font-bold transition-all ${
-                    path === '/' ? 'bg-[#2D4A27] text-white shadow-sm' : 'text-[#5A4D3B] hover:bg-[#E5DDCF]'
-                  }`}
-                >
-                  <Layers className="w-4 h-4 shrink-0" />
-                  <span>{isAr ? 'الرئيسية والمحاصيل' : isEn ? 'Overview & Field' : 'Accueil & Parcelle'}</span>
-                </Link>
-
-                <Link 
-                  to="/recommendation"
-                  onClick={() => setIsSidebarOpen(false)}
-                  className={`w-full flex items-center gap-2.5 px-3.5 py-2.5 rounded-xl text-xs font-bold transition-all ${
-                    path === '/recommendation' ? 'bg-[#2D4A27] text-white shadow-sm' : 'text-[#5A4D3B] hover:bg-[#E5DDCF]'
-                  }`}
-                >
-                  <TrendingUp className="w-4 h-4 shrink-0" />
-                  <span>{isAr ? 'توصية المحصول' : isEn ? 'Crop Recommendation' : 'Recommandation'}</span>
-                </Link>
-
-                <Link 
-                  to="/nasa"
-                  onClick={() => setIsSidebarOpen(false)}
-                  className={`w-full flex items-center gap-2.5 px-3.5 py-2.5 rounded-xl text-xs font-bold transition-all ${
-                    path === '/nasa' ? 'bg-[#2D4A27] text-white shadow-sm' : 'text-[#5A4D3B] hover:bg-[#E5DDCF]'
-                  }`}
-                >
-                  <Sun className="w-4 h-4 shrink-0 text-amber-600" />
-                  <span>{isAr ? 'مرصد ناسا المناخي' : isEn ? 'NASA Earth Data' : 'Données NASA (Climat)'}</span>
-                </Link>
-
-                <Link 
-                  to="/planner"
-                  onClick={() => setIsSidebarOpen(false)}
-                  className={`w-full flex items-center gap-2.5 px-3.5 py-2.5 rounded-xl text-xs font-bold transition-all ${
-                    path === '/planner' ? 'bg-[#2D4A27] text-white shadow-sm' : 'text-[#5A4D3B] hover:bg-[#E5DDCF]'
-                  }`}
-                >
-                  <Sparkles className="w-4 h-4 shrink-0 text-emerald-600" />
-                  <span>{isAr ? 'مخطط التناوب والسيناريوهات' : isEn ? 'Rotation Scenarios' : 'Planificateur & Scénarios'}</span>
-                </Link>
-
-                <Link 
-                  to="/simulator"
-                  onClick={() => setIsSidebarOpen(false)}
-                  className={`w-full flex items-center gap-2.5 px-3.5 py-2.5 rounded-xl text-xs font-bold transition-all ${
-                    path === '/simulator' ? 'bg-[#2D4A27] text-white shadow-sm' : 'text-[#5A4D3B] hover:bg-[#E5DDCF]'
-                  }`}
-                >
-                  <Sliders className="w-4 h-4 shrink-0 text-[#8C3A27]" />
-                  <span>{isAr ? 'محاكي الفرضيات والتغير' : isEn ? 'What-If Simulator' : 'Simulateur "Et Si ?"'}</span>
-                </Link>
-
-                <Link 
-                  to="/crops"
-                  onClick={() => setIsSidebarOpen(false)}
-                  className={`w-full flex items-center gap-2.5 px-3.5 py-2.5 rounded-xl text-xs font-bold transition-all ${
-                    path === '/crops' ? 'bg-[#2D4A27] text-white shadow-sm' : 'text-[#5A4D3B] hover:bg-[#E5DDCF]'
-                  }`}
-                >
-                  <Sprout className="w-4 h-4 shrink-0 text-[#2D4A27]" />
-                  <span>{isAr ? 'موسوعة المحاصيل' : isEn ? 'Crop Library' : 'Guide des Cultures'}</span>
-                </Link>
-
-                <Link 
-                  to="/soil"
-                  onClick={() => setIsSidebarOpen(false)}
-                  className={`w-full flex items-center gap-2.5 px-3.5 py-2.5 rounded-xl text-xs font-bold transition-all ${
-                    path === '/soil' ? 'bg-[#2D4A27] text-white shadow-sm' : 'text-[#5A4D3B] hover:bg-[#E5DDCF]'
-                  }`}
-                >
-                  <Compass className="w-4 h-4 shrink-0 text-cyan-700" />
-                  <span>{isAr ? 'مرصد التربة (تيرس/حمري)' : isEn ? 'Soil Intelligence' : 'Pédologie & Sols'}</span>
-                </Link>
-
-                <Link 
-                  to="/reports"
-                  onClick={() => setIsSidebarOpen(false)}
-                  className={`w-full flex items-center gap-2.5 px-3.5 py-2.5 rounded-xl text-xs font-bold transition-all ${
-                    path === '/reports' ? 'bg-[#2D4A27] text-white shadow-sm' : 'text-[#5A4D3B] hover:bg-[#E5DDCF]'
-                  }`}
-                >
-                  <FileText className="w-4 h-4 shrink-0 text-[#8C3A27]" />
-                  <span>{isAr ? 'تقرير اتخاذ القرار (PDF)' : isEn ? 'Decision Report (PDF)' : 'Rapport Décisionnel'}</span>
-                </Link>
-
-                <Link 
-                  to="/sources"
-                  onClick={() => setIsSidebarOpen(false)}
-                  className={`w-full flex items-center gap-2.5 px-3.5 py-2.5 rounded-xl text-xs font-bold transition-all ${
-                    path === '/sources' ? 'bg-[#2D4A27] text-white shadow-sm' : 'text-[#5A4D3B] hover:bg-[#E5DDCF]'
-                  }`}
-                >
-                  <Database className="w-4 h-4 shrink-0 text-[#7A6B53]" />
-                  <span>{isAr ? 'سجل بيانات ناسا' : isEn ? 'NASA Data Sources' : 'Registre NASA'}</span>
-                </Link>
-
-                <Link 
-                  to="/farms"
-                  onClick={() => setIsSidebarOpen(false)}
-                  className={`w-full flex items-center gap-2.5 px-3.5 py-2.5 rounded-xl text-xs font-bold transition-all ${
-                    path === '/farms' ? 'bg-[#2D4A27] text-white shadow-sm' : 'text-[#5A4D3B] hover:bg-[#E5DDCF]'
-                  }`}
-                >
-                  <BookmarkPlus className="w-4 h-4 shrink-0 text-amber-700" />
-                  <span>{isAr ? 'ضيعاتي ومخططاتي' : isEn ? 'My Farms & Plans' : 'Mes Parcelles & Plans'}</span>
-                </Link>
-
-                <Link 
-                  to="/advisor"
-                  onClick={() => setIsSidebarOpen(false)}
-                  className={`w-full flex items-center gap-2.5 px-3.5 py-2.5 rounded-xl text-xs font-bold transition-all ${
-                    path === '/advisor' ? 'bg-[#2D4A27] text-white shadow-sm' : 'text-[#5A4D3B] hover:bg-[#E5DDCF]'
-                  }`}
-                >
-                  <Mic className="w-4 h-4 shrink-0 text-[#8C3A27]" />
-                  <span>{isAr ? 'المرشد الصوتي (عمي أحمد)' : isEn ? 'Voice Advisor' : 'Conseiller Vocal'}</span>
-                </Link>
-              </nav>
+<nav className="p-3 space-y-1">
+  {NAV_ITEMS.filter((i) => i.mode === mode).map(({ to, icon: Icon, label }) => (
+    <Link
+      key={to}
+      to={to}
+      onClick={() => setIsSidebarOpen(false)}
+      className={`w-full flex items-center gap-2.5 px-3.5 py-2.5 rounded-xl text-xs font-bold transition-all ${
+        path === to ? 'bg-[#2D4A27] text-white shadow-sm' : 'text-[#5A4D3B] hover:bg-[#E5DDCF]'
+      }`}
+    >
+      <Icon className="w-4 h-4 shrink-0" />
+      <span>{label}</span>
+    </Link>
+  ))}
+</nav>
 
               {user && (
                 <div className="px-4">
@@ -485,16 +443,17 @@ function MainLayout() {
             </div>
 
             <div className="p-4 border-t border-[#DECAB3]/70 space-y-3">
+              {/* MODIF #5d — bouton audio trilingue */}
               <div 
                 onClick={speakCurrentAdvice}
                 className="p-3 bg-[#E7DFCF] hover:bg-[#E0D7C5] rounded-xl flex items-center justify-between text-xs text-[#524430] cursor-pointer transition-colors"
               >
                 <div className="flex items-center gap-2">
                   <Volume2 className="w-4 h-4 text-[#8C3A27]" />
-                  <span className="font-bold">{isAr ? 'إرشاد فلاحي بالصوت' : isEn ? 'Audio Guide' : 'Audio Guide'}</span>
+                  <span className="font-bold">{L('إرشاد فلاحي بالصوت', 'Guide audio', 'Audio Guide')}</span>
                 </div>
                 <span className="text-[10px] bg-[#2D4A27] text-white px-2 py-0.5 rounded-full font-bold">
-                  {isAr ? 'عمي أحمد' : 'Ami Ahmed'}
+                  {L('عمي أحمد', 'Ami Ahmed', 'Ami Ahmed')}
                 </span>
               </div>
 
@@ -508,14 +467,14 @@ function MainLayout() {
           <main className="flex-1 overflow-y-auto">
             <header className="px-4 sm:px-6 py-4 bg-[#FAF7F2] border-b border-[#DECAB3] flex flex-wrap items-center justify-between gap-4 sticky top-0 z-30 shadow-xs">
               <div className="flex items-center gap-3 flex-wrap">
-                {/* Hamburger Button to Toggle Menu */}
+                {/* MODIF #5b — Hamburger Button trilingue */}
                 <button
                   onClick={() => setIsSidebarOpen(!isSidebarOpen)}
                   className="p-2 rounded-xl bg-[#EFE9DC] hover:bg-[#E4DCCB] text-[#1E331A] border border-[#DECAB3] transition-colors cursor-pointer flex items-center gap-2 text-xs font-bold shadow-xs"
-                  title={isAr ? 'فتح / إغلاق القائمة' : 'Ouvrir / Fermer le menu'}
+                  title={L('فتح / إغلاق القائمة', 'Ouvrir / Fermer le menu', 'Open / Close menu')}
                 >
                   {isSidebarOpen ? <X className="w-4 h-4 text-[#8C3A27]" /> : <Menu className="w-4 h-4 text-[#2D4A27]" />}
-                  <span className="hidden sm:inline">{isSidebarOpen ? (isAr ? 'إغلاق' : 'Fermer') : (isAr ? 'القائمة' : 'Menu')}</span>
+                  <span className="hidden sm:inline">{isSidebarOpen ? L('إغلاق', 'Fermer', 'Close') : L('القائمة', 'Menu', 'Menu')}</span>
                 </button>
 
                 <div className="flex items-center gap-2 bg-[#EFE9DC] px-3.5 py-1.5 rounded-full border border-[#D5C4AC] text-xs font-bold text-[#3B3020]">
@@ -546,7 +505,7 @@ function MainLayout() {
                   <span>{apiResponse?.data_status === 'live' ? (isAr ? 'متصل بأقمار ناسا مباشرة' : isEn ? 'NASA Live Connection' : 'NASA Direct Live') : (isAr ? 'بيانات ناسا المناخية' : isEn ? 'NASA Climate Data' : 'NASA POWER Connecté')}</span>
                 </div>
 
-                {/* Demo Mode Button for Judges */}
+                {/* MODIF #5c — Demo Mode Button trilingue */}
                 <button
                   onClick={() => {
                     setSelectedRegionIndex(3); // Chaouia
@@ -557,21 +516,28 @@ function MainLayout() {
                     triggerAnalysis(33.0, -7.6);
                   }}
                   className="flex items-center gap-1.5 bg-amber-100 hover:bg-amber-200 text-amber-900 border border-amber-300 px-3 py-1 rounded-full text-xs font-bold transition-colors cursor-pointer"
-                  title="Charger la ferme pilote pour la démonstration"
+                  title={L('تحميل الضيعة التجريبية', 'Charger la ferme pilote pour la démonstration', 'Load the demo pilot farm')}
                 >
                   <Sparkles className="w-3.5 h-3.5 text-amber-700" />
-                  <span>{isAr ? 'عرض توضيحي للمحكمين ⭐' : isEn ? 'Demo Mode ⭐' : 'Mode Démo (Chaouia) ⭐'}</span>
+                  <span>{L('عرض توضيحي للمحكمين ⭐', 'Mode Démo (Chaouia) ⭐', 'Demo Mode (Chaouia) ⭐')}</span>
                 </button>
               </div>
 
               <div className="flex items-center gap-3">
-                <button
-                  onClick={speakCurrentAdvice}
-                  className="flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-[#8C3A27] text-white text-xs font-bold shadow-sm hover:bg-[#732F1F] transition-colors cursor-pointer"
-                >
-                  <Volume2 className="w-3.5 h-3.5" />
-                  <span>{isAr ? 'بالدارجة المغربية' : isEn ? 'Audio Guide' : 'En Français'}</span>
-                </button>
+<button
+  onClick={() => {
+    if (mode === 'farmer') { setMode('expert'); navigate('/nasa'); }
+    else { setMode('farmer'); navigate('/'); }
+  }}
+  className={`flex items-center gap-1.5 px-3.5 py-1.5 rounded-full text-xs font-bold border transition-colors cursor-pointer ${
+    mode === 'expert'
+      ? 'bg-[#1E331A] text-white border-[#1E331A]'
+      : 'bg-[#EFE9DC] text-[#2D4A27] border-[#D5C4AC] hover:bg-[#E5DDCF]'
+  }`}
+>
+  {mode === 'expert' ? <Sprout className="w-3.5 h-3.5" /> : <Microscope className="w-3.5 h-3.5" />}
+  <span>{mode === 'expert' ? L('وضع الفلاح', 'Mode agriculteur', 'Farmer mode') : L('وضع الخبير', 'Mode expert', 'Expert mode')}</span>
+</button>
 
                 {/* 3-Language Switcher (AR / FR / EN) */}
                 <div className="flex items-center bg-[#EFE9DC] border border-[#D5C4AC] rounded-full p-0.5 text-xs font-bold text-[#4D3F2C]">
@@ -904,12 +870,13 @@ function MainLayout() {
                         <h3 className="text-2xl font-black text-[#1E331A]">
                           {isAr ? `المحاصيل الأنسب لـ ${activeRegionName}` : isEn ? `Recommended Crops for ${activeRegionName}` : `Cultures recommandées pour ${activeRegionName}`}
                         </h3>
+                        {/* MODIF #2b — sous-titre trilingue avec précédent cultural */}
                         <p className="text-xs text-[#7A6B53]">
-                          {isAr 
-                            ? `بناءً على أمطار ناسا (${annualRain} ملم) ومحصولك السابق (${previousCrop === 'wheat_hard' ? 'القمح الصلب' : previousCrop})`
-                            : isEn
-                            ? `Based on NASA rainfall (${annualRain} mm) and previous crop.`
-                            : `Basé sur les données NASA (${annualRain} mm) et votre précédent cultural.`}
+                          {L(
+                            `بناءً على أمطار ناسا (${annualRain} ملم) ومحصولك السابق (${prevCropLabel})`,
+                            `Basé sur les données NASA (${annualRain} mm) et votre précédent cultural (${prevCropLabel}).`,
+                            `Based on NASA rainfall (${annualRain} mm) and your previous crop (${prevCropLabel}).`
+                          )}
                         </p>
                       </div>
 
@@ -923,7 +890,8 @@ function MainLayout() {
                                 selectedCropIndex === idx ? 'bg-[#2D4A27] text-white shadow-sm' : 'text-[#61513C] hover:bg-[#E5DDCF]'
                               }`}
                             >
-                              #{idx + 1} {isAr ? rec.crop_name_ar : rec.crop_name_fr}
+                              {/* MODIF #2c — fallback EN pour les onglets cultures */}
+                              #{idx + 1} {isAr ? rec.crop_name_ar : isEn ? (rec.crop_name_en || rec.crop_name_fr) : rec.crop_name_fr}
                             </button>
                           ))}
                         </div>
@@ -936,13 +904,16 @@ function MainLayout() {
                           <RefreshCw className="w-8 h-8 animate-spin text-[#8C3A27]" />
                         </div>
                         <div>
+                          {/* MODIF #2d — textes de chargement trilingues */}
                           <h4 className="text-base font-bold text-[#1E331A]">
-                            {isAr ? 'جاري تحليل إحداثيات الحقل عبر أقمار ناسا...' : 'Traitement des observations NASA POWER en cours...'}
+                            {L('جاري تحليل إحداثيات الحقل عبر أقمار ناسا...', 'Traitement des observations NASA POWER en cours...', 'Processing NASA POWER observations...')}
                           </h4>
                           <p className="text-xs text-[#7A6B53] mt-1">
-                            {isAr 
-                              ? `فحص سجل 5 سنوات من التساقطات والحرارة التراكمية لموقع ${currentRegion.name_ar}...`
-                              : `Calcul du bilan hydrique et de la rotation des sols pour ${currentRegion.name_fr}...`}
+                            {L(
+                              `فحص سجل 5 سنوات من التساقطات والحرارة التراكمية لموقع ${currentRegion.name_ar}...`,
+                              `Calcul du bilan hydrique et de la rotation des sols pour ${currentRegion.name_fr}...`,
+                              `Computing water balance and crop rotation for ${currentRegion.name_en}...`
+                            )}
                           </p>
                         </div>
                       </div>
@@ -964,9 +935,13 @@ function MainLayout() {
                               <h4 className="text-3xl sm:text-4xl font-black text-[#1E331A]">
                                 {isAr ? activeRecommendation.crop_name_ar : isEn ? (activeRecommendation.crop_name_en || activeRecommendation.crop_name_fr) : activeRecommendation.crop_name_fr}
                               </h4>
-                              <p className="text-xs font-bold text-[#7A6B53] mt-1">
-                                {isAr ? `الفئة: ${activeRecommendation.crop_category} • المساحة: ${fieldSize} هكتار` : isEn ? `Category: ${activeRecommendation.crop_category} • Field Area: ${fieldSize} Ha` : `Catégorie : ${activeRecommendation.crop_category} • Surface : ${fieldSize} Ha`}
-                              </p>
+                               <p className="text-xs font-bold text-[#7A6B53] mt-1">
+                               {isAr 
+                                ? `الفئة: ${translateCategory(activeRecommendation.crop_category)} • المساحة: ${fieldSize} هكتار` 
+                                : isEn 
+                                ? `Category: ${translateCategory(activeRecommendation.crop_category)} • Field Area: ${fieldSize} Ha` 
+                                : `Catégorie : ${translateCategory(activeRecommendation.crop_category)} • Surface : ${fieldSize} Ha`}
+                                 </p>
                             </div>
 
                             <div className="space-y-2">
@@ -979,7 +954,7 @@ function MainLayout() {
                             </div>
 
                             {/* Scientific Evidences & Agronomic Citations (For Doctors & Engineers) */}
-                            {activeRecommendation.evidences && activeRecommendation.evidences.length > 0 && (
+                            {mode === 'expert' && activeRecommendation.evidences && activeRecommendation.evidences.length > 0 && (
                               <div className="p-4 bg-[#EFE9DC] rounded-2xl border border-[#DECAB3] space-y-2.5">
                                 <div className="text-xs font-black text-[#1E331A] flex items-center gap-1.5">
                                   <ShieldCheck className="w-4 h-4 text-[#2D4A27]" />
@@ -1006,71 +981,19 @@ function MainLayout() {
                               </div>
                             )}
 
-                            {/* ─── NEW: WHAT-IF SIMULATOR & MULTI-YEAR ROTATION PLAN ─── */}
-                            <div className="p-4 bg-[#F4EFE6] rounded-2xl border-2 border-[#2D4A27]/20 space-y-3">
-                              <div className="flex items-center justify-between">
-                                <div className="flex items-center gap-2">
+                            {/* ═══ MODIF #1 — Remplacement du bloc « Et si » statique par un lien vers le simulateur ═══ */}
+                            {mode === 'expert' && (
+                              <Link
+                                to="/simulator"
+                                className="flex items-center justify-between p-4 bg-[#F4EFE6] rounded-2xl border-2 border-[#2D4A27]/20 text-xs font-black text-[#1E331A] hover:bg-[#EFE9DC]"
+                              >
+                                <span className="flex items-center gap-2">
                                   <Sparkles className="w-4 h-4 text-[#8C3A27]" />
-                                  <span className="text-xs font-black text-[#1E331A]">
-                                    {isAr ? 'محاكاة السيناريوهات المناخية (Et si / ماذا لو؟)' : isEn ? 'Climate "What-If" Scenario Simulator' : 'Simulateur d\'aléas "Et Si ?" (What-If)'}
-                                  </span>
-                                </div>
-                                <span className="text-[10px] bg-[#2D4A27] text-white px-2 py-0.5 rounded-full font-bold">
-                                  {isAr ? 'خوارزمية جديدة' : isEn ? 'New Engine' : 'Nouveau Moteur'}
+                                  {L('افتح محاكي «ماذا لو؟»', 'Ouvrir le simulateur « Et si ? »', 'Open the What-If simulator')}
                                 </span>
-                              </div>
-
-                              <p className="text-[11px] text-[#61513C]">
-                                {isAr 
-                                  ? 'اختر سيناريو مناخي لاختبار متانة خطتك ومحاكاة النتيجة في حالة الجفاف أو توفر مياه السقي:' 
-                                  : isEn
-                                  ? 'Test your field plan resilience under simulated climate anomalies or irrigation availability:'
-                                  : 'Testez la résilience de votre parcelle face aux aléas climatiques :'}
-                              </p>
-
-                              {/* What-If Scenario Pills */}
-                              <div className="grid grid-cols-1 sm:grid-cols-3 gap-2 text-xs">
-                                <div className="p-2.5 rounded-xl bg-white/80 border border-[#DECAB3] space-y-1">
-                                  <div className="font-bold text-[#8C3A27] flex items-center justify-between text-[11px]">
-                                    <span>🌧️ {isAr ? 'لو نقص المطر 20%' : isEn ? 'Rainfall -20%' : 'Pluie -20%'}</span>
-                                    <span className="text-amber-700 bg-amber-50 px-1.5 py-0.5 rounded font-mono">-9 pts</span>
-                                  </div>
-                                  <p className="text-[10px] text-[#7A6B53]">
-                                    {isAr ? 'الحمص يظل مقاوماً، والقمح يتراجع لخيار خطر.' : isEn ? 'Chickpea stays resilient, wheat shifts to higher risk.' : 'Le pois chiche résiste, le blé devient risqué.'}
-                                  </p>
-                                </div>
-
-                                <div className="p-2.5 rounded-xl bg-white/80 border border-[#DECAB3] space-y-1">
-                                  <div className="font-bold text-[#2D4A27] flex items-center justify-between text-[11px]">
-                                    <span>💧 {isAr ? 'لو تم سقي الحقل' : isEn ? 'Supplemental Irrigation' : 'Irrigation'}</span>
-                                    <span className="text-emerald-700 bg-emerald-50 px-1.5 py-0.5 rounded font-mono">+22 pts</span>
-                                  </div>
-                                  <p className="text-[10px] text-[#7A6B53]">
-                                    {isAr ? 'يقفز التوافق إلى 100% ويفتح إمكانية زراعة البطاطس.' : isEn ? 'Affinity reaches 100% and unlocks high-yield potato rotation.' : 'Score 100% et rotation vers pomme de terre.'}
-                                  </p>
-                                </div>
-
-                                <div className="p-2.5 rounded-xl bg-white/80 border border-[#DECAB3] space-y-1">
-                                  <div className="font-bold text-red-700 flex items-center justify-between text-[11px]">
-                                    <span>⚠️ {isAr ? 'لو كررنا القمح' : isEn ? 'Continuous Wheat (2 yrs)' : 'Céréale / Céréale'}</span>
-                                    <span className="text-red-700 bg-red-50 px-1.5 py-0.5 rounded font-mono">-39 pts</span>
-                                  </div>
-                                  <p className="text-[10px] text-[#7A6B53]">
-                                    {isAr ? 'خيار مرفوض (à éviter) بسبب استنزاف النيتروجين.' : isEn ? 'Strictly discouraged: soil nitrogen depletion and fungal root rot.' : 'À éviter absolument : rupture de fertilité.'}
-                                  </p>
-                                </div>
-                              </div>
-
-                              {/* Multi-Year Rotation Horizon */}
-                              <div className="pt-2 border-t border-[#DECAB3]/70 flex items-center justify-between text-[11px] text-[#4D3F2C] flex-wrap gap-2">
-                                <span className="font-bold">
-                                  📅 {isAr ? 'أفق الدورة للسنة القادمة (N+1):' : isEn ? 'Next Season Horizon (Year N+1):' : 'Horizon de rotation (Année N+1) :'}
-                                </span>
-                                <span className="bg-[#EFE9DC] px-2.5 py-1 rounded-lg font-semibold text-[#1E331A] border border-[#D5C4AC]">
-                                  {isAr ? '🌾 قمح صلب / لين (استفادة من نيتروجين الحمص)' : isEn ? '🌾 Durum / Soft Wheat (Leveraging fixed N)' : '🌾 Blé Dur / Tendre (Valorisation de l\'azote fixé)'}
-                                </span>
-                              </div>
-                            </div>
+                                {isAr ? <ArrowLeft className="w-4 h-4" /> : <ArrowRight className="w-4 h-4" />}
+                              </Link>
+                            )}
 
                             {activeRecommendation.cautions && activeRecommendation.cautions.length > 0 && (
                               <div className="p-3 bg-amber-50 rounded-2xl border border-amber-200 space-y-1">
@@ -1109,8 +1032,9 @@ function MainLayout() {
                               alt={activeRecommendation.crop_name_fr}
                               className="w-full h-full object-cover"
                             />
+                            {/* MODIF #2e — badge de score trilingue */}
                             <div className="absolute top-4 start-4 bg-[#2D4A27]/90 backdrop-blur-md text-white text-xs font-black px-3.5 py-1.5 rounded-full shadow-md">
-                              {isAr ? `مطابق بنسبة ${activeRecommendation.score}%` : `Score ${activeRecommendation.score}%`}
+                              {isAr ? `مطابق بنسبة ${activeRecommendation.score}%` : isEn ? `Match ${activeRecommendation.score}%` : `Score ${activeRecommendation.score}%`}
                             </div>
                           </div>
                         </div>
@@ -1118,162 +1042,142 @@ function MainLayout() {
                     ) : (
                       <div className="p-8 bg-[#FAF7F2] rounded-3xl border border-[#DECAB3] text-center">
                         <RefreshCw className="w-6 h-6 animate-spin text-[#8C3A27] mx-auto mb-2" />
-                        <p className="text-xs font-bold text-[#61513C]">{isAr ? 'جاري استرجاع معطيات ناسا...' : 'Calcul des recommandations...'}</p>
+                        {/* MODIF #2e — texte de secours trilingue */}
+                        <p className="text-xs font-bold text-[#61513C]">{L('جاري استرجاع معطيات ناسا...', 'Calcul des recommandations...', 'Computing recommendations...')}</p>
                       </div>
                     )}
 
-                    <div className="pt-4 flex justify-between">
+                    {/* ═══ MODIF #2f — Boutons du bas de /recommendation ═══ */}
+                    <div className="pt-4 flex justify-between gap-3 flex-wrap">
                       <button
-                        onClick={() => {
-                          setStep(2);
-                          navigate('/');
-                        }}
+                        onClick={() => { setStep(2); navigate('/'); }}
                         className="px-6 py-3.5 bg-[#EFE9DC] hover:bg-[#E5DDCF] border border-[#DECAB3] text-[#2D4A27] rounded-xl font-bold text-xs flex items-center gap-2 cursor-pointer"
                       >
                         {isAr ? <ArrowRight className="w-4 h-4" /> : <ArrowLeft className="w-4 h-4" />}
-                        <span>{isAr ? 'تغيير معطيات الحقل' : 'Modifier la parcelle'}</span>
+                        <span>{L('تغيير معطيات الحقل', 'Modifier la parcelle', 'Edit field details')}</span>
                       </button>
 
-                      <Link
-                        to="/weather"
-                        className="px-6 py-3.5 bg-[#2D4A27] hover:bg-[#1E331A] text-white rounded-xl font-bold text-xs flex items-center gap-2 shadow-sm"
+                      <button
+                        onClick={() => { setMode('expert'); navigate('/weather'); }}
+                        className="px-6 py-3.5 bg-[#2D4A27] hover:bg-[#1E331A] text-white rounded-xl font-bold text-xs flex items-center gap-2 shadow-sm cursor-pointer"
                       >
-                        <span>{isAr ? 'فحص حالة الأرض والطقس' : 'Voir la météo du sol'}</span>
-                        {isAr ? <ArrowLeft className="w-4 h-4" /> : <ArrowRight className="w-4 h-4" />}
-                      </Link>
+                        <Microscope className="w-4 h-4" />
+                        <span>
+                          {mode === 'farmer'
+                            ? L('تفاصيل تقنية للمختصين', 'Détails techniques (spécialistes)', 'Technical details (specialists)')
+                            : L('المؤشرات المناخية', 'Indicateurs climatiques', 'Climate indicators')}
+                        </span>
+                      </button>
                     </div>
                   </div>
                 } />
 
-                {/* ─── ROUTE 3: "/weather" (حالة الأرض والطقس الحقيقية من NASA POWER) ─── */}
+                {/* ─── ROUTE 3: "/weather" (MODIF #4 — version trilingue complète) ─── */}
                 <Route path="/weather" element={
                   <div className="space-y-6 animate-in fade-in duration-300">
-                    {/* Header */}
                     <div className="flex flex-wrap items-center justify-between gap-4">
                       <div>
                         <div className="text-xs font-bold text-[#8C3A27] flex items-center gap-1.5">
                           <Database className="w-3.5 h-3.5" />
-                          <span>{isAr ? 'بيانات الأرصاد الفضائية الحقيقية • NASA POWER AG' : 'Données Satellites Réelles • NASA POWER AG'}</span>
+                          <span>{L('بيانات الأرصاد الفضائية الحقيقية • NASA POWER AG', 'Données satellites réelles • NASA POWER AG', 'Real satellite data • NASA POWER AG')}</span>
                         </div>
                         <h3 className="text-2xl font-black text-[#1E331A]">
-                          {isAr ? `المؤشرات المناخية لـ ${currentRegion.name_ar}` : `Indicateurs Agro-climatiques : ${currentRegion.name_fr}`}
+                          {L(`المؤشرات المناخية لـ ${activeRegionName}`, `Indicateurs agro-climatiques : ${activeRegionName}`, `Agro-climatic indicators: ${activeRegionName}`)}
                         </h3>
                         <p className="text-xs text-[#7A6B53] mt-0.5">
-                          {isAr 
-                            ? `إحداثيات الرصد: خط العرض ${currentRegion.lat}°N • خط الطول ${currentRegion.lon}°W • دقة الاستشعار 0.5°`
-                            : `Coordonnées : ${currentRegion.lat}°N, ${currentRegion.lon}°W • Résolution spatiale : 0.5°`}
+                          {L(
+                            `إحداثيات الرصد: ${activeLat.toFixed(2)}°N • ${activeLon.toFixed(2)}° • دقة الاستشعار 0.5°`,
+                            `Coordonnées : ${activeLat.toFixed(2)}°N, ${activeLon.toFixed(2)}° • Résolution spatiale : 0.5°`,
+                            `Coordinates: ${activeLat.toFixed(2)}°N, ${activeLon.toFixed(2)}° • Spatial resolution: 0.5°`
+                          )}
                         </p>
                       </div>
 
-                      {/* Official NASA Badge */}
                       <div className="flex items-center gap-2 bg-[#FAF7F2] p-2.5 rounded-2xl border border-[#DECAB3] shadow-xs">
                         <span className={`w-3 h-3 rounded-full ${apiResponse?.data_status === 'live' ? 'bg-emerald-500 animate-pulse' : 'bg-amber-500'}`}></span>
                         <div className="text-start">
                           <div className="text-[10px] font-black uppercase text-[#2D4A27]">
-                            {apiResponse?.data_status === 'live' ? (isAr ? 'بيانات ناسا مباشرة (LIVE)' : 'NASA DIRECT LIVE') : (isAr ? 'مسترجع من الكاش (CACHED)' : 'CACHE NASA ACTIF')}
+                            {apiResponse?.data_status === 'live'
+                              ? L('بيانات ناسا مباشرة (LIVE)', 'NASA DIRECT LIVE', 'NASA LIVE DATA')
+                              : L('مسترجع من الكاش (CACHED)', 'CACHE NASA ACTIF', 'NASA CACHED DATA')}
                           </div>
                           <div className="text-[10px] text-[#7A6B53]">
-                            {apiResponse?.provenance?.period ? `${apiResponse.provenance.period.start.slice(0,4)} - ${apiResponse.provenance.period.end.slice(0,4)}` : '2021 - 2025 (5 ans)'}
+                            {apiResponse?.provenance?.period ? `${apiResponse.provenance.period.start.slice(0, 4)} - ${apiResponse.provenance.period.end.slice(0, 4)}` : L('2021 - 2025 (5 سنوات)', '2021 - 2025 (5 ans)', '2021 - 2025 (5 years)')}
                           </div>
                         </div>
                       </div>
                     </div>
 
-                    {/* Scientific Indicators Grid (100% Real from API) */}
                     <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
-                      
-                      {/* 1. Annual Precipitation */}
-                      <div className="bg-[#FAF7F2] p-6 rounded-3xl border border-[#DECAB3] flex flex-col justify-between shadow-xs">
-                        <div className="flex items-center justify-between">
-                          <span className="text-xs font-bold text-[#7A6B53] flex items-center gap-1.5">
-                            <CloudRain className="w-4 h-4 text-sky-600" />
-                            <span>{isAr ? 'التساقطات السنوية التراكمية' : 'Précipitations Annuelles'}</span>
-                          </span>
-                          <span className="text-[10px] font-mono text-[#8C7A60] bg-[#EFE9DC] px-2 py-0.5 rounded-full">PRECTOTCORR</span>
-                        </div>
-                        <div className="my-4">
-                          <div className="text-4xl font-black text-[#1E331A]">
-                            {indicators?.annual_rain_mm !== undefined ? indicators.annual_rain_mm : annualRain} <span className="text-lg font-bold text-[#7A6B53]">{isAr ? 'ملم/سنة' : 'mm/an'}</span>
+                      {[
+                        {
+                          icon: CloudRain, iconCls: 'text-sky-600', code: 'PRECTOTCORR',
+                          title: L('التساقطات السنوية التراكمية', 'Précipitations annuelles', 'Annual precipitation'),
+                          value: String(indicators?.annual_rain_mm ?? annualRain),
+                          unit: L('ملم/سنة', 'mm/an', 'mm/yr'),
+                          note: indicators?.annual_rain_mm && indicators.annual_rain_mm > 400
+                            ? L('أمطار ملائمة للحبوب والقطاني بورية', 'Pluviosité favorable aux céréales', 'Rainfall favorable to cereals')
+                            : L('منطقة نصف جافة تتطلب سقي تكميلي', "Zone semi-aride, appoint d'eau recommandé", 'Semi-arid zone, supplemental water recommended'),
+                          footLabel: L('مؤشر الجفاف (UNEP)', "Indice d'aridité UNEP", 'UNEP aridity index'),
+                          footValue: indicators?.aridity_index ? indicators.aridity_index.toFixed(3) : '—',
+                        },
+                        {
+                          icon: Sun, iconCls: 'text-amber-600', code: 'T2M',
+                          title: L('معدل الحرارة السنوي (2 متر)', 'Température moyenne (2 m)', 'Mean temperature (2 m)'),
+                          value: indicators?.mean_annual_temp_c !== undefined ? indicators.mean_annual_temp_c.toFixed(1) : String(avgTemp),
+                          unit: '°C',
+                          note: indicators?.mean_annual_temp_c && indicators.mean_annual_temp_c >= 22
+                            ? L('طقس دافئ إلى حار ملائم للأشجار المقاومة', "Climat chaud propice à l'argan et l'olivier", 'Warm climate suited to argan and olive')
+                            : L('مناخ معتدل مناسب للنضج الخضري', 'Climat tempéré favorable', 'Mild climate, favorable to crop growth'),
+                          footLabel: L('الحرارة التراكمية', 'Degrés-jours de croissance', 'Growing degree days'),
+                          footValue: indicators?.gdd_base10 ? `${Math.round(indicators.gdd_base10)} GDD` : '—',
+                        },
+                        {
+                          icon: Snowflake, iconCls: 'text-cyan-600', code: 'T2M_MIN < 0°C',
+                          title: L('أيام الصقيع السنوي', 'Risque de gel annuel', 'Annual frost risk'),
+                          value: String(indicators?.frost_days_per_year ?? 0),
+                          unit: L('أيام/سنة', 'j/an', 'days/yr'),
+                          note: (indicators?.frost_days_per_year || 0) <= 2
+                            ? L('خطر الصقيع منعدم أو ضئيل جداً', 'Risque de gel minime ou nul', 'Minimal or no frost risk')
+                            : L('انتباه من موجات البرد الشتوية', 'Attention au froid hivernal', 'Beware of winter cold spells'),
+                          footLabel: L('أشهر الجفاف (<30 ملم)', 'Mois secs (<30 mm)', 'Dry months (<30 mm)'),
+                          footValue: indicators?.dry_months !== undefined ? `${indicators.dry_months} ${L('أشهر/سنة', 'mois/an', 'months/yr')}` : '—',
+                        },
+                      ].map((c, i) => {
+                        const Icon = c.icon;
+                        return (
+                          <div key={i} className="bg-[#FAF7F2] p-6 rounded-3xl border border-[#DECAB3] flex flex-col justify-between shadow-xs">
+                            <div className="flex items-center justify-between">
+                              <span className="text-xs font-bold text-[#7A6B53] flex items-center gap-1.5">
+                                <Icon className={`w-4 h-4 ${c.iconCls}`} />
+                                <span>{c.title}</span>
+                              </span>
+                              <span className="text-[10px] font-mono text-[#8C7A60] bg-[#EFE9DC] px-2 py-0.5 rounded-full">{c.code}</span>
+                            </div>
+                            <div className="my-4">
+                              <div className="text-4xl font-black text-[#1E331A]">
+                                {c.value} <span className="text-lg font-bold text-[#7A6B53]">{c.unit}</span>
+                              </div>
+                              <p className="text-[11px] text-[#7A6B53] mt-1">{c.note}</p>
+                            </div>
+                            <div className="pt-2 border-t border-[#DECAB3]/60 text-[10px] text-[#7A6B53] font-semibold flex items-center justify-between">
+                              <span>{c.footLabel}</span>
+                              <span className="font-mono font-bold">{c.footValue}</span>
+                            </div>
                           </div>
-                          <p className="text-[11px] text-[#7A6B53] mt-1">
-                            {indicators?.annual_rain_mm && indicators.annual_rain_mm > 400 
-                              ? (isAr ? 'أمطار ملائمة للحبوب والقطاني بورية' : 'Pluviosité favorable aux céréales') 
-                              : (isAr ? 'منطقة نصف جافة تتطلب سقي تكميلي' : 'Zone semi-aride, appoint d\'eau recommandé')}
-                          </p>
-                        </div>
-                        <div className="pt-2 border-t border-[#DECAB3]/60 text-[10px] text-[#8C3A27] font-semibold flex items-center justify-between">
-                          <span>{isAr ? 'مؤشر الجفاف (UNEP Aridity)' : 'Indice d\'aridité UNEP'}</span>
-                          <span className="font-mono font-bold">{indicators?.aridity_index ? indicators.aridity_index.toFixed(3) : '0.40'}</span>
-                        </div>
-                      </div>
-
-                      {/* 2. Mean Annual Temperature */}
-                      <div className="bg-[#FAF7F2] p-6 rounded-3xl border border-[#DECAB3] flex flex-col justify-between shadow-xs">
-                        <div className="flex items-center justify-between">
-                          <span className="text-xs font-bold text-[#7A6B53] flex items-center gap-1.5">
-                            <Sun className="w-4 h-4 text-amber-600" />
-                            <span>{isAr ? 'معدل الحرارة السنوي (2 متر)' : 'Température Moyenne (2m)'}</span>
-                          </span>
-                          <span className="text-[10px] font-mono text-[#8C7A60] bg-[#EFE9DC] px-2 py-0.5 rounded-full">T2M</span>
-                        </div>
-                        <div className="my-4">
-                          <div className="text-4xl font-black text-[#1E331A]">
-                            {indicators?.mean_annual_temp_c !== undefined ? indicators.mean_annual_temp_c.toFixed(1) : avgTemp} <span className="text-lg font-bold text-[#7A6B53]">°C</span>
-                          </div>
-                          <p className="text-[11px] text-[#7A6B53] mt-1">
-                            {indicators?.mean_annual_temp_c && indicators.mean_annual_temp_c >= 22 
-                              ? (isAr ? 'طقس دافئ إلى حار ملائم للأشجار المقاومة' : 'Climat chaud propice à l\'argan et l\'olivier') 
-                              : (isAr ? 'مناخ معتدل مناسب للنضج الخضري' : 'Climat tempéré favorable')}
-                          </p>
-                        </div>
-                        <div className="pt-2 border-t border-[#DECAB3]/60 text-[10px] text-[#2D4A27] font-semibold flex items-center justify-between">
-                          <span>{isAr ? 'حساب الحرارة التراكمية' : 'Degrés-jours de croissance'}</span>
-                          <span className="font-mono font-bold">{indicators?.gdd_base10 ? `${Math.round(indicators.gdd_base10)} GDD` : '4076 GDD'}</span>
-                        </div>
-                      </div>
-
-                      {/* 3. Frost Risk & Extreme Cold */}
-                      <div className="bg-[#FAF7F2] p-6 rounded-3xl border border-[#DECAB3] flex flex-col justify-between shadow-xs">
-                        <div className="flex items-center justify-between">
-                          <span className="text-xs font-bold text-[#7A6B53] flex items-center gap-1.5">
-                            <Snowflake className="w-4 h-4 text-cyan-600" />
-                            <span>{isAr ? 'أيام الصقيع السنوي (جريحة)' : 'Risque de Gel Annuel'}</span>
-                          </span>
-                          <span className="text-[10px] font-mono text-[#8C7A60] bg-[#EFE9DC] px-2 py-0.5 rounded-full">T2M_MIN &lt; 0°C</span>
-                        </div>
-                        <div className="my-4">
-                          <div className="text-4xl font-black text-[#1E331A]">
-                            {indicators?.frost_days_per_year !== undefined ? indicators.frost_days_per_year : 0} <span className="text-lg font-bold text-[#7A6B53]">{isAr ? 'أيام/سنة' : 'j/an'}</span>
-                          </div>
-                          <p className="text-[11px] text-[#7A6B53] mt-1">
-                            {(indicators?.frost_days_per_year || 0) <= 2 
-                              ? (isAr ? 'خطر الصقيع منعدم أو ضئيل جداً على المحاصيل' : 'Risque de gel minime ou nul') 
-                              : (isAr ? 'انتباه من موجات البرد الشتوية في المرتفعات' : 'Attention au froid hivernal')}
-                          </p>
-                        </div>
-                        <div className="pt-2 border-t border-[#DECAB3]/60 text-[10px] text-[#7A6B53] font-semibold flex items-center justify-between">
-                          <span>{isAr ? 'أشهر الجفاف (<30mm)' : 'Mois secs (<30mm)'}</span>
-                          <span className="font-mono font-bold">{indicators?.dry_months ? `${indicators.dry_months} mois/an` : '7 mois/an'}</span>
-                        </div>
-                      </div>
-
+                        );
+                      })}
                     </div>
 
-                    {/* Scientific Provenance Banner (NASA Space Apps Challenge Field Shift Compliance) */}
                     <div className="p-6 bg-[#FAF7F2] rounded-3xl border border-[#DECAB3] space-y-4">
                       <div className="flex items-center justify-between flex-wrap gap-2">
                         <div className="flex items-center gap-2">
                           <ShieldCheck className="w-5 h-5 text-[#2D4A27]" />
                           <h4 className="text-sm font-extrabold text-[#1E331A]">
-                            {isAr ? 'بيانات المرجع الفضائي والمصدر (NASA Earth Observation Provenance)' : 'Traçabilité et Données Scientifiques NASA POWER'}
+                            {L('المرجع الفضائي والمصدر (NASA Earth Observation)', 'Traçabilité et données scientifiques NASA POWER', 'NASA POWER data provenance')}
                           </h4>
                         </div>
-                        <a 
-                          href="https://power.larc.nasa.gov/" 
-                          target="_blank" 
-                          rel="noreferrer"
-                          className="text-[11px] font-bold text-[#8C3A27] hover:underline flex items-center gap-1"
-                        >
+                        <a href="https://power.larc.nasa.gov/" target="_blank" rel="noreferrer" className="text-[11px] font-bold text-[#8C3A27] hover:underline flex items-center gap-1">
                           <span>NASA POWER Project</span>
                           <ExternalLink className="w-3 h-3" />
                         </a>
@@ -1281,48 +1185,43 @@ function MainLayout() {
 
                       <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-3 text-xs bg-[#EFE9DC] p-4 rounded-2xl border border-[#D5C4AC]/60">
                         <div>
-                          <div className="text-[10px] text-[#7A6B53] font-bold">{isAr ? 'المصدر الفضائي:' : 'Projet Satellite :'}</div>
+                          <div className="text-[10px] text-[#7A6B53] font-bold">{L('المصدر:', 'Projet satellite :', 'Source:')}</div>
                           <div className="font-semibold text-[#1E331A]">{apiResponse?.provenance?.source || 'NASA POWER Daily AG v2'}</div>
                         </div>
                         <div>
-                          <div className="text-[10px] text-[#7A6B53] font-bold">{isAr ? 'فترة الحساب الإحصائي:' : 'Période analysée :'}</div>
+                          <div className="text-[10px] text-[#7A6B53] font-bold">{L('الفترة المدروسة:', 'Période analysée :', 'Analysed period:')}</div>
                           <div className="font-semibold text-[#1E331A]">
                             {apiResponse?.provenance?.period ? `${apiResponse.provenance.period.start} → ${apiResponse.provenance.period.end}` : '20210101 → 20251231'}
                           </div>
                         </div>
                         <div>
-                          <div className="text-[10px] text-[#7A6B53] font-bold">{isAr ? 'الإحداثيات الفعلية:' : 'Point GPS exact :'}</div>
+                          <div className="text-[10px] text-[#7A6B53] font-bold">{L('الإحداثيات الفعلية:', 'Point GPS exact :', 'Exact GPS point:')}</div>
                           <div className="font-semibold font-mono text-[#1E331A]">
-                            {apiResponse?.provenance?.latitude ?? currentRegion.lat}°N, {apiResponse?.provenance?.longitude ?? currentRegion.lon}°W
+                            {apiResponse?.provenance?.latitude ?? activeLat}°N, {apiResponse?.provenance?.longitude ?? activeLon}°
                           </div>
                         </div>
                         <div>
-                          <div className="text-[10px] text-[#7A6B53] font-bold">{isAr ? 'المتغيرات المسترجعة:' : 'Variables API :'}</div>
+                          <div className="text-[10px] text-[#7A6B53] font-bold">{L('المتغيرات:', 'Variables API :', 'API variables:')}</div>
                           <div className="font-mono text-[10px] text-[#8C3A27] font-semibold">T2M, PRECTOTCORR, RH2M, GDD</div>
                         </div>
                       </div>
 
                       <p className="text-xs text-[#61513C] leading-relaxed">
-                        {isAr 
-                          ? `هذه المؤشرات مستخرجة مباشرة من مشروع NASA POWER (Agroclimatology Community) بمركز لانغلي للأبحاث (Langley Research Center). يتم دمج هذه القياسات مع معادلات الدورة الزراعية المعتمدة من المعهد الوطني للبحث الزراعي (INRA) ومنظمة (FAO) لتقديم أدق توصية لمحصول القطعة الأرضية.`
-                          : `Indicateurs extraits directement du projet NASA POWER (Agroclimatology Community) du NASA Langley Research Center. Ces données alimentent nos règles agronomiques (INRA / FAO) pour une rotation des cultures durable et rentable.`}
+                        {L(
+                          'هذه المؤشرات مستخرجة من مشروع NASA POWER (Agroclimatology) بمركز لانغلي للأبحاث، وتُدمج مع قواعد الدورة الزراعية المعتمدة على INRA و FAO.',
+                          'Indicateurs extraits du projet NASA POWER (Agroclimatology) du NASA Langley Research Center. Ces données alimentent nos règles agronomiques (INRA / FAO) pour une rotation des cultures durable.',
+                          'Indicators extracted from NASA POWER (Agroclimatology) at the NASA Langley Research Center. They feed our agronomic rules (INRA / FAO) for sustainable crop rotation.'
+                        )}
                       </p>
                     </div>
 
-                    <div className="pt-4 flex justify-between">
-                      <Link
-                        to="/recommendation"
-                        className="px-6 py-3.5 bg-[#EFE9DC] hover:bg-[#E5DDCF] border border-[#DECAB3] text-[#2D4A27] rounded-xl font-bold text-xs flex items-center gap-2"
-                      >
+                    <div className="pt-4 flex justify-between gap-3 flex-wrap">
+                      <Link to="/recommendation" className="px-6 py-3.5 bg-[#EFE9DC] hover:bg-[#E5DDCF] border border-[#DECAB3] text-[#2D4A27] rounded-xl font-bold text-xs flex items-center gap-2">
                         {isAr ? <ArrowRight className="w-4 h-4" /> : <ArrowLeft className="w-4 h-4" />}
-                        <span>{isAr ? 'رجوع للتوصيات' : 'Retour aux cultures'}</span>
+                        <span>{L('رجوع للتوصيات', 'Retour aux cultures', 'Back to recommendations')}</span>
                       </Link>
-
-                      <Link
-                        to="/advisor"
-                        className="px-6 py-3.5 bg-[#8C3A27] hover:bg-[#732F1F] text-white rounded-xl font-bold text-xs flex items-center gap-2 shadow-sm"
-                      >
-                        <span>{isAr ? 'استشارة المرشد الصوتي' : 'Parler à Ami Ahmed'}</span>
+                      <Link to="/simulator" className="px-6 py-3.5 bg-[#8C3A27] hover:bg-[#732F1F] text-white rounded-xl font-bold text-xs flex items-center gap-2 shadow-sm">
+                        <span>{L('جرّب سيناريوهات «ماذا لو؟»', 'Tester des scénarios « Et si ? »', 'Try What-If scenarios')}</span>
                         {isAr ? <ArrowLeft className="w-4 h-4" /> : <ArrowRight className="w-4 h-4" />}
                       </Link>
                     </div>

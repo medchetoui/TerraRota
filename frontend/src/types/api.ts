@@ -225,7 +225,9 @@ export interface WhatIfResponse {
 
 export interface DataSourceVariable {
   code: string;
-  name: string;
+  name_fr: string;
+  name_ar: string;
+  name_en: string;
   unit: string;
 }
 
@@ -238,17 +240,17 @@ export interface DataSource {
   api_docs_url?: string;
   status: 'fully_integrated' | 'partially_integrated' | 'investigating' | 'not_integrated';
   spatial_resolution: string;
-  temporal_resolution: string;
+  temporal_resolution_fr: string;
+  temporal_resolution_ar: string;
+  temporal_resolution_en: string;
   variables: DataSourceVariable[];
-  processing_methods: string[];
-  limitations: string;
+  processing_methods_fr: string[];
+  processing_methods_ar: string[];
+  processing_methods_en: string[];
+  limitations_fr: string;
+  limitations_ar: string;
+  limitations_en: string;
 }
-
-export interface DataSourcesResponse {
-  status: string;
-  data_sources: DataSource[];
-}
-
 // ─── Farm Plans ─────────────────────────────────────────────
 
 export interface FarmPlan {

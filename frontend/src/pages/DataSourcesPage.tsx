@@ -2,9 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { 
   Database, 
   ExternalLink, 
-  ShieldCheck, 
   AlertCircle, 
-  Layers, 
   Info,
   CheckCircle2,
   Clock
@@ -76,18 +74,22 @@ export const DataSourcesPage: React.FC<DataSourcesPageProps> = ({ lang }) => {
           <span>{isAr ? 'سجل مصادر البيانات الفضائية التابع لناسا' : isEn ? 'NASA Earth Observation Data Registry' : 'Registre des Données Satellitaires NASA'}</span>
         </div>
         <h2 className="text-2xl sm:text-3xl font-black text-[#1E331A]">
-          {isAr ? 'مصادر البيانات والأقمار الاصطناعية المعتمدة' : 'Sources de Données & Satellites NASA'}
+          {isAr ? 'مصادر البيانات والأقمار الاصطناعية المعتمدة' : isEn ? 'NASA Data Sources & Satellites' : 'Sources de Données & Satellites NASA'}
         </h2>
         <p className="text-xs sm:text-sm text-[#7A6B53] max-w-3xl leading-relaxed">
           {isAr 
             ? 'توثيق رسمي لجميع مجموعات البيانات البيئية لوكالة الفضاء الأمريكية (NASA) والمؤسسات الشريكة (ISRIC / FAO) مع بيان دقتها المكانية والزمنية وحالتها التشغيلية في المنصة.'
+            : isEn
+            ? 'Official and transparent inventory of Earth observation data flows used or being integrated into TerraRota, along with their limitations and resolutions.'
             : 'Inventaire officiel et transparent des flux de données d\'observation de la Terre utilisés ou en cours d\'intégration dans TerraRota, avec leurs limites et résolutions.'}
         </p>
       </div>
 
       {/* Sources Cards */}
       {loading ? (
-        <div className="p-12 text-center text-sm font-bold text-[#7A6B53]">Chargement du registre NASA...</div>
+        <div className="p-12 text-center text-sm font-bold text-[#7A6B53]">
+          {isAr ? 'جارٍ تحميل سجل ناسا...' : isEn ? 'Loading NASA registry...' : 'Chargement du registre NASA...'}
+        </div>
       ) : (
         <div className="space-y-6">
           {sources.map((src) => (
@@ -104,13 +106,13 @@ export const DataSourcesPage: React.FC<DataSourcesPageProps> = ({ lang }) => {
                       target="_blank" 
                       rel="noopener noreferrer"
                       className="text-[#8C3A27] hover:text-[#732F1F]"
-                      title="Visiter le portail officiel NASA"
+                      title={isAr ? 'زيارة البوابة الرسمية لناسا' : isEn ? 'Visit official NASA portal' : 'Visiter le portail officiel NASA'}
                     >
                       <ExternalLink className="w-4 h-4" />
                     </a>
                   </div>
                   <p className="text-xs text-[#7A6B53] font-semibold mt-0.5">
-                    Fournisseur : {src.provider} • Produit : <span className="font-mono text-[#1E331A]">{src.product_id}</span>
+                    {isAr ? 'المزود:' : isEn ? 'Provider:' : 'Fournisseur :'} {src.provider} • {isAr ? 'المنتج:' : isEn ? 'Product:' : 'Produit :'} <span className="font-mono text-[#1E331A]">{src.product_id}</span>
                   </p>
                 </div>
                 {getStatusBadge(src.status)}
@@ -119,16 +121,26 @@ export const DataSourcesPage: React.FC<DataSourcesPageProps> = ({ lang }) => {
               {/* Specs Grid */}
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 text-xs">
                 <div className="p-3 rounded-2xl bg-[#EFE9DC]">
-                  <span className="text-[#7A6B53] font-bold block">Résolution Spatiale :</span>
-                  <span className="font-extrabold text-[#1E331A]">{src.spatial_resolution}</span>
+                  <span className="text-[#7A6B53] font-bold block mb-1">
+                    {isAr ? 'الدقة المكانية:' : isEn ? 'Spatial Resolution:' : 'Résolution Spatiale :'}
+                  </span>
+                  <span className="font-extrabold text-[#1E331A]" dir="ltr">
+                    {src.spatial_resolution}
+                  </span>
                 </div>
                 <div className="p-3 rounded-2xl bg-[#EFE9DC]">
-                  <span className="text-[#7A6B53] font-bold block">Résolution Temporelle :</span>
-                  <span className="font-extrabold text-[#1E331A]">{src.temporal_resolution}</span>
+                  <span className="text-[#7A6B53] font-bold block mb-1">
+                    {isAr ? 'الدقة الزمنية:' : isEn ? 'Temporal Resolution:' : 'Résolution Temporelle :'}
+                  </span>
+                  <span className="font-extrabold text-[#1E331A]">
+                    {isAr ? src.temporal_resolution_ar : isEn ? src.temporal_resolution_en : src.temporal_resolution_fr}
+                  </span>
                 </div>
                 <div className="p-3 rounded-2xl bg-[#EFE9DC] sm:col-span-2">
-                  <span className="text-[#7A6B53] font-bold block">Variables extraites :</span>
-                  <span className="font-semibold text-[#1E331A]">
+                  <span className="text-[#7A6B53] font-bold block mb-1">
+                    {isAr ? 'المتغيرات المستخرجة:' : isEn ? 'Extracted Variables:' : 'Variables extraites :'}
+                  </span>
+                  <span className="font-semibold text-[#1E331A]" dir="ltr">
                     {src.variables.map(v => `${v.code} (${v.unit})`).join(', ')}
                   </span>
                 </div>
@@ -136,9 +148,11 @@ export const DataSourcesPage: React.FC<DataSourcesPageProps> = ({ lang }) => {
 
               {/* Processing methods */}
               <div className="space-y-1.5 text-xs text-[#4D3F2C]">
-                <div className="font-bold text-[#1E331A]">Traitements & Algorithmes Appliqués :</div>
-                <ul className="list-disc list-inside space-y-0.5 text-[#61513C]">
-                  {src.processing_methods.map((m, i) => (
+                <div className="font-bold text-[#1E331A]">
+                  {isAr ? 'المعالجات والخوارزميات المطبقة:' : isEn ? 'Processing & Algorithms Applied:' : 'Traitements & Algorithmes Appliqués :'}
+                </div>
+                <ul className={`list-disc space-y-0.5 text-[#61513C] ${isAr ? 'list-inside pr-4' : 'list-inside'}`}>
+                  {(isAr ? src.processing_methods_ar : isEn ? src.processing_methods_en : src.processing_methods_fr).map((m, i) => (
                     <li key={i}>{m}</li>
                   ))}
                 </ul>
@@ -148,7 +162,9 @@ export const DataSourcesPage: React.FC<DataSourcesPageProps> = ({ lang }) => {
               <div className="p-3.5 rounded-2xl bg-[#EFE9DC]/70 border border-[#DECAB3] text-xs text-[#61513C] flex items-start gap-2">
                 <AlertCircle className="w-4 h-4 text-amber-700 shrink-0 mt-0.5" />
                 <div>
-                  <strong className="text-[#1E331A]">Limites Connues :</strong> {src.limitations}
+                  <strong className="text-[#1E331A]">
+                    {isAr ? 'القيود المعروفة:' : isEn ? 'Known Limitations:' : 'Limites Connues :'}
+                  </strong> {isAr ? src.limitations_ar : isEn ? src.limitations_en : src.limitations_fr}
                 </div>
               </div>
             </div>

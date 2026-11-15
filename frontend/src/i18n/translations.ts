@@ -31,18 +31,15 @@ export const translations = {
     submitBtn: 'Obtenir les recommandations',
     reviseBtn: 'Modifier les données',
 
-    // Water access options
-    rainfed: 'Pluvial (Bour / بدون سقي)',
-    irrigated: 'Irrigué (سقوي)',
-    partial: 'Partiellement irrigué (ري تكميلي)',
-
-    // Soil types
-    clay: 'Argileux (طيني)',
-    clay_loam: 'Argilo-limoneux (طيني طميي)',
-    loam: 'Limoneux (طميي)',
-    sandy_loam: 'Sablo-limoneux (رملي طميي)',
-    sandy: 'Sableux (رملي)',
-    unknown: 'Inconnu (غير محدد)',
+  rainfed: 'Pluvial (Bour)',
+irrigated: 'Irrigué',
+partial: 'Partiellement irrigué (appoint)',
+clay: 'Argileux',
+clay_loam: 'Argilo-limoneux (Tirs)',
+loam: 'Limoneux',
+sandy_loam: 'Sablo-limoneux (Hamri)',
+sandy: 'Sableux',
+unknown: 'Inconnu',
 
     // Crop names
     wheat_hard: 'Blé dur',
