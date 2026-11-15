@@ -144,6 +144,11 @@ export const VoiceCallScreen: React.FC<VoiceCallScreenProps> = ({
       });
 
       if (response.ok) {
+        // If user already interrupted while audio was downloading, don't play
+        if (!isSpeakingRef.current) {
+          return;
+        }
+
         const blob = await response.blob();
         const audioUrl = URL.createObjectURL(blob);
         const audio = new Audio(audioUrl);
@@ -153,6 +158,7 @@ export const VoiceCallScreen: React.FC<VoiceCallScreenProps> = ({
           isSpeakingRef.current = false;
           URL.revokeObjectURL(audioUrl);
           if (isCallActiveRef.current) {
+            setCallState('listening');
             if (onEnd) onEnd();
             else startListening();
           }
@@ -262,7 +268,9 @@ export const VoiceCallScreen: React.FC<VoiceCallScreenProps> = ({
       rec.interimResults = true;
 
       rec.onstart = () => {
-        setCallState('listening');
+        if (!isSpeakingRef.current) {
+          setCallState('listening');
+        }
         setErrorNotice(null);
       };
 
@@ -270,6 +278,9 @@ export const VoiceCallScreen: React.FC<VoiceCallScreenProps> = ({
       let accumulatedFinal = '';
 
       rec.onresult = (event: any) => {
+        // If AI is speaking, ignore mic input (echo cancellation)
+        if (isSpeakingRef.current) return;
+
         let currentInterim = '';
         for (let i = event.resultIndex; i < event.results.length; ++i) {
           if (event.results[i].isFinal) {
@@ -287,7 +298,7 @@ export const VoiceCallScreen: React.FC<VoiceCallScreenProps> = ({
         clearTimeout(silenceTimer);
 
         // Only submit the question after the user has completely finished speaking
-        // (silence pause of 2.2 seconds allows the farmer to think and speak without interruption)
+        // (silence pause of 2.2 seconds allows natural speaking while remaining reactive)
         if (currentDisplay.length >= 3) {
           silenceTimer = setTimeout(() => {
             if (isCallActiveRef.current && !isSpeakingRef.current && currentDisplay.length >= 3) {
@@ -506,7 +517,7 @@ export const VoiceCallScreen: React.FC<VoiceCallScreenProps> = ({
               : callState === 'processing'
               ? (isAr ? 'جاري تحليل معطيات ناسا والتربة...' : isEn ? 'Analyzing NASA climate & soil data...' : 'Analyse des données NASA & sol...')
               : callState === 'speaking'
-              ? (isAr ? `${advisorName} كيشرح لك النصيحة...` : isEn ? `${advisorName} is speaking...` : `${advisorName} vous répond...`)
+              ? (isAr ? `${advisorName} كيشرح لك النصيحة... (اضغط الدائرة للمقاطعة)` : isEn ? `${advisorName} is speaking... (tap circle to interrupt)` : `${advisorName} vous répond... (cliquez pour couper)`)
               : (isAr ? 'اضغط على الميكروفون للتكلم' : isEn ? 'Tap microphone to speak' : 'Cliquez sur le micro pour parler')}
           </div>
           <div className="text-xs text-[#DECAB3] opacity-80">

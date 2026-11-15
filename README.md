@@ -127,11 +127,14 @@ The engine calculates the live delta and displays before-and-after affinity scor
 
 ---
 
-## 🌐 Trilingual Accessibility & Voice Guide
+## 🌐 Trilingual Accessibility & Agentic Voice Advisor
 
 - **100% Trilingual Parity**: Full instant switching between **Moroccan Arabic (العربية - RTL)**, **French (Français)**, and **English**.
+- **Agentic AI Agricultural Advisor ("Ami Ahmed" & "Mi Fatima")**:
+  - Full-duplex conversational voice call (`VoiceCallScreen.tsx`) powered by high-definition Moroccan neural voices (**Ami Ahmed 👨‍🌾** via `ar-MA-JamalNeural` and **Mi Fatima 👩‍🌾** via `ar-MA-MounaNeural`).
+  - **Autonomous Plan Actions**: Farmers can speak directly in Moroccan Darija to inspect their land or link recommended crops to their official plan (e.g. *"صافي غير ربطها بالخطة الرسمية"* / *"peux-tu insérer cela dans mon plan"*), generating human-confirmed `FarmPlan` updates.
+  - Natural voice barge-in with speech streaming and an adaptive 2.2s silence detection timer.
 - **Interactive Morocco Leaflet Map**: Direct GPS coordinate selection across all Moroccan agricultural provinces.
-- **Smart Voice Advisor ("Ami Ahmed")**: Designed for illiterate and smallholder farmers to listen to agricultural advice in Moroccan Darija.
 - **One-Click Farm Save & Plan Approval**: Saved parcels and approved rotation plans persist in the database and appear in **"Saved Farms & Plans"** (`/farms`).
 - **Official PDF Report Generator**: Instant download of official decision-support reports citing NASA, INRA, and FAO.
 
@@ -175,14 +178,14 @@ npm run dev
 TerraRota incorporates an automated test suite verifying data integrity, error boundaries, and deterministic scoring:
 
 ```powershell
-# Run backend test suite (50 automated tests)
-pytest backend/tests.py -v
-# Result: 50 passed in ~2.5s (100% pass rate)
+# Run backend test suite (101 automated tests across agronomy, NASA indicators, and AI advisor)
+pytest backend/ -v
+# Result: 101 passed in ~12s (100% pass rate)
 
 # Verify TypeScript compilation and production build
 cd frontend
 npm run build
-# Result: built in ~0.9s with 0 errors
+# Result: built in ~1.1s with 0 errors
 ```
 
 ---
