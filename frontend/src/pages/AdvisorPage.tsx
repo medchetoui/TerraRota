@@ -24,6 +24,7 @@ interface AdvisorPageProps {
 }
 
 export const AdvisorPage: React.FC<AdvisorPageProps> = ({ lang }) => {
+  const [persona, setPersona] = useState<'ami_ahmed' | 'mi_fatima'>('ami_ahmed');
   const [context, setContext] = useState<AdvisorContextData | null>(null);
   const [isCallActive, setIsCallActive] = useState(false);
   const [messages, setMessages] = useState<AdvisorMessageItem[]>([]);
@@ -81,7 +82,9 @@ export const AdvisorPage: React.FC<AdvisorPageProps> = ({ lang }) => {
         questionText,
         lang,
         sessionId,
-        context?.active_parcel?.id || null
+        context?.active_parcel?.id || null,
+        undefined,
+        persona
       );
 
       if (resp.status === 'ok') {
@@ -169,14 +172,18 @@ export const AdvisorPage: React.FC<AdvisorPageProps> = ({ lang }) => {
             <span>{isAr ? 'المستشار الفلاحي الذكي' : isEn ? 'Intelligent Agricultural Advisor' : 'Conseiller Agricole Intelligent'}</span>
           </div>
           <h2 className="text-2xl sm:text-3xl font-black text-[#1E331A]">
-            {isAr ? 'استشارة مباشرة مع عمي أحمد' : isEn ? 'Live Consultation with Ami Ahmed' : 'Consultation avec Ami Ahmed'}
+            {isAr
+              ? (persona === 'mi_fatima' ? 'استشارة مباشرة مع مي فاطمة' : 'استشارة مباشرة مع عمي أحمد')
+              : isEn
+              ? (persona === 'mi_fatima' ? 'Live Consultation with Mi Fatima' : 'Live Consultation with Ami Ahmed')
+              : (persona === 'mi_fatima' ? 'Consultation avec Mi Fatima' : 'Consultation avec Ami Ahmed')}
           </h2>
           <p className="text-xs text-[#7A6B53] mt-1 max-w-xl">
             {isAr
-              ? 'تحدث بصوتك أو اكتب أسئلتك. عمي أحمد يفهم لهجتك ويربط نصائحه مباشرة بمعطيات أرضك والطقس من أقمار ناسا.'
+              ? `تحدث بصوتك أو اكتب أسئلتك. ${persona === 'mi_fatima' ? 'مي فاطمة' : 'عمي أحمد'} يفهم لهجتك ويربط النصائح مباشرة بمعطيات أرضك والطقس من أقمار ناسا.`
               : isEn
-              ? 'Speak naturally or type your questions. Ami Ahmed analyzes your real parcel context and NASA Earth observations in real-time.'
-              : 'Parlez à voix haute ou écrivez. Ami Ahmed analyse votre parcelle et les observations satellites NASA en temps réel.'}
+              ? `Speak naturally or type your questions. ${persona === 'mi_fatima' ? 'Mi Fatima' : 'Ami Ahmed'} analyzes your real parcel context and NASA Earth observations in real-time.`
+              : `Parlez à voix haute ou écrivez. ${persona === 'mi_fatima' ? 'Mi Fatima' : 'Ami Ahmed'} analyse votre parcelle et les observations satellites NASA en temps réel.`}
           </p>
         </div>
 
@@ -205,6 +212,50 @@ export const AdvisorPage: React.FC<AdvisorPageProps> = ({ lang }) => {
           >
             <Scale className="w-4 h-4 text-[#8C3A27]" />
             <span>{isAr ? 'مقارنة محصولين' : isEn ? 'Compare Crops' : 'Comparer'}</span>
+          </button>
+        </div>
+      </div>
+
+      {/* Assistant Persona Switcher (Ami Ahmed - Man / Mi Fatima - Woman) */}
+      <div className="bg-[#FAF7F2] border border-[#DECAB3] rounded-3xl p-4 flex flex-col sm:flex-row items-center justify-between gap-4 shadow-xs">
+        <div className="flex items-center gap-3">
+          <div className="w-10 h-10 rounded-2xl bg-[#2D4A27] text-white flex items-center justify-center font-bold text-lg">
+            {persona === 'mi_fatima' ? '👩‍🌾' : '👨‍🌾'}
+          </div>
+          <div>
+            <div className="text-xs font-bold text-[#1E331A]">
+              {isAr ? 'اختر المستشار المفضل لديك' : isEn ? 'Choose Your Agricultural Advisor' : 'Choisissez Votre Conseiller'}
+            </div>
+            <div className="text-[11px] text-[#7A6B53]">
+              {isAr
+                ? 'استمتع باستشارة صوتية بالدارجة المغربية بصوت رجالي أو نسائي فائق الواقعية'
+                : 'Experience ultra-realistic Moroccan voice consultation in male or female tone'}
+            </div>
+          </div>
+        </div>
+
+        <div className="flex items-center gap-2 bg-white p-1 rounded-2xl border border-[#DECAB3]">
+          <button
+            onClick={() => setPersona('ami_ahmed')}
+            className={`px-4 py-2 rounded-xl text-xs font-bold transition-all cursor-pointer flex items-center gap-2 ${
+              persona === 'ami_ahmed'
+                ? 'bg-[#2D4A27] text-white shadow-sm'
+                : 'text-[#7A6B53] hover:text-[#1E331A]'
+            }`}
+          >
+            <span>👨‍🌾</span>
+            <span>{isAr ? 'عمي أحمد (صوت رجالي)' : 'Ami Ahmed (Male)'}</span>
+          </button>
+          <button
+            onClick={() => setPersona('mi_fatima')}
+            className={`px-4 py-2 rounded-xl text-xs font-bold transition-all cursor-pointer flex items-center gap-2 ${
+              persona === 'mi_fatima'
+                ? 'bg-[#8C3A27] text-white shadow-sm'
+                : 'text-[#7A6B53] hover:text-[#1E331A]'
+            }`}
+          >
+            <span>👩‍🌾</span>
+            <span>{isAr ? 'مي فاطمة (صوت نسائي)' : 'Mi Fatima (Female)'}</span>
           </button>
         </div>
       </div>
@@ -256,7 +307,7 @@ export const AdvisorPage: React.FC<AdvisorPageProps> = ({ lang }) => {
       />
 
       {/* Classic Darija Quick Question Box (Member 3 component & test harness compatibility) */}
-      <FellahQuestion lang={lang} />
+      <FellahQuestion lang={lang} persona={persona} />
 
       {/* Interactive AI Voice Call Screen (if active) */}
       {isCallActive && (
@@ -264,6 +315,8 @@ export const AdvisorPage: React.FC<AdvisorPageProps> = ({ lang }) => {
           <VoiceCallScreen
             lang={lang}
             farmerName={context?.farmer?.first_name || 'Agriculteur'}
+            persona={persona}
+            onPersonaChange={setPersona}
             onCallEnd={() => setIsCallActive(false)}
             onQuestionAsked={handleAsk}
             activeResult={activeResult}
@@ -290,6 +343,7 @@ export const AdvisorPage: React.FC<AdvisorPageProps> = ({ lang }) => {
             onSendMessage={async (txt) => { await handleAsk(txt); }}
             isLoading={isLoading}
             onProposePlan={handleProposePlan}
+            persona={persona}
           />
         </div>
 

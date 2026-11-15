@@ -273,7 +273,8 @@ export async function askAdvisor(
   lang: 'ar' | 'fr' | 'en' = 'ar',
   sessionId?: number | null,
   parcelId?: number | null,
-  scenarioId?: string
+  scenarioId?: string,
+  persona: 'ami_ahmed' | 'mi_fatima' = 'ami_ahmed'
 ): Promise<AdvisorChatResponse> {
   return request<AdvisorChatResponse>('/advisor/chat/', {
     method: 'POST',
@@ -283,8 +284,29 @@ export async function askAdvisor(
       session_id: sessionId,
       parcel_id: parcelId,
       scenario_id: scenarioId || 'cereales_apres_cereale',
+      persona,
     }),
   });
+}
+
+export async function getAdvisorSpeechAudio(
+  text: string,
+  lang: 'ar' | 'fr' | 'en' = 'ar',
+  persona: 'ami_ahmed' | 'mi_fatima' = 'ami_ahmed'
+): Promise<Blob | null> {
+  try {
+    const response = await fetch('/api/v1/advisor/voice/speak/', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ text, lang, persona }),
+    });
+    if (response.ok) {
+      return await response.blob();
+    }
+  } catch (err) {
+    console.warn('getAdvisorSpeechAudio failed:', err);
+  }
+  return null;
 }
 
 export async function getAdvisorHistory(): Promise<AdvisorHistoryResponse> {

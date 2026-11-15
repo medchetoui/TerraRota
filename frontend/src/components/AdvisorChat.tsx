@@ -9,6 +9,7 @@ interface AdvisorChatProps {
   isLoading: boolean;
   onProposePlan?: (cropId: string, reason: string) => void;
   onCompareCrops?: (cropA: string, cropB: string) => void;
+  persona?: 'ami_ahmed' | 'mi_fatima';
 }
 
 export const AdvisorChat: React.FC<AdvisorChatProps> = ({
@@ -18,6 +19,7 @@ export const AdvisorChat: React.FC<AdvisorChatProps> = ({
   isLoading,
   onProposePlan,
   onCompareCrops,
+  persona = 'ami_ahmed',
 }) => {
   const [inputText, setInputText] = useState('');
   const isAr = lang === 'ar';
@@ -43,11 +45,11 @@ export const AdvisorChat: React.FC<AdvisorChatProps> = ({
     }
 
     try {
-      // 1. Try human neural voice from backend
+      // 1. Try human neural voice from backend with persona
       const resp = await fetch('/api/v1/advisor/voice/speak/', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ text, lang }),
+        body: JSON.stringify({ text, lang, persona }),
       });
       if (resp.ok) {
         const blob = await resp.blob();
@@ -120,7 +122,9 @@ export const AdvisorChat: React.FC<AdvisorChatProps> = ({
                   <span className="font-bold">
                     {m.role === 'user'
                       ? (isAr ? 'أنت' : isEn ? 'You' : 'Vous')
-                      : (isAr ? 'عمي أحمد (مستشار ناسا)' : isEn ? 'Ami Ahmed (NASA Advisor)' : 'Ami Ahmed')}
+                      : (persona === 'mi_fatima'
+                          ? (isAr ? 'مي فاطمة (مستشارة فلاحية)' : isEn ? 'Mi Fatima (Agricultural Advisor)' : 'Mi Fatima')
+                          : (isAr ? 'عمي أحمد (مستشار فلاحي)' : isEn ? 'Ami Ahmed (Agricultural Advisor)' : 'Ami Ahmed'))}
                   </span>
                   {m.role === 'ai' && (
                     <button

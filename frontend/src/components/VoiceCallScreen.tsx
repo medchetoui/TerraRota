@@ -1,10 +1,12 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { Phone, PhoneOff, Mic, MicOff, Volume2, Sparkles, MessageSquare, AlertCircle } from 'lucide-react';
+import { Phone, PhoneOff, Mic, MicOff, Volume2, Sparkles, AlertCircle } from 'lucide-react';
 import type { AdvisorChatResult } from '../types/api';
 
 interface VoiceCallScreenProps {
   lang: 'ar' | 'fr' | 'en';
   farmerName: string;
+  persona: 'ami_ahmed' | 'mi_fatima';
+  onPersonaChange?: (p: 'ami_ahmed' | 'mi_fatima') => void;
   onCallEnd: () => void;
   onQuestionAsked: (question: string) => Promise<AdvisorChatResult | null>;
   activeResult: AdvisorChatResult | null;
@@ -33,6 +35,8 @@ interface SpeechRecognitionInstance {
 export const VoiceCallScreen: React.FC<VoiceCallScreenProps> = ({
   lang,
   farmerName,
+  persona,
+  onPersonaChange,
   onCallEnd,
   onQuestionAsked,
   activeResult,
@@ -47,9 +51,25 @@ export const VoiceCallScreen: React.FC<VoiceCallScreenProps> = ({
   const recognitionRef = useRef<SpeechRecognitionInstance | null>(null);
   const isSpeakingRef = useRef(false);
   const isCallActiveRef = useRef(true);
+  const audioPlayerRef = useRef<HTMLAudioElement | null>(null);
+  const callStateRef = useRef<CallState>('connecting');
+
+  // Keep state ref in sync for event callbacks
+  useEffect(() => {
+    callStateRef.current = callState;
+  }, [callState]);
 
   const isAr = lang === 'ar';
   const isEn = lang === 'en';
+  const isFatima = persona === 'mi_fatima';
+
+  const advisorName = isFatima
+    ? (isAr ? 'مي فاطمة' : isEn ? 'Mi Fatima' : 'Mi Fatima')
+    : (isAr ? 'عمي أحمد' : isEn ? 'Ami Ahmed' : 'Ami Ahmed');
+
+  const advisorTitle = isFatima
+    ? (isAr ? 'مستشارتك الفلاحية' : isEn ? 'Your Agricultural Advisor' : 'Votre Conseillère Agricole')
+    : (isAr ? 'مستشارك الفلاحي' : isEn ? 'Your Agricultural Advisor' : 'Votre Conseiller Agricole');
 
   // Call duration counter
   useEffect(() => {
@@ -69,41 +89,46 @@ export const VoiceCallScreen: React.FC<VoiceCallScreenProps> = ({
     return `${m.toString().padStart(2, '0')}:${s.toString().padStart(2, '0')}`;
   };
 
-  // Welcome speech when call connects
+  // Welcome speech when call connects or persona changes
   useEffect(() => {
+    isCallActiveRef.current = true;
     const welcomeTimer = setTimeout(() => {
-      setCallState('speaking');
       const welcomeText = isAr
-        ? `السلام عليكم أ سي ${farmerName}! أنا عمي أحمد، المستشار الفلاحي الذكي ديالك. تفضل، سولني على أرضك ومحاصيلك وأنا كنسَمْعك.`
+        ? (isFatima
+            ? `السلام عليكم أ سي ${farmerName}! أنا مي فاطمة، مستشارتك الفلاحية الذكية. تفضل، سولني على أرضك ومحاصيلك وأنا كنسَمْعك.`
+            : `السلام عليكم أ سي ${farmerName}! أنا عمي أحمد، المستشار الفلاحي الذكي ديالك. تفضل، سولني على أرضك ومحاصيلك وأنا كنسَمْعك.`)
         : isEn
-        ? `Hello ${farmerName}! I am Ami Ahmed, your smart agricultural advisor. Please, ask me about your field, soil or crop rotations, I am listening.`
-        : `Bonjour ${farmerName} ! Je suis Ami Ahmed, votre conseiller agricole intelligent. Posez-moi vos questions sur votre parcelle, je vous écoute.`;
+        ? (isFatima
+            ? `Hello ${farmerName}! I am Mi Fatima, your smart agricultural advisor. Please, ask me about your field, soil or crop rotations, I am listening.`
+            : `Hello ${farmerName}! I am Ami Ahmed, your smart agricultural advisor. Please, ask me about your field, soil or crop rotations, I am listening.`)
+        : (isFatima
+            ? `Bonjour ${farmerName} ! Je suis Mi Fatima, votre conseillère agricole intelligente. Posez-moi vos questions sur votre parcelle, je vous écoute.`
+            : `Bonjour ${farmerName} ! Je suis Ami Ahmed, votre conseiller agricole intelligent. Posez-moi vos questions sur votre parcelle, je vous écoute.`);
 
       speakText(welcomeText, () => {
-        if (isCallActiveRef.current) {
+        if (isCallActiveRef.current && !isMuted) {
           startListening();
         }
       });
-    }, 1200);
+    }, 800);
 
     return () => {
       clearTimeout(welcomeTimer);
       stopSpeaking();
       stopListening();
     };
-  }, []);
+  }, [persona]);
 
-  const audioPlayerRef = useRef<HTMLAudioElement | null>(null);
-
-  // Play high-definition human voice from backend neural TTS with fallback to browser
+  // Play high-definition human voice from backend neural TTS (Edge-TTS) with fallback to browser
   const speakText = async (text: string, onEnd?: () => void) => {
+    stopListening();
     isSpeakingRef.current = true;
     setCallState('speaking');
     setCurrentAiSpeech(text);
 
     // Stop previous audio if any
     if (audioPlayerRef.current) {
-      audioPlayerRef.current.pause();
+      try { audioPlayerRef.current.pause(); } catch {}
       audioPlayerRef.current = null;
     }
     if ('speechSynthesis' in window) {
@@ -111,11 +136,11 @@ export const VoiceCallScreen: React.FC<VoiceCallScreenProps> = ({
     }
 
     try {
-      // 1. First priority: Server-side Human Neural Voice (/api/v1/advisor/voice/speak/)
+      // 1. Primary: Server-side Human Neural Voice (/api/v1/advisor/voice/speak/) with Edge-TTS
       const response = await fetch('/api/v1/advisor/voice/speak/', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ text, lang }),
+        body: JSON.stringify({ text, lang, persona }),
       });
 
       if (response.ok) {
@@ -141,7 +166,7 @@ export const VoiceCallScreen: React.FC<VoiceCallScreenProps> = ({
         return;
       }
     } catch (err) {
-      console.warn('Backend human voice unavailable, falling back to Web Speech:', err);
+      console.warn('Backend neural voice error, using fallback:', err);
     }
 
     // 2. Fallback: Browser Web Speech API
@@ -150,21 +175,23 @@ export const VoiceCallScreen: React.FC<VoiceCallScreenProps> = ({
 
   const fallbackWebSpeech = (text: string, onEnd?: () => void) => {
     if (!('speechSynthesis' in window)) {
+      isSpeakingRef.current = false;
       if (onEnd) onEnd();
+      else startListening();
       return;
     }
     const utterance = new SpeechSynthesisUtterance(text);
     const targetLang = isAr ? 'ar' : isEn ? 'en' : 'fr';
-    utterance.lang = isAr ? 'ar-XA' : isEn ? 'en-US' : 'fr-FR';
+    utterance.lang = isAr ? 'ar-MA' : isEn ? 'en-US' : 'fr-FR';
 
     const voices = window.speechSynthesis.getVoices();
     if (voices && voices.length > 0) {
       const matchingVoices = voices.filter((v) =>
         v.lang.toLowerCase().startsWith(targetLang)
       );
-      const naturalVoice = matchingVoices.find((v) =>
-        /natural|neural|google|premium|enhanced/i.test(v.name)
-      ) || matchingVoices[0];
+      const genderPattern = isFatima ? /female|woman|fém/i : /male|man|masc/i;
+      const matchedGender = matchingVoices.find((v) => genderPattern.test(v.name));
+      const naturalVoice = matchedGender || matchingVoices[0];
 
       if (naturalVoice) {
         utterance.voice = naturalVoice;
@@ -172,8 +199,8 @@ export const VoiceCallScreen: React.FC<VoiceCallScreenProps> = ({
       }
     }
 
-    utterance.rate = isAr ? 0.92 : 0.96;
-    utterance.pitch = 0.95;
+    utterance.rate = isAr ? 0.94 : 0.98;
+    utterance.pitch = isFatima ? 1.05 : 0.95;
 
     utterance.onend = () => {
       isSpeakingRef.current = false;
@@ -197,7 +224,7 @@ export const VoiceCallScreen: React.FC<VoiceCallScreenProps> = ({
 
   const stopSpeaking = () => {
     if (audioPlayerRef.current) {
-      audioPlayerRef.current.pause();
+      try { audioPlayerRef.current.pause(); } catch {}
       audioPlayerRef.current = null;
     }
     if ('speechSynthesis' in window) {
@@ -206,9 +233,9 @@ export const VoiceCallScreen: React.FC<VoiceCallScreenProps> = ({
     isSpeakingRef.current = false;
   };
 
-  // Web Speech Recognition (STT)
+  // Web Speech Recognition (STT) with auto-reconnection
   const startListening = () => {
-    if (isMuted || !isCallActiveRef.current) return;
+    if (isMuted || !isCallActiveRef.current || isSpeakingRef.current) return;
 
     const SpeechRec = (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition;
     if (!SpeechRec) {
@@ -226,6 +253,7 @@ export const VoiceCallScreen: React.FC<VoiceCallScreenProps> = ({
     try {
       if (recognitionRef.current) {
         try { recognitionRef.current.abort(); } catch {}
+        recognitionRef.current = null;
       }
 
       const rec: SpeechRecognitionInstance = new SpeechRec();
@@ -257,20 +285,37 @@ export const VoiceCallScreen: React.FC<VoiceCallScreenProps> = ({
       };
 
       rec.onerror = (e: any) => {
-        if (e.error === 'no-speech') {
-          // Restart listening after brief pause
-          if (isCallActiveRef.current && !isSpeakingRef.current) {
-            setTimeout(() => startListening(), 800);
+        // Harmless speech timeout or silence -> automatically restart listening loop
+        if (e.error === 'no-speech' || e.error === 'network') {
+          if (isCallActiveRef.current && !isSpeakingRef.current && !isMuted) {
+            setTimeout(() => {
+              if (isCallActiveRef.current && !isSpeakingRef.current && !isMuted) {
+                startListening();
+              }
+            }, 600);
+            return;
           }
-        } else if (e.error !== 'aborted') {
+        } else if (e.error === 'not-allowed') {
+          setErrorNotice(isAr ? 'تم رفض إذن الميكروفون' : 'Microphone permission denied');
           setCallState('idle');
+        } else if (e.error !== 'aborted') {
+          // Keep listening ready instead of completely locking into paused state
+          setTimeout(() => {
+            if (isCallActiveRef.current && !isSpeakingRef.current && !isMuted) {
+              startListening();
+            }
+          }, 800);
         }
       };
 
       rec.onend = () => {
-        if (isCallActiveRef.current && callState === 'listening' && !isSpeakingRef.current) {
-          // Keep listening loop active
-          setTimeout(() => startListening(), 600);
+        // When speech recognition ends naturally, if the call is still active and AI is not speaking, keep listening active!
+        if (isCallActiveRef.current && !isSpeakingRef.current && !isMuted && callStateRef.current !== 'processing') {
+          setTimeout(() => {
+            if (isCallActiveRef.current && !isSpeakingRef.current && !isMuted && callStateRef.current !== 'processing') {
+              startListening();
+            }
+          }, 400);
         }
       };
 
@@ -299,15 +344,23 @@ export const VoiceCallScreen: React.FC<VoiceCallScreenProps> = ({
       if (result && isCallActiveRef.current) {
         // Voice speaks the personalized answer
         speakText(result.answer_text, () => {
-          if (isCallActiveRef.current) {
+          if (isCallActiveRef.current && !isMuted) {
             startListening();
           }
         });
       } else {
-        setCallState('idle');
+        if (isCallActiveRef.current && !isMuted) {
+          startListening();
+        } else {
+          setCallState('idle');
+        }
       }
     } catch {
-      setCallState('idle');
+      if (isCallActiveRef.current && !isMuted) {
+        startListening();
+      } else {
+        setCallState('idle');
+      }
     }
   };
 
@@ -329,19 +382,55 @@ export const VoiceCallScreen: React.FC<VoiceCallScreenProps> = ({
     onCallEnd();
   };
 
+  const handleTapCenter = () => {
+    if (callState === 'speaking') {
+      stopSpeaking();
+      startListening();
+    } else if (callState === 'listening') {
+      // already listening
+    } else {
+      setIsMuted(false);
+      startListening();
+    }
+  };
+
   return (
-    <div className="bg-[#1E331A] text-white rounded-3xl p-6 sm:p-8 shadow-2xl border border-[#2D4A27] relative overflow-hidden flex flex-col items-center justify-between min-h-[480px]">
+    <div className="bg-[#1E331A] text-white rounded-3xl p-6 sm:p-8 shadow-2xl border border-[#2D4A27] relative overflow-hidden flex flex-col items-center justify-between min-h-[490px]">
       {/* Background ambient pulse effects */}
       <div className="absolute inset-0 bg-radial from-[#2D4A27]/40 via-transparent to-transparent pointer-events-none"></div>
 
-      {/* Top Header: Advisor Name, Call Timer, Detected Language */}
-      <div className="w-full flex items-center justify-between text-xs text-[#E5DDCF] z-10">
+      {/* Top Header: Advisor Name, Persona Switcher, Call Timer, Detected Language */}
+      <div className="w-full flex items-center justify-between text-xs text-[#E5DDCF] z-10 flex-wrap gap-2">
         <div className="flex items-center gap-2">
           <span className="w-2.5 h-2.5 rounded-full bg-emerald-400 animate-ping"></span>
           <span className="font-bold text-white text-sm">
-            {isAr ? 'عمي أحمد — مستشارك الفلاحي' : isEn ? 'Ami Ahmed — AI Agricultural Advisor' : 'Ami Ahmed — Conseiller Agricole'}
+            {advisorName} — {advisorTitle}
           </span>
         </div>
+
+        {/* Persona quick switch buttons */}
+        {onPersonaChange && (
+          <div className="flex items-center bg-black/40 rounded-full p-1 border border-white/10 text-[11px]">
+            <button
+              onClick={() => onPersonaChange('ami_ahmed')}
+              className={`px-3 py-1 rounded-full font-bold transition-all cursor-pointer flex items-center gap-1 ${
+                !isFatima ? 'bg-emerald-600 text-white shadow-xs' : 'text-white/60 hover:text-white'
+              }`}
+            >
+              <span>👨‍🌾</span>
+              <span>{isAr ? 'عمي أحمد (رجل)' : 'Ami Ahmed'}</span>
+            </button>
+            <button
+              onClick={() => onPersonaChange('mi_fatima')}
+              className={`px-3 py-1 rounded-full font-bold transition-all cursor-pointer flex items-center gap-1 ${
+                isFatima ? 'bg-amber-600 text-white shadow-xs' : 'text-white/60 hover:text-white'
+              }`}
+            >
+              <span>👩‍🌾</span>
+              <span>{isAr ? 'مي فاطمة (امرأة)' : 'Mi Fatima'}</span>
+            </button>
+          </div>
+        )}
 
         <div className="flex items-center gap-3">
           <div className="bg-black/30 backdrop-blur-md px-3 py-1 rounded-full font-mono text-xs border border-white/10">
@@ -353,10 +442,14 @@ export const VoiceCallScreen: React.FC<VoiceCallScreenProps> = ({
         </div>
       </div>
 
-      {/* Central Visual: Animated Call Waveform & Avatar */}
+      {/* Central Visual: Animated Call Waveform & Interactive Avatar */}
       <div className="flex flex-col items-center justify-center my-6 z-10 space-y-4">
         {/* Animated Avatar / Radar */}
-        <div className="relative flex items-center justify-center">
+        <div
+          onClick={handleTapCenter}
+          className="relative flex items-center justify-center cursor-pointer group"
+          title={isAr ? 'اضغط للتكلم أو إيقاف الصوت' : 'Click to talk or interrupt'}
+        >
           {callState === 'speaking' && (
             <div className="absolute w-44 h-44 rounded-full bg-emerald-500/20 animate-ping duration-1000"></div>
           )}
@@ -367,7 +460,7 @@ export const VoiceCallScreen: React.FC<VoiceCallScreenProps> = ({
             <div className="absolute w-44 h-44 rounded-full bg-sky-500/20 animate-spin"></div>
           )}
 
-          <div className={`w-32 h-32 rounded-full flex items-center justify-center shadow-xl border-4 transition-all duration-500 ${
+          <div className={`w-32 h-32 rounded-full flex items-center justify-center shadow-xl border-4 transition-all duration-500 group-hover:scale-105 ${
             callState === 'speaking'
               ? 'bg-emerald-700 border-emerald-400 scale-105'
               : callState === 'listening'
@@ -383,7 +476,7 @@ export const VoiceCallScreen: React.FC<VoiceCallScreenProps> = ({
             ) : callState === 'processing' ? (
               <Sparkles className="w-14 h-14 text-white animate-spin" />
             ) : (
-              <Phone className="w-12 h-12 text-white" />
+              <Mic className="w-12 h-12 text-white" />
             )}
           </div>
         </div>
@@ -392,21 +485,21 @@ export const VoiceCallScreen: React.FC<VoiceCallScreenProps> = ({
         <div className="text-center space-y-1">
           <div className="text-base font-bold text-white tracking-wide">
             {callState === 'connecting'
-              ? (isAr ? 'جاري الاتصال بعمي أحمد...' : isEn ? 'Connecting to Ami Ahmed...' : 'Connexion en cours...')
+              ? (isAr ? `جاري الاتصال بـ ${advisorName}...` : isEn ? `Connecting to ${advisorName}...` : `Connexion avec ${advisorName}...`)
               : callState === 'listening'
-              ? (isAr ? 'عمي أحمد كيتصنت ليك... تكلم دابا' : isEn ? 'Ami Ahmed is listening... Speak now' : 'Ami Ahmed vous écoute... Parlez')
+              ? (isAr ? `${advisorName} كيتصنت ليك... تكلم دابا` : isEn ? `${advisorName} is listening... Speak now` : `${advisorName} vous écoute... Parlez`)
               : callState === 'processing'
               ? (isAr ? 'جاري تحليل معطيات ناسا والتربة...' : isEn ? 'Analyzing NASA climate & soil data...' : 'Analyse des données NASA & sol...')
               : callState === 'speaking'
-              ? (isAr ? 'عمي أحمد كيشرح لك النصيحة...' : isEn ? 'Ami Ahmed is speaking...' : 'Ami Ahmed vous répond...')
-              : (isAr ? 'المكالمة متوقفة مؤقتاً' : isEn ? 'Call paused' : 'En attente')}
+              ? (isAr ? `${advisorName} كيشرح لك النصيحة...` : isEn ? `${advisorName} is speaking...` : `${advisorName} vous répond...`)
+              : (isAr ? 'اضغط على الميكروفون للتكلم' : isEn ? 'Tap microphone to speak' : 'Cliquez sur le micro pour parler')}
           </div>
           <div className="text-xs text-[#DECAB3] opacity-80">
             {isAr
-              ? 'استشارة صوتية مباشرة مبنية على بيانات ناسا الحقيقية'
+              ? 'استشارة صوتية طبيعية مباشرة مبنية على بيانات ناسا الحقيقية'
               : isEn
-              ? 'Live voice consultation grounded in real NASA observations'
-              : 'Consultation vocale directe basée sur les observations NASA'}
+              ? 'Ultra-realistic neural voice grounded in real NASA observations'
+              : 'Voix neuronale réaliste basée sur les observations NASA'}
           </div>
         </div>
       </div>
@@ -439,7 +532,7 @@ export const VoiceCallScreen: React.FC<VoiceCallScreenProps> = ({
         </div>
       )}
 
-      {/* Call Controls: Mute, End Call */}
+      {/* Call Controls: Mute, Resume/Start listening, End Call */}
       <div className="w-full flex items-center justify-center gap-6 mt-6 z-10">
         {/* Mute button */}
         <button

@@ -109,9 +109,10 @@ const UI_STRINGS = {
 
 interface FellahQuestionProps {
   lang?: 'ar' | 'fr' | 'en';
+  persona?: 'ami_ahmed' | 'mi_fatima';
 }
 
-export default function FellahQuestion({ lang = 'ar' }: FellahQuestionProps) {
+export default function FellahQuestion({ lang = 'ar', persona = 'ami_ahmed' }: FellahQuestionProps) {
   const [setup, setSetup] = useState<FellahSetup | null>(null);
   const [scenario, setScenario] = useState('');
   const [question, setQuestion] = useState('');
@@ -163,6 +164,55 @@ export default function FellahQuestion({ lang = 'ar' }: FellahQuestionProps) {
     if (suivant) setTestId(suivant);
   };
 
+  const playAnswerAudio = async (ans: FellahAnswer) => {
+    stopAudio();
+
+    // Prepare text to speak depending on selected language
+    let textToSpeak = '';
+    if (isAr) {
+      textToSpeak = ans.phrases.map((g) => g.map((p) => p.darija).join(' ')).join('. ');
+    } else if (isEn) {
+      textToSpeak = ans.phrases.map((g) => g.map((p) => p.fr).join(' ')).join('. ');
+    } else {
+      textToSpeak = ans.phrases.map((g) => g.map((p) => p.fr).join(' ')).join('. ');
+    }
+    if (!textToSpeak.trim()) {
+      textToSpeak = ans.texte;
+    }
+
+    setPlaying(true);
+
+    // 1. Try server-side neural human voice (Edge-TTS)
+    try {
+      const resp = await fetch('/api/v1/advisor/voice/speak/', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ text: textToSpeak, lang, persona }),
+      });
+      if (resp.ok) {
+        const blob = await resp.blob();
+        const url = URL.createObjectURL(blob);
+        const a = new Audio(url);
+        audioRef.current = a;
+        a.onended = () => {
+          URL.revokeObjectURL(url);
+          setPlaying(false);
+        };
+        a.onerror = () => {
+          URL.revokeObjectURL(url);
+          playWithTTS(textToSpeak);
+        };
+        await a.play();
+        return;
+      }
+    } catch {
+      // Fallback below
+    }
+
+    // 2. Fallback to Browser Speech Synthesis
+    playWithTTS(textToSpeak);
+  };
+
   const ask = async (texte: string, voix?: { langue: string; t0: number }) => {
     const q = texte.trim();
     if (!q || !scenario) return;
@@ -177,6 +227,10 @@ export default function FellahQuestion({ lang = 'ar' }: FellahQuestionProps) {
           langue: voix.langue, transcription: q, intention: r.intention, culture: r.culture,
           reponse: r.texte, erreur: null, ms: Math.round(performance.now() - voix.t0),
         });
+        // Farmer spoke with voice -> AI automatically replies with voice!
+        setTimeout(() => {
+          playAnswerAudio(r);
+        }, 150);
       }
     } catch {
       setNotice(ui.cannotAnswer);
@@ -219,32 +273,24 @@ export default function FellahQuestion({ lang = 'ar' }: FellahQuestionProps) {
 
   const clips = (answer?.phrases.flat().map((p) => p.audio).filter(Boolean) as string[]) || [];
 
-  const playWithTTS = () => {
+  const playWithTTS = (customText?: string) => {
     if (!('speechSynthesis' in window) || !answer) {
       stopAudio();
       return;
     }
     window.speechSynthesis.cancel();
 
-    // Prepare text to speak depending on selected language
-    let textToSpeak = '';
-    let voiceLang = 'ar-MA';
-
-    if (isAr) {
-      textToSpeak = answer.phrases.map((g) => g.map((p) => p.darija).join(' ')).join('. ');
-      voiceLang = 'ar-MA';
-    } else if (isEn) {
-      textToSpeak = answer.phrases.map((g) => g.map((p) => p.fr).join(' ')).join('. ');
-      voiceLang = 'en-US';
-    } else {
-      textToSpeak = answer.phrases.map((g) => g.map((p) => p.fr).join(' ')).join('. ');
-      voiceLang = 'fr-FR';
+    let textToSpeak = customText || '';
+    if (!textToSpeak) {
+      if (isAr) {
+        textToSpeak = answer.phrases.map((g) => g.map((p) => p.darija).join(' ')).join('. ');
+      } else {
+        textToSpeak = answer.phrases.map((g) => g.map((p) => p.fr).join(' ')).join('. ');
+      }
+      if (!textToSpeak.trim()) textToSpeak = answer.texte;
     }
 
-    if (!textToSpeak.trim()) {
-      textToSpeak = answer.texte;
-    }
-
+    const voiceLang = isAr ? 'ar-MA' : isEn ? 'en-US' : 'fr-FR';
     const utterance = new SpeechSynthesisUtterance(textToSpeak);
     utterance.lang = voiceLang;
     utterance.rate = 0.95;
@@ -259,8 +305,9 @@ export default function FellahQuestion({ lang = 'ar' }: FellahQuestionProps) {
       stopAudio();
       return;
     }
+    if (!answer) return;
 
-    // If we have pre-recorded clips, play them sequentially
+    // If pre-recorded clips exist, play them; otherwise synthesize with neural voice
     if (clips.length > 0) {
       let i = 0;
       const next = () => {
@@ -271,14 +318,13 @@ export default function FellahQuestion({ lang = 'ar' }: FellahQuestionProps) {
         const a = new Audio(clips[i++]);
         audioRef.current = a;
         a.onended = next;
-        a.onerror = () => playWithTTS();
-        a.play().catch(() => playWithTTS());
+        a.onerror = () => playAnswerAudio(answer);
+        a.play().catch(() => playAnswerAudio(answer));
       };
       setPlaying(true);
       next();
     } else {
-      // Fallback cleanly to Browser Web Speech Synthesis!
-      playWithTTS();
+      playAnswerAudio(answer);
     }
   };
 
@@ -398,13 +444,13 @@ export default function FellahQuestion({ lang = 'ar' }: FellahQuestionProps) {
             onClick={play}
             disabled={clips.length === 0}
             className={`w-full py-3 rounded-2xl font-bold flex items-center justify-center gap-2 transition-all cursor-pointer ${
-              clips.length === 0 ? 'bg-[#EFE9DC] text-[#1E331A] opacity-50 cursor-not-allowed' : playing ? 'bg-[#8C3A27] text-white animate-pulse' : 'bg-[#EFE9DC] hover:bg-[#E2D8C6] text-[#1E331A]'
+              clips.length === 0 ? 'bg-[#EFE9DC] text-[#1E331A] opacity-50 cursor-not-allowed' : playing ? 'bg-[#8C3A27] text-white animate-pulse' : 'bg-[#2D4A27] hover:bg-[#1E331A] text-white shadow-md'
             }`}
           >
             {clips.length === 0 ? <VolumeX className="w-5 h-5" /> : playing ? <VolumeX className="w-5 h-5" /> : <Volume2 className="w-5 h-5" />}
             <span>{clips.length === 0 ? 'الصوت مازال ما تسجلش' : playing ? ui.stopVoice : ui.listenAnswer}</span>
             {clips.length > 0 && (
-              <span className="text-[11px] font-normal opacity-70">
+              <span className="text-[11px] font-normal opacity-80">
                 ({ui.recordedVoice})
               </span>
             )}

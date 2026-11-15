@@ -41,50 +41,111 @@ from django.http import HttpResponse
 logger = logging.getLogger("terrarota")
 
 
-# ─── Natural Human Voice Audio Synthesizer (Studio Quality) ───────────────────
+# ─── Neural Human Voice Audio Synthesizer (Microsoft Edge TTS) ────────────────
+
+# Voice map: persona × lang → edge-tts voice name
+# ami_ahmed = male agricultural advisor (عمي أحمد)
+# mi_fatima = female agricultural advisor (مي فاطمة / لالة فاطمة)
+_VOICE_MAP = {
+    "ami_ahmed": {
+        "ar": "ar-MA-JamalNeural",   # Moroccan Arabic, male
+        "fr": "fr-FR-HenriNeural",   # French, male
+        "en": "en-US-GuyNeural",     # English, male
+    },
+    "mi_fatima": {
+        "ar": "ar-MA-MounaNeural",   # Moroccan Arabic, female
+        "fr": "fr-FR-DeniseNeural",  # French, female
+        "en": "en-US-JennyNeural",   # English, female
+    },
+}
+
+# Default fallback when edge-tts is unavailable
+_GTTS_LANG_MAP = {"ar": ("ar", "com"), "fr": ("fr", "fr"), "en": ("en", "com")}
+
 
 @api_view(["POST"])
 @permission_classes([AllowAny])
 def advisor_speak(request):
     """
     POST /api/v1/advisor/voice/speak/
-    Generates real human-sounding speech MP3 on the fly for any Arabic/Darija,
-    French, or English text using Google's Neural Text-to-Speech engine.
+    Body: { text, lang, persona? }
+      - persona: "ami_ahmed" (default, male) | "mi_fatima" (female)
+      - lang: "ar" | "fr" | "en"
+
+    Generates real human neural speech (MP3) using Microsoft Edge TTS.
+    Falls back to gTTS if edge-tts is unavailable.
+
+    Voice selection:
+      Ami Ahmed  → ar-MA-JamalNeural / fr-FR-HenriNeural / en-US-GuyNeural
+      Mi Fatima  → ar-MA-MounaNeural / fr-FR-DeniseNeural / en-US-JennyNeural
     """
     text = str(request.data.get("text") or "").strip()
     lang = str(request.data.get("lang") or "ar").strip().lower()
+    persona = str(request.data.get("persona") or "ami_ahmed").strip().lower()
+
+    if persona not in _VOICE_MAP:
+        persona = "ami_ahmed"
+    if lang not in ("ar", "fr", "en"):
+        lang = "ar"
 
     if not text:
         return Response({"status": "error", "message": "text is required"}, status=status.HTTP_400_BAD_REQUEST)
 
+    # ── 1. Try edge-tts (Neural human voice — Microsoft Azure) ────────────────
+    try:
+        import asyncio
+        import edge_tts
+
+        voice_name = _VOICE_MAP[persona][lang]
+
+        async def _synthesize():
+            communicate = edge_tts.Communicate(text, voice_name)
+            chunks = []
+            async for chunk in communicate.stream():
+                if chunk["type"] == "audio":
+                    chunks.append(chunk["data"])
+            return b"".join(chunks)
+
+        # Run the async TTS in a fresh event loop
+        try:
+            loop = asyncio.get_event_loop()
+            if loop.is_running():
+                import concurrent.futures
+                with concurrent.futures.ThreadPoolExecutor() as pool:
+                    future = pool.submit(asyncio.run, _synthesize())
+                    audio_bytes = future.result(timeout=20)
+            else:
+                audio_bytes = loop.run_until_complete(_synthesize())
+        except RuntimeError:
+            audio_bytes = asyncio.run(_synthesize())
+
+        if audio_bytes:
+            response = HttpResponse(audio_bytes, content_type="audio/mpeg")
+            fn = "ami_ahmed_voice.mp3" if persona == "ami_ahmed" else "mi_fatima_voice.mp3"
+            response["Content-Disposition"] = f'inline; filename="{fn}"'
+            response["X-Voice-Name"] = voice_name
+            response["X-Persona"] = persona
+            return response
+
+    except Exception as exc:
+        logger.warning("edge-tts unavailable (%s), falling back to gTTS", exc)
+
+    # ── 2. Fallback: gTTS (robotic, but works offline) ────────────────────────
     try:
         from gtts import gTTS
-        # Map lang to gTTS language code with regional accent
-        tts_lang = "ar"
-        tld = "com"
-        if lang == "fr":
-            tts_lang = "fr"
-            tld = "fr"
-        elif lang == "en":
-            tts_lang = "en"
-            tld = "com"
-        else:
-            tts_lang = "ar"
-            tld = "com"
-
+        tts_lang, tld = _GTTS_LANG_MAP.get(lang, ("ar", "com"))
         tts = gTTS(text=text, lang=tts_lang, tld=tld, slow=False)
         fp = BytesIO()
         tts.write_to_fp(fp)
         fp.seek(0)
-
         response = HttpResponse(fp.read(), content_type="audio/mpeg")
-        response["Content-Disposition"] = 'inline; filename="ami_ahmed_voice.mp3"'
+        response["Content-Disposition"] = 'inline; filename="advisor_voice.mp3"'
         return response
-    except Exception as exc:
-        logger.warning("gTTS generation error: %s", exc)
+    except Exception as exc2:
+        logger.warning("gTTS fallback also failed: %s", exc2)
         return Response({
             "status": "error",
-            "message": f"TTS synthesis unavailable: {exc}",
+            "message": f"TTS synthesis unavailable: {exc2}",
         }, status=status.HTTP_503_SERVICE_UNAVAILABLE)
 
 
@@ -144,6 +205,7 @@ def advisor_chat(request):
     session_id = data.get("session_id")
     parcel_id = data.get("parcel_id")
     scenario_id = data.get("scenario_id", "cereales_apres_cereale")
+    persona = data.get("persona", "ami_ahmed")
 
     t0 = time.perf_counter()
 
@@ -170,6 +232,7 @@ def advisor_chat(request):
                 "region": (ctx.get("active_parcel") or {}).get("region", ""),
                 "soil_type": (ctx.get("active_parcel") or {}).get("soil_type", ""),
                 "water_access": (ctx.get("active_parcel") or {}).get("water_access", ""),
+                "persona": persona,
             },
         )
 
@@ -183,7 +246,7 @@ def advisor_chat(request):
 
     # 4. Generate answer
     try:
-        result = answer(question, ctx, lang=lang, scenario_id=scenario_id)
+        result = answer(question, ctx, lang=lang, scenario_id=scenario_id, persona=persona)
     except Exception as exc:
         logger.error("Advisor chat error: %s", exc)
         return Response({

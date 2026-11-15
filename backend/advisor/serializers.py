@@ -50,6 +50,7 @@ class ChatRequestSerializer(serializers.Serializer):
     session_id = serializers.IntegerField(required=False, allow_null=True)
     parcel_id = serializers.IntegerField(required=False, allow_null=True)
     scenario_id = serializers.CharField(max_length=60, default='cereales_apres_cereale', required=False)
+    persona = serializers.ChoiceField(choices=['ami_ahmed', 'mi_fatima'], default='ami_ahmed', required=False)
 
 
 class CompareRequestSerializer(serializers.Serializer):

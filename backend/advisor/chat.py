@@ -95,7 +95,7 @@ FOLLOWUP_SUGGESTIONS = {
 }
 
 
-def answer(question: str, ctx: dict, lang: str = "ar", scenario_id: str = "cereales_apres_cereale") -> dict:
+def answer(question: str, ctx: dict, lang: str = "ar", scenario_id: str = "cereales_apres_cereale", persona: str = "ami_ahmed") -> dict:
     """
     Main chat entry point.
 
@@ -104,6 +104,7 @@ def answer(question: str, ctx: dict, lang: str = "ar", scenario_id: str = "cerea
         ctx: farmer context from context.build_context()
         lang: 'ar', 'fr', or 'en'
         scenario_id: fellah scenario (from /fellah/scenarios/)
+        persona: 'ami_ahmed' (male advisor) or 'mi_fatima' (female advisor)
 
     Returns:
         dict with intent, answer_text, darija_phrases, evidence, followups, etc.
@@ -189,6 +190,7 @@ def answer(question: str, ctx: dict, lang: str = "ar", scenario_id: str = "cerea
         engine_result=engine_result,
         top_crop=top_crop,
         darija_response=darija_response,
+        persona=persona,
     )
 
     # 6. Build evidence from recommendation engine
@@ -242,7 +244,7 @@ def answer(question: str, ctx: dict, lang: str = "ar", scenario_id: str = "cerea
 
 
 def _build_personalized_answer(
-    intent, question, lang, ctx, farmer_inputs, indicators, engine_result, top_crop, darija_response
+    intent, question, lang, ctx, farmer_inputs, indicators, engine_result, top_crop, darija_response, persona="ami_ahmed"
 ):
     """Build a natural language answer based on intent and farmer context."""
     active_parcel = ctx.get("active_parcel") or {}
@@ -257,6 +259,11 @@ def _build_personalized_answer(
         "name_en" if lang == "en" else "name_fr", prev_crop_id
     )
 
+    is_fatima = persona == "mi_fatima"
+    advisor_name_ar = "مي فاطمة، المستشارة الفلاحية ديالك" if is_fatima else "عمي أحمد، المستشار الفلاحي ديالك"
+    advisor_name_fr = "Mi Fatima, votre conseillère agricole" if is_fatima else "Ami Ahmed, votre conseiller agricole"
+    advisor_name_en = "Mi Fatima, your agricultural advisor" if is_fatima else "Ami Ahmed, your agricultural advisor"
+
     # Climate summary
     rain_mm = round(indicators["annual_rain_mm"]) if indicators else None
     temp_c = round(indicators["mean_annual_temp_c"], 1) if indicators else None
@@ -266,19 +273,24 @@ def _build_personalized_answer(
         if lang == "ar":
             return (
                 f"وعليكم السلام ورحمة الله أ سي {farmer_name}! مرحباً بك. "
-                f"أنا عمي أحمد، المستشار الفلاحي ديالك لأرض {region}. "
+                f"أنا {advisor_name_ar} لأرض {region}. "
+                f"أنا مربوطة بأقمار ناسا وكنعرف طبيعة التربة ديالك ({soil}). " if is_fatima else
+                f"وعليكم السلام ورحمة الله أ سي {farmer_name}! مرحباً بك. "
+                f"أنا {advisor_name_ar} لأرض {region}. "
                 f"أنا مربوط مباشرة بأقمار ناسا وكنعرف طبيعة التربة ديالك ({soil}). "
                 f"تفضل سولني: شنو باغي تزرع، واش تكمل بالقمح، أو حالة الشتا فهاد الموسم؟"
             )
         elif lang == "fr":
             return (
-                f"Bonjour et bienvenue {farmer_name} ! Je suis Ami Ahmed, votre conseiller agricole pour la région de {region}. "
+                f"Bonjour et bienvenue {farmer_name} ! Je suis {advisor_name_fr} pour la région de {region}. "
+                f"Connectée aux satellites NASA et aux données de votre sol ({soil}), " if is_fatima else
+                f"Bonjour et bienvenue {farmer_name} ! Je suis {advisor_name_fr} pour la région de {region}. "
                 f"Connecté aux satellites NASA et aux données de votre sol ({soil}), "
                 f"je suis à votre écoute : quelle culture envisager, rotation ou météo ?"
             )
         else:
             return (
-                f"Hello and welcome {farmer_name}! I am Ami Ahmed, your agricultural advisor for {region}. "
+                f"Hello and welcome {farmer_name}! I am {advisor_name_en} for {region}. "
                 f"Connected directly to NASA satellites and your soil data ({soil}), "
                 f"feel free to ask: what to plant, crop rotation, or rainfall conditions."
             )
