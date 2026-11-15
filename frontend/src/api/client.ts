@@ -200,3 +200,55 @@ export async function deletePlan(id: number): Promise<{ status: string }> {
     method: 'DELETE',
   });
 }
+
+// ─── Questions du fellah en darija (Membre 3) ───
+
+export interface FellahPhrase {
+  id: string;
+  darija: string;
+  fr: string;
+  audio: string | null;
+}
+
+export interface FellahAnswer {
+  question: string;
+  scenario: string;
+  intention: string;
+  culture: string | null;
+  phrases: FellahPhrase[][];
+  texte: string;
+  ms: number;
+}
+
+export interface FellahTestQuestion {
+  id: string;
+  a_dire: string;
+  ecriture_arabe: string;
+  type_attendu: string;
+  culture_attendue: string;
+  traduction_fr: string;
+}
+
+export interface FellahSetup {
+  scenarios: { id: string; darija: string; fr: string }[];
+  defaut: string;
+  suggestions: { question: string; fr: string }[];
+  questions_test: FellahTestQuestion[];
+  journal: boolean;
+  badge: string;
+}
+
+export async function getFellahSetup(): Promise<FellahSetup> {
+  return request<FellahSetup>('/fellah/scenarios/');
+}
+
+export async function askFellah(question: string, scenario: string): Promise<FellahAnswer> {
+  return request<FellahAnswer>('/fellah/question/', {
+    method: 'POST',
+    body: JSON.stringify({ question, scenario }),
+  });
+}
+
+export async function logFellahVoiceTry(entry: Record<string, unknown>): Promise<void> {
+  await request('/fellah/journal/', { method: 'POST', body: JSON.stringify(entry) });
+}
