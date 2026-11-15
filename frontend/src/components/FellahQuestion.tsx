@@ -66,6 +66,14 @@ export default function FellahQuestion() {
     setPlaying(false);
   };
 
+  const logTry = (entry: Record<string, unknown>) => {
+    if (!testMode || !setup?.journal) return;
+    logFellahVoiceTry({ methode: 'app-navigateur', attendu_id: testId, ...entry }).catch(() => undefined);
+    const ids = setup.questions_test.map((q) => q.id);
+    const suivant = ids[ids.indexOf(testId) + 1];
+    if (suivant) setTestId(suivant);
+  };
+
   const ask = async (texte: string, voix?: { langue: string; t0: number }) => {
     const q = texte.trim();
     if (!q || !scenario) return;
@@ -75,11 +83,11 @@ export default function FellahQuestion() {
       const r = await askFellah(q, scenario);
       setAnswer(r);
       setNotice('');
-      if (voix && testMode && setup?.journal) {
-        logFellahVoiceTry({
-          methode: 'app-navigateur', langue: voix.langue, attendu_id: testId, transcription: q,
-          intention: r.intention, culture: r.culture, ms: Math.round(performance.now() - voix.t0),
-        }).catch(() => undefined);
+      if (voix) {
+        logTry({
+          langue: voix.langue, transcription: q, intention: r.intention, culture: r.culture,
+          reponse: r.texte, erreur: null, ms: Math.round(performance.now() - voix.t0),
+        });
       }
     } catch {
       setNotice('ما قدرتش نجاوب دابا. عاود من بعد.');
@@ -105,6 +113,10 @@ export default function FellahQuestion() {
         return;
       }
       setNotice(MESSAGES[e.error] || 'ما فهمتش. اكتب سؤالك.');
+      if (e.error !== 'aborted') {
+        logTry({ langue, transcription: '', intention: null, culture: null, reponse: null, erreur: e.error,
+                 ms: Math.round(performance.now() - t0) });
+      }
     };
     rec.onend = () => setListening(false);
     setNotice('');

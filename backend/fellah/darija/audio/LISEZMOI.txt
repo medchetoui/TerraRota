@@ -1,2 +1,0 @@
-Clips darija (voix humaine, WAV mono 16 bits), nommés exactement comme dans la liste
-CLIPS_DEMO_HIBA.md (dépôt terrarota-data du Membre 3). Clip absent = réponse en texte seul.
