@@ -94,6 +94,13 @@ export const AdvisorPage: React.FC<AdvisorPageProps> = ({ lang, parcelle = null,
         setSessionId(resp.session_id);
         setActiveResult(resp.result);
 
+        // If the AI agent automatically created a plan proposal in response to farmer's voice command:
+        if ((resp as any).proposal) {
+          setPendingProposal((resp as any).proposal);
+        } else if (resp.result?.intent === 'ACTION_PLAN' && resp.result?.top_crop) {
+          handleProposePlan(resp.result.top_crop.crop_id, resp.result.answer_text);
+        }
+
         const aiMsg: AdvisorMessageItem = {
           id: Date.now() + 1,
           role: 'ai',

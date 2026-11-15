@@ -268,6 +268,33 @@ def advisor_chat(request):
         ai_response=result,
     )
 
+    # If the user instructed the advisor to link to the plan (Agentic action), auto-create the proposed plan!
+    proposal_data = None
+    if result.get("intent") == "ACTION_PLAN":
+        top_crop = result.get("top_crop") or {}
+        crop_id = top_crop.get("crop_id", "argan")
+        active_parcel = ctx.get("active_parcel") or {}
+        try:
+            proposal = FarmPlan.objects.create(
+                user=request.user if request.user.is_authenticated else None,
+                parcel_id=active_parcel.get("id"),
+                title=f"{'AI Proposal' if lang == 'en' else 'Proposition IA' if lang == 'fr' else 'اقتراح المستشار'}: {crop_id}",
+                status="proposed",
+                selected_crop=crop_id,
+                recommended_crops=[],
+                farmer_feedback="طلب الربط الصوتي المباشر بالخطة",
+            )
+            proposal_data = {
+                "proposal_id": proposal.id,
+                "proposal_status": "pending_farmer_approval",
+                "proposed_crop": crop_id,
+                "explanation": f"تم تجهيز ربط محصول {crop_id} بخطة أرضك بناءً على طلبك الصوتي.",
+                "confirm_prompt": "هل تؤكد اعتماد هذا المحصول في خطتك الرسمية؟",
+            }
+            result["plan_proposal"] = proposal_data
+        except Exception as p_err:
+            logger.warning("Auto plan creation error: %s", p_err)
+
     # Update user message intent
     user_msg.intent = result["intent"]
     user_msg.save(update_fields=["intent"])
@@ -276,6 +303,7 @@ def advisor_chat(request):
         "status": "ok",
         "session_id": session.id,
         "result": result,
+        "proposal": proposal_data,
     })
 
 

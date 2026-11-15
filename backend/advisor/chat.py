@@ -100,6 +100,11 @@ INTENTS_MAPPING = {
         "fr": "Demande de détails supplémentaires",
         "en": "Request for more details",
     },
+    "ACTION_PLAN": {
+        "ar": "ربط بالخطة الزراعية",
+        "fr": "Liaison au plan d'exploitation",
+        "en": "Link to Farm Plan",
+    },
     "HORS_PERIMETRE": {
         "ar": "سؤال خارج نطاق الخدمة",
         "fr": "Question hors périmètre",
@@ -178,8 +183,18 @@ def answer(question: str, ctx: dict, lang: str = "ar", scenario_id: str = "cerea
         intent = "EXPLICATION_DETAIL"
         confidence = 0.95
 
+    # Detect agentic action: Link to farm plan / approve recommendation ("ربطها بالخطة", "اعتمدها", "زيدها للبلان")
+    plan_action_words = [
+        "رباطها", "ربطها", "ربط", "خطة", "الخطة", "خطتي", "الخطة الرسمية", "البلان", "بلان", 
+        "ضيفها", "زيدها", "اعتمدها", "صافي ربط", "صافي ديرها", "طبقها",
+        "lier au plan", "ajouter au plan", "valider le plan", "link to plan", "add to plan", "confirm plan"
+    ]
+    if intent == "INCONNU" and any(w in q_clean for w in plan_action_words):
+        intent = "ACTION_PLAN"
+        confidence = 0.98
+
     # 1. Classify intent using existing Darija NLP
-    if intent not in ("SALUTATION", "REMERCIEMENT", "EXPLICATION_DETAIL"):
+    if intent not in ("SALUTATION", "REMERCIEMENT", "EXPLICATION_DETAIL", "ACTION_PLAN"):
         classification = comprendre.classer(question, "mots_cles")
         intent = classification.get("intention", "INCONNU")
         confidence = classification.get("confiance", 0.0)
@@ -650,6 +665,31 @@ def _build_personalized_answer(
                 f"This recommendation capitalizes on your {soil} soil moisture retention. "
                 f"Rotating after {prev_crop_name} breaks pest cycles and optimizes soil health based on {evidence_text}. "
                 f"Would you like to compare with an alternative crop or add this to your plan?"
+            )
+
+    # ── ACTION_PLAN (الربط التلقائي بالخطة الرسمية للأرض) ───────────
+    elif intent == "ACTION_PLAN":
+        chosen_crop = top_crop or {"crop_id": "argan", "crop_name_ar": "الأركان", "crop_name_fr": "Argan", "crop_emoji": "🌳"}
+        c_name = chosen_crop.get("crop_name_ar" if lang == "ar" else "crop_name_fr" if lang == "fr" else "crop_name_en", "المحصول")
+        c_emoji = chosen_crop.get("crop_emoji", "🌱")
+
+        if lang == "ar":
+            return (
+                f"صافي أ سي {farmer_name}، على الراس والعين! تم تفعيل الإجراء وربط محصول {c_name} {c_emoji} بالخطة الزراعية ديال أرضك مباشرة. "
+                f"طلعت ليك دابا بطاقة التأكيد الرسمية فالأعلى باش تعتمدها بنقرة واحدة، "
+                f"وهكذا غادي تسجل رسمياً فالسجل الفلاحي ديال الموسم. واش كاين شي محصول آخر باغي نزيدوه؟"
+            )
+        elif lang == "fr":
+            return (
+                f"C'est fait {farmer_name} ! J'ai immédiatement lié {c_name} {c_emoji} à votre plan d'exploitation. "
+                f"Le bandeau de confirmation officiel vient d'apparaître pour validation en un clic. "
+                f"Souhaitez-vous ajouter une autre parcelle ou simuler les rendements ?"
+            )
+        else:
+            return (
+                f"Done {farmer_name}! I have linked {c_name} {c_emoji} directly to your official farm plan. "
+                f"The approval banner is now ready for your one-click confirmation. "
+                f"Would you like to simulate yields or adjust another field?"
             )
 
     # ── FIABILITE ─────────────────────────────────────────────────
